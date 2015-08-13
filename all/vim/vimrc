@@ -1,0 +1,268 @@
+" =============================================================================
+" ================================= Bundle Settings ===========================
+" =============================================================================
+set nocompatible              " be iMproved, required
+filetype off                  " required by Vundle
+
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim/
+call vundle#begin()
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+" ============================ UI section =====================================
+" impowed status line
+Plugin 'bling/vim-airline'
+" fast fs tree navigation
+Plugin 'scrooloose/nerdtree'
+" buffer manipulation
+Plugin 'fholgado/minibufexpl.vim'
+" start sessions screen
+Plugin 'mhinz/vim-startify'
+" tmux and vim integration
+Plugin 'christoomey/vim-tmux-navigator'
+" color theme molokai
+Plugin 'svetlov/molokai'
+
+" ===================== code-style section ====================================
+" easy comment for common languages
+Plugin 'tpope/vim-commentary'
+" python pep8 auto indent
+Plugin 'hynek/vim-python-pep8-indent'
+" doxygen syntax highlight
+Plugin 'vim-scripts/DoxyGen-Syntax'
+" plugin for mrporc syntax hightlighter (uncomment it on statbox-dev machine)
+" Plugin 'git://github.yandex-team.ru/borman/vim-mrproc'
+
+" ========================== dev section ======================================
+" error checking
+Plugin 'scrooloose/syntastic'
+" code autocomplete for c/c++/python
+Plugin 'Valloric/YouCompleteMe'
+
+" snippets plugin
+Plugin 'SirVer/ultisnips'
+" Snippets are separated from the plugin.
+Plugin 'honza/vim-snippets'
+
+" Comfortable grep
+Plugin 'vim-scripts/grep.vim'
+call vundle#end()             " reguired by Vundle
+filetype plugin indent on     " required by Vundle
+
+" =============================================================================
+" ============================== Startify Settings ============================
+" =============================================================================
+let g:startify_bookmarks = [ '~/.vimrc' ]
+let g:startify_custom_indices = ['f', 'g', 'h', 'j']
+
+" =============================================================================
+" ============================ MiniBufExpl Settings ===========================
+" =============================================================================
+let g:did_minibufexplorer_syntax_inits = 1
+hi def link MBENormal                Comment
+hi def link MBEChanged               String
+hi def link MBEVisibleNormal         Type
+hi def link MBEVisibleChanged        PreProc
+hi def link MBEVisibleActiveNormal   Identifier
+hi def link MBEVisibleActiveChanged  Statement
+
+" =============================================================================
+" =============================== Syntastic Settings ==========================
+" =============================================================================
+let g:syntastic_python_checkers = ['flake8', 'pylint', 'pep8']
+let g:syntastic_python_pep8_args = ['--max-line-length=99']
+let g:syntastic_python_flake8_args = ['--max-line-length=99']
+let g:syntastic_python_pylint_post_args='--disable=C0103,C0111'
+
+" =============================================================================
+" ================================ YCM Settings ===============================
+" =============================================================================
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_global_ycm_extra_conf = "~/projects/dots/all/vim/ycm.py"
+let g:ycm_goto_buffer_command = 'vertical-split'
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_autoclose_preview_window_after_insertion = 1
+
+let g:ycm_key_list_select_completion = ['<Down>']
+let g:ycm_key_list_previous_completion = ['<Up>']
+
+" =============================================================================
+" ============================= UltiSnips Settings ============================
+" =============================================================================
+let g:UltiSnipsExpandTrigger="<C-j>"
+
+" =============================================================================
+" ============================== FileType Settings ============================
+" =============================================================================
+autocmd BufRead,BufNewFile job* set filetype=mrproc
+
+" =============================================================================
+" ============================== Custom Functions =============================
+" =============================================================================
+
+function! Preserve(command)
+    " Preparation: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " Do the business:
+    execute a:command
+    " Clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
+endfunction
+
+function! CallWithNormalizeSplints(command)
+    execute a:command
+    execute "wincmd ="
+endfunction
+
+function! PropagatePasteBufferToOSX()
+  let @n=getreg('"')
+  call system('pbcopy', @n)
+  echo "done"
+endfunction
+
+function! PopulatePasteBufferFromOSX()
+  let @"=system('pbpaste')
+  echo "done"
+endfunction
+
+let g:_ctoggled = 0
+function! Ctoggle()
+    if g:_ctoggled == 1
+        let g:_ctoggled = 0
+        cclose
+    else
+        let g:_ctoggled = 1
+        copen
+    endif
+endfunction
+
+let g:_ltoggled = 0
+function! Ltoggle()
+    if g:_ltoggled == 1
+        let g:_ltoggled = 0
+        lclose
+    else
+        let g:_ltoggled = 1
+        lopen
+    endif
+endfunction
+
+" =============================================================================
+" ================================= KeyMap Settings ===========================
+" =============================================================================
+
+" strip all trailing whitespaces at :w
+autocmd BufWritePre * :call Preserve("%s/\\s\\+$//e")
+" resize all splits if vim resized
+autocmd VimResized * wincmd =
+
+" auto close vim if NERDTree is only one opened window
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+
+
+" go file in vertical split
+map gf :vertical wincmd f<CR>
+" auto reindent entire file
+nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
+
+" buffers manipulating with localhost
+nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
+nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
+
+" nnoremap <C-C>
+
+map gnt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
+map gns :Startify<CR>
+
+map gdf :YcmComplete GoToDefinition<CR>
+map gdc :YcmComplete GoToDeclaration<CR>
+
+
+nnoremap S :%s/
+vnoremap s :s/
+
+" clist mappings
+nnoremap <C-C> :call Ctoggle()<cr>
+nmap gnl :cnext<CR>
+nmap gpl :cprev<CR>
+
+" llist mappings
+nnoremap <C-L> :call Ltoggle()<cr>
+nmap gnl :lnext<CR>
+nmap gpl :lprev<CR>
+
+" map <Tab> >>
+" map <S-Tab> <<
+
+" =============================================================================
+" ================================= Global Settings ===========================
+" =============================================================================
+syntax on                       " set syntax support if there's syntax file
+set t_Co=256                    " add native colors for terminals except tty
+colorscheme molokai             " set my colorscheme
+
+let g:load_doxygen_syntax = 1   " For doxygen syntax highlight
+let g:python_highlight_all = 1  " For full python syntax highlight
+
+set exrc                        " allow to use external rc files
+set secure                      " restrict usage of some commands in external rc files
+
+scriptencoding utf-8
+set encoding=utf-8
+set fdm=indent      " folding based on indent lvl
+set ruler			" show the cursor position all the time
+set number			" Show line numbers
+set laststatus=2	" Always show the statusline
+set cursorline      " Highlight current line
+set colorcolumn=80  " color 80 characters in line
+
+set list listchars=tab:»·,trail:·,extends:$,nbsp:=
+
+set viminfo='20,\"50  " read/write file .viminfo, store<=50 lines of registers
+set history=50        " keep 50 lines of command line history
+" Suffixes that get lower priority when doing tab completion for filenames.
+set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,
+            \.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
+
+set hidden      " more native buffer behavior
+set showcmd		" Show (partial) command in status line.
+set showmatch	" Show matching brackets.
+set ignorecase	" Do case insensitive matching
+set incsearch	" Incremental search
+"set autowrite	" Automatically save before commands like :next and :make
+
+set wildignore=*/.git/*,*/.svn/*
+set wildignore+=*.o,*.so,*.pyc
+set wildmode=longest:full
+set wildmenu
+
+set shiftwidth=4
+set tabstop=4
+set softtabstop=4
+set smartindent		" always set autoindenting on
+set smarttab
+set expandtab
+
+
+set hlsearch	" Highlight search
+set nowrapscan	" Don't wrap around EOF or BOF while searching
+set suffixesadd=.pl,.pm,.yml,.yaml,.tyaml " for `gf' (open file under cursor)
+
+
+set encoding=utf-8
+set fileencodings=utf-8,cp1251,koi8-r
+
+
+set backspace=indent,eol,start	" more powerful backspacing
+set dir=~/.vim/swap   " district directory for all swap files
+set backupcopy=yes " keep a backup file
+if has("persistent_undo")
+    set undofile    " Persistent  undo
+    set undodir=~/.vim/undo
+endif
