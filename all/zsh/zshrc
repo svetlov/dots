@@ -87,11 +87,23 @@ export YT_PROXY=plato.yt.yandex.net
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
-alias vimconfig="vim ~/.vimrc ~/.vim/adhoc.vim"
+alias vimconfig="vim ~/.vimrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias vsp="vsplit_tab"
 alias cx="chmod +x "
-alias nbstart="workon statbox && ipython notebook --certfile=~/.ipython/profile_nbstatbox/security/mycert.pem --no-browser --port=7000"
+
+nbstart () {
+    workon $1 && \
+        ipython notebook \
+        --certfile=~/projects/dots/all/security/mycert.pem \
+        --no-browser --port=7000
+}
+
+nbtunnel () {
+    ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
+        && open -a safari https://localhost:6500
+}
+
 
 bindkey '^R' history-incremental-search-backward
 
