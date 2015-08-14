@@ -47,7 +47,7 @@ BASIC_CPP_FLAGS = [
 
 def gcc_include_pathes():
     cppfile = tempfile.NamedTemporaryFile(suffix=".cpp")
-    command_args = ['g++', '-Wp,-v', '-fsyntax-only', cppfile, ]
+    command_args = ['g++', '-Wp,-v', '-fsyntax-only', cppfile.name, ]
     gcc_call = sb.Popen(command_args, stderr=sb.PIPE, universal_newlines=True)
 
     gcc_stdlib_pathes = []
