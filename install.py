@@ -82,6 +82,8 @@ class VimInstaller(Installer):
 
 class TmuxInstaller(Installer):
     def install(self):
+        with PathGuard(os.path.join(PWD, "all", "tmux")):
+            sb.call(["./install.sh"])
         os.symlink(
             os.path.join(PWD, "all", "tmux", "tmux.conf"),
             os.path.join(HOME, ".tmux.conf")
