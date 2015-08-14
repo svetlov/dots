@@ -31,12 +31,14 @@ class DebianInstaller(Installer):
     git cmake python-dev gcc g++ zsh
     """
 
+
 class GitConfigInstaller(Installer):
     def install(self):
         os.symlink(
             os.path.join(PWD, "all", "git", "gitconfig"),
             os.path.join(HOME, ".gitconfig")
         )
+
 
 class OhMyZSHInstaller(Installer):
     def install(self):
@@ -59,7 +61,6 @@ class OhMyZSHInstaller(Installer):
         )
 
 
-
 class VimInstaller(Installer):
     def install(self):
         os.symlink(
@@ -77,11 +78,29 @@ class VimInstaller(Installer):
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
             sb.call(["./install.sh", "--clang-completer"])
-        sb.call(["zsh"])
+
+
+class TmuxInstaller(Installer):
+    def install(self):
+        os.symlink(
+            os.path.join(PWD, "all", "tmux", "tmux.conf"),
+            os.path.join(HOME, ".tmux.conf")
+        )
+
+        localBin = os.path.join(HOME, ".local", "usr", "bin")
+        os.mkdir(localBin)
+        for filename in ['pbcopy', 'pbpaste']:
+            os.symlink(
+                os.path.join(PWD, "all", "tmux", filename),
+                os.path.join(localBin, filename)
+            )
+
 
 def main():
-    # OhMyZSHInstaller().install()
+    VimInstaller().install()
+    OhMyZSHInstaller().install()
     GitConfigInstaller().install()
+    TmuxInstaller().install()
 
 
 if __name__ == '__main__':
