@@ -64,8 +64,6 @@ export LC_CTYPE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-export YT_PROXY=plato.yt.yandex.net
-
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
 #   export EDITOR='vim'
@@ -92,34 +90,35 @@ alias ohmyzsh="vim ~/.oh-my-zsh"
 alias vsp="vsplit_tab"
 alias cx="chmod +x "
 
-nbstart () {
-    workon $1 && \
-        ipython notebook \
-        --certfile=~/projects/dots/all/security/mycert.pem \
-        --no-browser --port=7000
-}
-
-nbtunnel () {
-    ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
-        && open -a safari https://localhost:6500
-}
-
-
 bindkey '^R' history-incremental-search-backward
 
-if [ -z "$TMUX" ]; then
-    function refresh { }
-    if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
-        echo "$SSH_AUTH_SOCK" > ~/tmp
-        ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    if [ -z "$TMUX" ]; then
+        function refresh { }
+        if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
+            echo "$SSH_AUTH_SOCK" > ~/tmp
+            ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+        fi
+        tmux attach || tmux new -A
+    else
+        function refresh {
+            export  $(tmux show-environment | grep "^SSH_AUTH_SOCK")
+        }
     fi
-    tmux attach || tmux new -A
+
+    function preexec {
+        refresh
+    }
+
+    nbstart () {
+        workon $1 && \
+            ipython notebook \
+            --certfile=~/projects/dots/all/security/mycert.pem \
+            --no-browser --port=7000
+    }
 else
-    function refresh {
-        export  $(tmux show-environment | grep "^SSH_AUTH_SOCK")
+    nbtunnel () {
+        ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
+            && open -a safari https://localhost:6500
     }
 fi
-
-function preexec {
-    refresh
-}

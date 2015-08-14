@@ -1,0 +1,23 @@
+Host *
+    ForwardAgent yes
+    RemoteForward 2224 127.0.0.1:2224
+    RemoteForward 2225 127.0.0.1:2225
+
+Host cloud
+    User cloud-user
+    HostName 37.9.123.183
+
+Host test
+    HostName 37.9.123.55
+
+Host e
+    HostName stbx-dev01e.yandex.ru
+
+Host e2
+    HostName dev02e.stat.yandex.net
+
+Host h
+    HostName stbx-dev01h.stat.yandex.net
+
+Host hermes
+    HostName 213.131.9.60
