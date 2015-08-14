@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import os
@@ -28,7 +28,7 @@ class Installer(object):
 
 class DebianInstaller(Installer):
     """
-    git cmake python-dev gcc g++ zsh
+    git cmake python-dev python python3 gcc g++ zsh virtualenvwrapper
     """
 
 
@@ -88,7 +88,7 @@ class TmuxInstaller(Installer):
         )
 
         localBin = os.path.join(HOME, ".local", "usr", "bin")
-        os.mkdir(localBin)
+        os.makedirs(localBin, exist_ok=True)
         for filename in ['pbcopy', 'pbpaste']:
             os.symlink(
                 os.path.join(PWD, "all", "tmux", filename),
@@ -97,9 +97,9 @@ class TmuxInstaller(Installer):
 
 
 def main():
-    VimInstaller().install()
-    OhMyZSHInstaller().install()
-    GitConfigInstaller().install()
+    # VimInstaller().install()
+    # OhMyZSHInstaller().install()
+    # GitConfigInstaller().install()
     TmuxInstaller().install()
 
 
