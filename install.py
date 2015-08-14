@@ -74,7 +74,6 @@ class VimInstaller(Installer):
         sb.call(["zsh"])
 
 def main():
-    # VimInstaller().install()
     OhMyZSHInstaller().install()
 
 
