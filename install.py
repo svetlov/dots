@@ -18,10 +18,13 @@ def PathGuard(path):
     yield
     os.chdir(prev)
 
+def forceRemove(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
 
 def symlink(source, destination, force=True):
     if force:
-        os.remove(destination)
+        forceRemove(destination)
     os.symlink(source, destination)
 
 
@@ -107,10 +110,10 @@ class TmuxInstaller(Installer):
 
 
 def main():
-    VimInstaller().install()
+    # VimInstaller().install()
     OhMyZSHInstaller().install()
-    GitConfigInstaller().install()
-    TmuxInstaller().install()
+    # GitConfigInstaller().install()
+    # TmuxInstaller().install()
 
 
 if __name__ == '__main__':
