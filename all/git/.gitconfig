@@ -1,0 +1,11 @@
+[core]
+    excludesfile = /Users/splinter/.gitignore
+    editor = vim
+[alias]
+    co = checkout
+    ci = commit
+    s = status
+    b = branch
+    h = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    unstage = reset HEAD --
+    last = log -1 HEAD
