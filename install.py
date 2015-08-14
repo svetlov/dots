@@ -31,6 +31,12 @@ class DebianInstaller(Installer):
     git cmake python-dev gcc g++ zsh
     """
 
+class GitConfigInstaller(Installer):
+    def install(self):
+        os.symlink(
+            os.path.join(PWD, "all", "git", "gitconfig"),
+            os.path.join(HOME, ".gitconfig")
+        )
 
 class OhMyZSHInstaller(Installer):
     def install(self):
@@ -74,7 +80,8 @@ class VimInstaller(Installer):
         sb.call(["zsh"])
 
 def main():
-    OhMyZSHInstaller().install()
+    # OhMyZSHInstaller().install()
+    GitConfigInstaller().install()
 
 
 if __name__ == '__main__':
