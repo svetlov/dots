@@ -92,11 +92,16 @@ alias cx="chmod +x "
 
 bindkey '^R' history-incremental-search-backward
 
-if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+if [ `uname` = "Darwin" ]; then
+    nbtunnel () {
+        ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
+            && open -a safari https://localhost:6500
+    }
+elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     if [ -z "$TMUX" ]; then
         function refresh { }
-        if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
-            echo "$SSH_AUTH_SOCK" > ~/tmp
+        if [[ -n "$SSH_AUTH_SOCK" && \
+            "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
             ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
         fi
         tmux attach || tmux new -A
@@ -117,8 +122,5 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
             --no-browser --port=7000
     }
 else
-    nbtunnel () {
-        ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
-            && open -a safari https://localhost:6500
-    }
+
 fi
