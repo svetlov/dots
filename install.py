@@ -108,8 +108,8 @@ class VimInstaller(Installer):
             os.path.join(HOME, ".vim/bundle/Vundle.vim")
         ])
         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-        os.mkdir(os.path.join(HOME, ".vim", "undo"))
-        os.mkdir(os.path.join(HOME, ".vim", "swap"))
+        os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
             sb.call(["./install.sh", "--clang-completer"])
