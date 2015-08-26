@@ -37,7 +37,6 @@ class RegisterInstallerMetaclass(type):
 
 
 class Installer(object, metaclass=RegisterInstallerMetaclass):
-    # __metaclass__ = RegisterInstallerMetaclass
     name = None
     description = None
 
@@ -87,7 +86,7 @@ class OhMyZSHInstaller(Installer):
             os.path.join(HOME, ".zshrc")
         )
         themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
-        os.mkdir(themes)
+        os.makedirs(themes, exist_ok=True)
         symlink(
             os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"),
             os.path.join(themes, "mytheme.zsh-theme")
