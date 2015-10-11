@@ -97,6 +97,15 @@ if [ `uname` = "Darwin" ]; then
         ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
             && open -a safari https://localhost:6500
     }
+    nbstart () {
+        if [[ $# == 1 ]]; then
+            workon $1 && ipython notebook
+        elif [[ $# == 0 ]]; then
+            ipython notebook
+        else;
+            echo "Usage: $0 [venv]"
+        fi
+    }
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     if [ -z "$TMUX" ]; then
         function refresh { }
@@ -107,7 +116,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         tmux attach || tmux new -A
     else
         function refresh {
-            export  $(tmux show-environment | grep "^SSH_AUTH_SOCK")
+            export $(tmux show-environment | grep "^SSH_AUTH_SOCK")
         }
     fi
 
