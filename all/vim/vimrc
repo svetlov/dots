@@ -19,8 +19,12 @@ Plugin 'bling/vim-airline'
 Plugin 'scrooloose/nerdtree'
 " buffer manipulation
 Plugin 'fholgado/minibufexpl.vim'
+" nice tags about file
+Plugin 'majutsushi/tagbar'
 " start sessions screen
 Plugin 'mhinz/vim-startify'
+" fast mru files navigation
+Plugin 'ctrlpvim/ctrlp.vim'
 " tmux and vim integration
 Plugin 'christoomey/vim-tmux-navigator'
 " color theme molokai

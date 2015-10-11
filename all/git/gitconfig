@@ -9,3 +9,5 @@
     h = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
     unstage = reset HEAD --
     last = log -1 HEAD
+[user]
+    name = Vsevolod Svetlov

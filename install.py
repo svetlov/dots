@@ -37,7 +37,6 @@ class RegisterInstallerMetaclass(type):
 
 
 class Installer(object, metaclass=RegisterInstallerMetaclass):
-    # __metaclass__ = RegisterInstallerMetaclass
     name = None
     description = None
 
@@ -87,7 +86,7 @@ class OhMyZSHInstaller(Installer):
             os.path.join(HOME, ".zshrc")
         )
         themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
-        os.mkdir(themes)
+        os.makedirs(themes, exist_ok=True)
         symlink(
             os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"),
             os.path.join(themes, "mytheme.zsh-theme")
@@ -109,8 +108,8 @@ class VimInstaller(Installer):
             os.path.join(HOME, ".vim/bundle/Vundle.vim")
         ])
         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-        os.mkdir(os.path.join(HOME, ".vim", "undo"))
-        os.mkdir(os.path.join(HOME, ".vim", "swap"))
+        os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
             sb.call(["./install.sh", "--clang-completer"])
