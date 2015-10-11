@@ -53,6 +53,7 @@ class DebianInstaller(Installer):
     """
     git cmake python-dev python python3 gcc g++ zsh virtualenvwrapper
     python-pip python3-pip
+    exuberant-ctags  " for vim tagbar
     """
 
     name = 'debian'
