@@ -45,13 +45,13 @@ COMPLETION_WAITING_DOTS="true"
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$PROJECTS
 
-plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
+plugins=(git python osx brew history-substring-search vi-mode)
 
 # User configuration
 
 PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
 PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-PATH="$HOME/.local/usr/bin:/usr/texbin:$PATH"
+PATH="$HOME/.local/usr/bin:$HOME/.local/bin:/usr/texbin:$PATH"
 export PATH
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -123,6 +123,26 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     function preexec {
         refresh
     }
+
+    if [ -e "$HOME/projects/arcadia/devtools/ya/ya" ]; then
+        alias ya="~/projects/arcadia/devtools/ya/ya"
+        alias vim="~/projects/arcadia/devtools/ya/ya tool vim"
+        ## Arcadia
+        export ARCADIA_ROOT="$HOME/arc/arcadia"
+        ## For Ya
+        export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
+        ## Use actual tools from 'ya tool'
+        export CC=$(ya tool cc --print-path)
+        ## After installation type
+        unset CC
+        alias gcc=$CC
+        export CXX=$(ya tool c++ --print-path)
+        ## After installation type
+        unset CXX
+        alias g++=$CXX
+        ## Binaries build with latest GCC require latest libstdc++:
+        export LD_LIBRARY_PATH="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+    fi
 
     nbstart () {
         workon $1 && \

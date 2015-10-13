@@ -37,8 +37,6 @@ Plugin 'tpope/vim-commentary'
 Plugin 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
 Plugin 'vim-scripts/DoxyGen-Syntax'
-" plugin for mrporc syntax hightlighter (uncomment it on statbox-dev machine)
-" Plugin 'git://github.yandex-team.ru/borman/vim-mrproc'
 
 " ========================== dev section ======================================
 " error checking
@@ -55,6 +53,12 @@ Plugin 'honza/vim-snippets'
 Plugin 'vim-scripts/grep.vim'
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
+
+" Do things a bit different if we are at Yandex
+let yandex_config_path = $HOME . '/projects/arcadia/.vimrc'
+if filereadable(yandex_config_path)
+    exec 'source ' . yandex_config_path
+endif
 
 " =============================================================================
 " ============================== Startify Settings ============================
