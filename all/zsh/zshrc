@@ -45,24 +45,22 @@ COMPLETION_WAITING_DOTS="true"
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$PROJECTS
 
-plugins=(git python osx brew history-substring-search vi-mode)
-
-# User configuration
-
 PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
 PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 PATH="$HOME/.local/usr/bin:$HOME/.local/bin:/usr/texbin:$PATH"
 export PATH
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 export LC=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+
+plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
+
+# export MANPATH="/usr/local/man:$MANPATH"
+
+source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
@@ -127,6 +125,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     if [ -e "$HOME/projects/arcadia/devtools/ya/ya" ]; then
         alias ya="~/projects/arcadia/devtools/ya/ya"
         alias vim="~/projects/arcadia/devtools/ya/ya tool vim"
+        alias mapreduce="~/projects/arcadia/quality/mapreduce/mapreduce"
         ## Arcadia
         export ARCADIA_ROOT="$HOME/arc/arcadia"
         ## For Ya
@@ -140,8 +139,11 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         ## After installation type
         unset CXX
         alias g++=$CXX
+        export OMP_NUM_THREADS=8
+        export MKL_NUM_THREADS=8
         ## Binaries build with latest GCC require latest libstdc++:
-        export LD_LIBRARY_PATH="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        export LIBRARY_PATH="/home/splinter/.local/usr/lib:/home/splinter/.local/lib:${LIBRARY_PATH}"
+        export LD_LIBRARY_PATH="$(ya tool c++ --print-toolchain-path)/gcc/lib:~/.local/usr/lib:~/.local/lib"
     fi
 
     nbstart () {
