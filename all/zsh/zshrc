@@ -123,11 +123,12 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     }
 
     if [ -e "$HOME/projects/arcadia/devtools/ya/ya" ]; then
+        echo "using arcadia builds"
         alias ya="~/projects/arcadia/devtools/ya/ya"
         alias vim="~/projects/arcadia/devtools/ya/ya tool vim"
         alias mapreduce="~/projects/arcadia/quality/mapreduce/mapreduce"
         ## Arcadia
-        export ARCADIA_ROOT="$HOME/arc/arcadia"
+        export ARCADIA_ROOT="$HOME/projects/arcadia"
         ## For Ya
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
         ## Use actual tools from 'ya tool'
