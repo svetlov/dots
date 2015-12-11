@@ -4,6 +4,13 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required by Vundle
 
+" install Vindle if there is none
+if !filereadable(expand('$HOME/.vim/bundle/Vundle.vim/README.md'))
+    echo "Installing Vundle.."
+    echo ""
+    silent !mkdir -p ~/.vim/bundle
+    silent !git clone --quiet https://github.com/gmarik/Vundle.vim ~/.vim/bundle/Vundle.vim
+endif
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim/
@@ -17,12 +24,8 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'bling/vim-airline'
 " fast fs tree navigation
 Plugin 'scrooloose/nerdtree'
-" buffer manipulation
-Plugin 'fholgado/minibufexpl.vim'
 " nice tags about file
 Plugin 'majutsushi/tagbar'
-" start sessions screen
-Plugin 'mhinz/vim-startify'
 " fast mru files navigation
 Plugin 'ctrlpvim/ctrlp.vim'
 " tmux and vim integration
@@ -44,6 +47,8 @@ Plugin 'scrooloose/syntastic'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
 
+Plugin 'jeaye/color_coded'
+
 " snippets plugin
 Plugin 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
@@ -61,21 +66,29 @@ if filereadable(yandex_config_path)
 endif
 
 " =============================================================================
-" ============================== Startify Settings ============================
+" ============================= Airline Settings =============================
 " =============================================================================
-let g:startify_bookmarks = [ '~/.vimrc' ]
-let g:startify_custom_indices = ['f', 'g', 'h', 'j']
 
-" =============================================================================
-" ============================ MiniBufExpl Settings ===========================
-" =============================================================================
-let g:did_minibufexplorer_syntax_inits = 1
-hi def link MBENormal                Comment
-hi def link MBEChanged               String
-hi def link MBEVisibleNormal         Type
-hi def link MBEVisibleChanged        PreProc
-hi def link MBEVisibleActiveNormal   Identifier
-hi def link MBEVisibleActiveChanged  Statement
+set laststatus=2
+let g:airline_theme='solarized'
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+let g:airline_theme = 'molokai'
+
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.branch = '⎇'
+
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+
+" enable buffer indicies
+let g:airline#extensions#tabline#buffer_nr_show = 1
+" collapse buffer line if exactly one buffer
+let g:airline_inactive_collapse=1
 
 " =============================================================================
 " =============================== Syntastic Settings ==========================
@@ -89,23 +102,43 @@ let g:syntastic_python_pylint_post_args='--disable=C0103,C0111'
 " ================================ YCM Settings ===============================
 " =============================================================================
 let g:ycm_confirm_extra_conf = 0
+let g:ycm_add_preview_to_completeopt = 1
 let g:ycm_global_ycm_extra_conf = "~/projects/dots/all/vim/ycm.py"
 let g:ycm_goto_buffer_command = 'vertical-split'
 let g:ycm_autoclose_preview_window_after_completion = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
 
+let g:ycm_error_symbol = '☓'
+let g:ycm_warning_symbol = '☝'
+let g:ycm_filetype_specific_completion_to_disable = {
+    \ 'csv' : 1,
+    \ 'diff' : 1,
+    \ 'gitcommit' : 1,
+    \ 'help' : 1,
+    \ 'infolog' : 1,
+    \ 'mail' : 1,
+    \ 'markdown' : 1,
+    \ 'notes' : 1,
+    \ 'pandoc' : 1,
+    \ 'qf' : 1,
+    \ 'svn' : 1,
+    \ 'tagbar' : 1,
+    \ 'text' : 1,
+    \ 'unite' : 1,
+    \ 'vimwiki' : 1
+    \}
+
 let g:ycm_key_list_select_completion = ['<Down>']
 let g:ycm_key_list_previous_completion = ['<Up>']
+
+map gdf :YcmComplete GoToDefinition<CR>
+map gdc :YcmComplete GoToDeclaration<CR>
+autocmd FileType c,ccp,python nnoremap <buffer> <C-h> :YcmCompleter GetDoc<CR>
 
 " =============================================================================
 " ============================= UltiSnips Settings ============================
 " =============================================================================
 let g:UltiSnipsExpandTrigger="<C-j>"
-
-" =============================================================================
-" ============================== FileType Settings ============================
-" =============================================================================
-autocmd BufRead,BufNewFile job* set filetype=mrproc
 
 " =============================================================================
 " ============================== Custom Functions =============================
@@ -161,6 +194,16 @@ function! Ltoggle()
     endif
 endfunction
 
+function! NumberToggle()
+  if(&relativenumber == 1)
+    set number
+    set relativenumber=0
+  else
+    let relativenumber=1
+  endif
+endfunc
+
+
 " =============================================================================
 " ================================= KeyMap Settings ===========================
 " =============================================================================
@@ -173,6 +216,15 @@ autocmd VimResized * wincmd =
 " auto close vim if NERDTree is only one opened window
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
+" Automatically close Quickfix window if it is the last one.
+aug QFClose
+  au!
+  au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix"|q|endif
+aug END
+
+
+" toggle line number view
+nnoremap <C-n> :call NumberToggle()<cr>
 
 " go file in vertical split
 map gf :vertical wincmd f<CR>
@@ -187,9 +239,6 @@ nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
 map gnt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 map gns :Startify<CR>
-
-map gdf :YcmComplete GoToDefinition<CR>
-map gdc :YcmComplete GoToDeclaration<CR>
 
 
 nnoremap S :%s/
@@ -211,60 +260,79 @@ nmap gpl :lprev<CR>
 " =============================================================================
 " ================================= Global Settings ===========================
 " =============================================================================
-syntax on                       " set syntax support if there's syntax file
-set t_Co=256                    " add native colors for terminals except tty
-colorscheme molokai             " set my colorscheme
+set exrc                                " allow to use external rc files
+set secure                              " restrict usage of some commands in external rc files
 
-let g:load_doxygen_syntax = 1   " For doxygen syntax highlight
-let g:python_highlight_all = 1  " For full python syntax highlight
 
-set exrc                        " allow to use external rc files
-set secure                      " restrict usage of some commands in external rc files
+syntax on                               " set syntax support if there's syntax file
+set t_Co=256                            " add native colors for terminals except tty
+colorscheme molokai                     " set my colorscheme
 
-scriptencoding utf-8
-set encoding=utf-8
-set fdm=indent      " folding based on indent lvl
-set ruler			" show the cursor position all the time
-set number			" Show line numbers
-set laststatus=2	" Always show the statusline
-set cursorline      " Highlight current line
-set colorcolumn=80  " color 80 characters in line
-
-set list listchars=tab:»·,trail:·,extends:$,nbsp:=
-
-set viminfo='20,\"50  " read/write file .viminfo, store<=50 lines of registers
-set history=50        " keep 50 lines of command line history
-" Suffixes that get lower priority when doing tab completion for filenames.
-set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,
-            \.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
-
-set hidden      " more native buffer behavior
-set showcmd		" Show (partial) command in status line.
-set showmatch	" Show matching brackets.
-set ignorecase	" Do case insensitive matching
-set incsearch	" Incremental search
-"set autowrite	" Automatically save before commands like :next and :make
-
-set wildignore=*/.git/*,*/.svn/*
-set wildignore+=*.o,*.so,*.pyc
-set wildmode=longest:full
-set wildmenu
+set ruler			                    " show the cursor position all the time
+set number			                    " Show line numbers
+set laststatus=2	                    " Always show the statusline
+set cursorline                          " Highlight current line
+set colorcolumn=121                     " color 121 characters in line
+" set showcmd		                        " Show (partial) command in status line.
+set showmatch	                        " Show matching brackets.
 
 set shiftwidth=4
 set tabstop=4
 set softtabstop=4
-set smartindent		" always set autoindenting on
+set smartindent                         " always set autoindenting on
 set smarttab
 set expandtab
 
+set fdm=indent                          " folding based on indent lvl
+set foldlevelstart=99                   " all folds open by default
+set splitright                          " Open splits to the right
 
-set hlsearch	" Highlight search
-set nowrapscan	" Don't wrap around EOF or BOF while searching
-set suffixesadd=.pl,.pm,.yml,.yaml,.tyaml " for `gf' (open file under cursor)
+let g:load_doxygen_syntax = 1           " For doxygen syntax highlight
+let g:python_highlight_all = 1          " For full python syntax highlight
 
 
+scriptencoding utf-8
 set encoding=utf-8
 set fileencodings=utf-8,cp1251,koi8-r
+set fileformat=unix                     " file mode is unix
+set fileformats=unix,dos,mac            " detects unix, dos, mac file formats in that order
+
+set viminfo='20,\"500                   " read/write file .viminfo, store<=500 lines of registers
+set history=50                          " keep 50 lines of command line history
+
+" Suffixes that get lower priority when doing tab completion for filenames.
+set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,
+            \.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
+" for `gf' (open file under cursor)
+set suffixesadd=.pl,.pm,.yml,.yaml,.tyaml
+
+set hidden                              " more native buffer behavior
+set undolevels=1000                     " use many levels of undo
+
+set ignorecase                          " Do case insensitive matching
+set incsearch                           " Incremental search
+set hlsearch	                        " Highlight search
+set nowrapscan	                        " Don't wrap around EOF or BOF while searching
+
+" set autowrite                         " Automatically save before commands like :next and :make
+
+" When you type the first tab, it will complete as much as possible, the second
+" tab hit will provide a list, the third and subsequent tabs will cycle through
+" completion options so you can complete the file without further keys
+set wildignore=*/.git/*,*/.svn/*
+set wildignore+=*.o,*.so,*.pyc
+set wildmode=longest,full
+set wildmenu
+
+" The "longest" option makes completion insert the longest prefix of all
+" the possible matches; see :h completeopt
+set completeopt=menu,menuone,longest
+set switchbuf=useopen,usetab
+
+
+" this makes sure that shell scripts are highlighted
+" as bash scripts and not sh scripts
+let g:is_posix = 1
 
 
 set backspace=indent,eol,start	" more powerful backspacing
