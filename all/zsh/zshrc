@@ -50,11 +50,16 @@ PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 PATH="$HOME/.local/usr/bin:$HOME/.local/bin:/usr/texbin:$PATH"
 export PATH
 
+export CPATH="$HOME/.local/usr/include:$HOME/.local/include:${CPATH}"
+export LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:${LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:${LD_LIBRARY_PATH}"
+
 # You may need to manually set your language environment
 export LC=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+export EDITOR='vim'
 
 plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
 
@@ -62,25 +67,6 @@ plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
 alias vimconfig="vim ~/.vimrc"
@@ -122,29 +108,37 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         refresh
     }
 
-    if [ -e "$HOME/projects/arcadia/devtools/ya/ya" ]; then
-        echo "using arcadia builds"
-        alias ya="~/projects/arcadia/devtools/ya/ya"
-        alias vim="~/projects/arcadia/devtools/ya/ya tool vim"
-        alias mapreduce="~/projects/arcadia/quality/mapreduce/mapreduce"
-        ## Arcadia
-        export ARCADIA_ROOT="$HOME/projects/arcadia"
+    export ARCADIA_ROOT="$HOME/projects/arcadia"
+    if [ -e "$ARCADIA_ROOT/devtools/ya/ya" ]; then
+        alias ya="$ARCADIA_ROOT/devtools/ya/ya"
+        alias gdb='ya tool gdb'
+        alias svn='ya tool svn'
+        alias mapreduce="$ARCADIA_ROOT/quality/mapreduce/mapreduce"
         ## For Ya
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
         ## Use actual tools from 'ya tool'
         export CC=$(ya tool cc --print-path)
         ## After installation type
-        unset CC
         alias gcc=$CC
         export CXX=$(ya tool c++ --print-path)
         ## After installation type
-        unset CXX
         alias g++=$CXX
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
         ## Binaries build with latest GCC require latest libstdc++:
-        export LIBRARY_PATH="/home/splinter/.local/usr/lib:/home/splinter/.local/lib:${LIBRARY_PATH}"
-        export LD_LIBRARY_PATH="$(ya tool c++ --print-toolchain-path)/gcc/lib:~/.local/usr/lib:~/.local/lib"
+        yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
+
+        alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
+            --add-result='.hpp' --add-result='.c' --add-result='.cc' \
+            --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+            --no-src-links --keep-going'
+    fi
+
+    if which yt > /dev/null ; then
+        export YT_PROXY=freud.yt.yandex.net
+        export YT_TOKEN=`cat ~/.yt/token`
+        export YT_HOME=//home/vision-duplicates/splinter
     fi
 
     nbstart () {
