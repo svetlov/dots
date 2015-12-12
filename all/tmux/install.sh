@@ -16,9 +16,8 @@ wget -O tmux-1.9.tar.gz http://sourceforge.net/projects/tmux/files/tmux/tmux-1.9
 tar xvzf tmux-1.9.tar.gz
 
 cd tmux-1.9
-./configure --prefix ${HOME}/.local/usr # CFLAGS="-I$HOME/.local/usr/include -I$HOME/.local/usr/include/ncurses" LDFLAGS="-L$HOME/.local/usr/lib -L$HOME/.local/usr/include/ncurses -L$HOME/.local/usr/include"
-# CPPFLAGS="-I$HOME/.local/usr/include -I$HOME/.local/usr/include/ncurses" LDFLAGS="-static -L$HOME/.local/usr/include -L$HOME/.local/usr/include/ncurses -L$HOME/.local/usr/lib"
-make -j
+./configure --prefix ${HOME}/.local/usr CFLAGS="-I${HOME}/.local/usr/include/ncurses"
+CFLAGS="-I$HOME/.local/usr/include/ncurses:${CFLAGS}" make -j
 make install
 cd ../..
 
