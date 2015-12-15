@@ -65,8 +65,9 @@ class LibraryInstaller(Installer):
     def install():
         with PathGuard(os.path.join(PWD, 'all', 'libs')):
             sb.call(['./install-cmake.sh'])
-            sb.call(['./install-readline.sh'])
+            sb.call(['./install-tinfo.sh'])
             sb.call(['./install-ncurses.sh'])
+            sb.call(['./install-readline.sh'])
             sb.call(['./install-libevent.sh'])
             sb.call(['./install-lua.sh'])
             sb.call(['./install-luajit.sh'])

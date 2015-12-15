@@ -10,8 +10,8 @@ readlineurl=http://git.savannah.gnu.org/cgit/readline.git/snapshot/readline-mast
 wget $readlineurl -O readline.tar.gz
 tar xvzf readline.tar.gz
 cd readline-master
-./configure CFLAS='-fPIC' --prefix=$HOME/.local/usr/
-make CFLAGS='-fPIC' -j
+./configure CFLAS='-fPIC' --prefix=$HOME/.local/usr --with-curses
+make SHLIB_LIBS='-lncurses -ltinfo' CFLAGS='-fPIC' -j shared static
 make install
 
 cd ../..

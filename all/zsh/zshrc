@@ -51,8 +51,8 @@ PATH="$HOME/.local/usr/bin:$HOME/.local/bin:/usr/texbin:$PATH"
 export PATH
 
 export CPATH="$HOME/.local/usr/include:$HOME/.local/include:${CPATH}"
-export LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:${LIBRARY_PATH}"
-export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:${LD_LIBRARY_PATH}"
+export LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:$HOME/.local/usr/lib/x86_64-linux-gnu:${LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:$HOME/.local/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
 
 # You may need to manually set your language environment
 export LC=en_US.UTF-8
