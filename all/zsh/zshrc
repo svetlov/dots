@@ -135,7 +135,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
             --no-src-links --keep-going'
     fi
 
-    if which yt > /dev/null ; then
+    if [ -e "${HOME}/.yt/token" ]; then
         export YT_PROXY=freud.yt.yandex.net
         export YT_TOKEN=`cat ~/.yt/token`
         export YT_HOME=//home/vision-duplicates/splinter

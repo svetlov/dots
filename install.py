@@ -7,7 +7,7 @@ import subprocess as sb
 from contextlib import contextmanager
 
 
-PWD = __file__.rsplit(os.path.sep)[0]
+PWD = os.path.abspath(__file__.rsplit(os.path.sep)[0])
 HOME = os.path.expanduser("~")
 INSTALLERS = {}
 
@@ -114,25 +114,27 @@ class VimInstaller(Installer):
 
     @staticmethod
     def install():
-        with PathGuard(os.path.join(PWD, 'all', 'vim')):
-            sb.call('./install-vim.sh')
-        symlink(
-            os.path.join(PWD, "all", "vim", "vimrc"),
-            os.path.join(HOME, ".vimrc")
-        )
-        sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-        os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
-        os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
-        with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
-            sb.call(["git", "submodule", "update", "--init", "--recursive"])
-            sb.call(["./install.py", "--clang-completer"])
+        # with PathGuard(os.path.join(PWD, 'all', 'vim')):
+        #     sb.call('./install-vim.sh')
+        # symlink(
+        #     os.path.join(PWD, "all", "vim", "vimrc"),
+        #     os.path.join(HOME, ".vimrc")
+        # )
+        # sb.call(["vim", "-e", "+PluginInstall", "+qall"])
+        # os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
+        # os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+        # with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
+        #     sb.call(["git", "submodule", "update", "--init", "--recursive"])
+        #     sb.call(["./install.py", "--clang-completer"])
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "build"])
             with PathGuard("build"):
                 sb.call(["cmake", "-DCMAKE_PREFIX_PATH=~/.local/usr/", ".."])
-                sb.call(["make", "&&", "make", "install"])
-                sb.call(["make", "clean", "&&", "make", "clean_clang"])
+                sb.call(["make"])
+                sb.call(["make", "install"])
+                sb.call(["make", "clean"])
+                sb.call(["make", "clean_clang"])
 
 
 class TmuxInstaller(Installer):
