@@ -16,6 +16,8 @@ cd ncurses-5.9
 make CFLAGS='-fPIC' -j
 make install
 
+ln -s ${HOME}/.local/usr/lib/libncursesw.so ${HOME}/.local/usr/lib/libncurses.so
+
 cd ../..
 
-rm ${HOME}/build -r
+rm ${HOME}/build -rf
