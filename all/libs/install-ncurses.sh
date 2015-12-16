@@ -11,7 +11,7 @@ cd ncurses-5.9
     CFLAGS='-fPIC' \
     --prefix=$HOME/.local/usr \
     --with-shared \
-    --enable-widec --with-terminfo-dirs=/usr/share/terminfo
+    --enable-widec --with-terminfo-dirs=${HOME}/.local/usr/share/terminfo
 
 make CFLAGS='-fPIC' -j
 make install

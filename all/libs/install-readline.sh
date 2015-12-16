@@ -15,4 +15,4 @@ make SHLIB_LIBS='-lncurses -ltinfo' CFLAGS='-fPIC' -j shared static
 make install
 
 cd ../..
-rm ${HOME}/build -r
+# rm ${HOME}/build -r
