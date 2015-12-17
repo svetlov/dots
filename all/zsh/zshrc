@@ -44,15 +44,36 @@ COMPLETION_WAITING_DOTS="true"
 
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$PROJECTS
+export _LOCAL=${HOME}/.local
 
-PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
-PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-PATH="$HOME/.local/usr/bin:$HOME/.local/bin:/usr/texbin:$PATH"
-export PATH
+NEWPATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+NEWPATH="/usr/local/opt/coreutils/libexec/gnubin:$NEWPATH"
+NEWPATH="${_LOCAL}/bin:${_LOCAL}/usr/bin:/usr/texbin:$NEWPATH"
+export PATH=${NEWPATH}
 
-export CPATH="$HOME/.local/usr/include:$HOME/.local/include:${CPATH}"
-export LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:$HOME/.local/usr/lib/x86_64-linux-gnu:${LIBRARY_PATH}"
-export LD_LIBRARY_PATH="$HOME/.local/usr/lib:$HOME/.local/lib:$HOME/.local/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+_NEW_CPATH="${_LOCAL}/usr/include/c++/4.9.3:${_LOCAL}/usr/include/c++/4.9.3/x86_64-unknown-linux-gnu"
+_NEW_CPATH="${_LOCAL}/usr/include:${_LOCAL}/include:${_NEW_CPATH}"
+if [[ ! -z ${CPATH} ]]; then
+    export CPATH="${_NEW_CPATH}:${CPATH}"
+else
+    export CPATH=${_NEW_CPATH}
+fi
+
+_NEW_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64"
+_NEW_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LIBRARY_PATH}"
+if [[ ! -z ${LIBRARY_PATH} ]]; then
+    export LIBRARY_PATH="${_NEW_LIBRARY_PATH}:${LIBRARY_PATH}"
+else
+    export LIBRARY_PATH=${_NEW_LIBRARY_PATH}
+fi
+
+_NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64"
+_NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LD_LIBRARY_PATH}"
+if [[ ! -z ${LD_LIBRARY_PATH} ]]; then
+    export LD_LIBRARY_PATH="${_NEW_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+else
+    export LD_LIBRARY_PATH=${_NEW_LD_LIBRARY_PATH}
+fi
 
 # You may need to manually set your language environment
 export LC=en_US.UTF-8
@@ -75,6 +96,15 @@ alias vsp="vsplit_tab"
 alias cx="chmod +x "
 
 bindkey '^R' history-incremental-search-backward
+
+if [ -e "${HOME}/.local/usr/bin/g++" ]; then
+    export CXX=${HOME}/.local/usr/bin/g++
+fi
+
+if [ -e "${HOME}/.local/usr/bin/gcc" ]; then
+    export CC=${HOME}/.local/usr/bin/gcc
+fi
+
 
 if [ `uname` = "Darwin" ]; then
     nbtunnel () {

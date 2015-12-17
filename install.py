@@ -64,6 +64,7 @@ class LibraryInstaller(Installer):
     @staticmethod
     def install():
         with PathGuard(os.path.join(PWD, 'all', 'libs')):
+            sb.call(['./install-gcc49.sh'])
             sb.call(['./install-cmake.sh'])
             sb.call(['./install-tinfo.sh'])
             sb.call(['./install-ncurses.sh'])
@@ -71,7 +72,6 @@ class LibraryInstaller(Installer):
             sb.call(['./install-libevent.sh'])
             sb.call(['./install-lua.sh'])
             sb.call(['./install-luajit.sh'])
-            sb.call(['./install-clang.sh'])
 
 
 class GitConfigInstaller(Installer):
@@ -114,18 +114,18 @@ class VimInstaller(Installer):
 
     @staticmethod
     def install():
-        # with PathGuard(os.path.join(PWD, 'all', 'vim')):
-        #     sb.call('./install-vim.sh')
-        # symlink(
-        #     os.path.join(PWD, "all", "vim", "vimrc"),
-        #     os.path.join(HOME, ".vimrc")
-        # )
-        # sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-        # os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
-        # os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
-        # with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
-        #     sb.call(["git", "submodule", "update", "--init", "--recursive"])
-        #     sb.call(["./install.py", "--clang-completer"])
+        with PathGuard(os.path.join(PWD, 'all', 'vim')):
+            sb.call('./install-vim.sh')
+        symlink(
+            os.path.join(PWD, "all", "vim", "vimrc"),
+            os.path.join(HOME, ".vimrc")
+        )
+        sb.call(["vim", "-e", "+PluginInstall", "+qall"])
+        os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+        with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
+            sb.call(["git", "submodule", "update", "--init", "--recursive"])
+            sb.call(["./install.py", "--clang-completer"])
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "build"])

@@ -5,11 +5,11 @@ set -e
 mkdir -p ${HOME}/build
 cd ${HOME}/build
 
-wget https://acelnmp.googlecode.com/files/libevent-2.0.19-stable.tar.gz
-tar xvzf libevent-2.0.19-stable.tar.gz
+wget http://sourceforge.net/projects/levent/files/libevent/libevent-1.4/libevent-1.4.15.tar.gz/download
+tar xvzf download
 
-cd libevent-2.0.19-stable
-./configure CFLAGS='-fPIC' --prefix=$HOME/.local/usr --disable-shared
+cd libevent-1.4.15
+./configure CFLAGS='-fPIC' --prefix=$HOME/.local/usr
 make CFLAGS='-fPIC' -j
 make install
 
