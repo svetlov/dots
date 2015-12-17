@@ -38,7 +38,7 @@ fi
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$PROJECTS
 
-if [[ ! -f ${_LOCAL}/usr/bin/virtualenvwrapper.sh ]]; then
+if [[ ! -f ${_LOCAL}/bin/virtualenvwrapper.sh ]]; then
     pip install --user virtualenvwrapper
 fi
 
@@ -48,7 +48,6 @@ alias vimconfig="vim ~/.vimrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias vsp="vsplit_tab"
 alias cx="chmod +x "
-
 
 if [ -e "${HOME}/.local/usr/bin/g++-4.9" ]; then
     export CXX=${HOME}/.local/usr/bin/g++-4.9
