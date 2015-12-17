@@ -4,8 +4,6 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export EDITOR='vim'
 
-export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$PROJECTS
 export _LOCAL=${HOME}/.local
 
 NEWPATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
@@ -35,6 +33,13 @@ if [[ ! -z ${LD_LIBRARY_PATH} ]]; then
     export LD_LIBRARY_PATH="${_NEW_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
 else
     export LD_LIBRARY_PATH=${_NEW_LD_LIBRARY_PATH}
+fi
+
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$PROJECTS
+
+if [[ ! -f ${_LOCAL}/usr/bin/virtualenvwrapper.sh ]]; then
+    pip install --user virtualenvwrapper
 fi
 
 alias zshconfig="vim ~/.zshrc"
