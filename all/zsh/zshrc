@@ -89,6 +89,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         alias ya="$ARCADIA_ROOT/devtools/ya/ya"
         alias gdb='ya tool gdb'
         alias svn='ya tool svn'
+        alias svnst="ya tool svn status | grep '^[AM]'"
         alias mapreduce="$ARCADIA_ROOT/quality/mapreduce/mapreduce"
         ## For Ya
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
