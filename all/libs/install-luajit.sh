@@ -1,6 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
-mkdir ${HOME}/build
+set -e
+
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 wget http://luajit.org/download/LuaJIT-2.1.0-beta1.tar.gz

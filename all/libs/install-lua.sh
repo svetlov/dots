@@ -1,6 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
-mkdir ${HOME}/build
+set -e
+
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 curl -R -O http://www.lua.org/ftp/lua-5.3.2.tar.gz

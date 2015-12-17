@@ -41,46 +41,7 @@ COMPLETION_WAITING_DOTS="true"
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-
-export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$PROJECTS
-export _LOCAL=${HOME}/.local
-
-NEWPATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
-NEWPATH="/usr/local/opt/coreutils/libexec/gnubin:$NEWPATH"
-NEWPATH="${_LOCAL}/bin:${_LOCAL}/usr/bin:/usr/texbin:$NEWPATH"
-export PATH=${NEWPATH}
-
-_NEW_CPATH="${_LOCAL}/usr/include/c++/4.9.3:${_LOCAL}/usr/include/c++/4.9.3/x86_64-unknown-linux-gnu"
-_NEW_CPATH="${_LOCAL}/usr/include:${_LOCAL}/include:${_NEW_CPATH}"
-if [[ ! -z ${CPATH} ]]; then
-    export CPATH="${_NEW_CPATH}:${CPATH}"
-else
-    export CPATH=${_NEW_CPATH}
-fi
-
-_NEW_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64"
-_NEW_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LIBRARY_PATH}"
-if [[ ! -z ${LIBRARY_PATH} ]]; then
-    export LIBRARY_PATH="${_NEW_LIBRARY_PATH}:${LIBRARY_PATH}"
-else
-    export LIBRARY_PATH=${_NEW_LIBRARY_PATH}
-fi
-
-_NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64"
-_NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LD_LIBRARY_PATH}"
-if [[ ! -z ${LD_LIBRARY_PATH} ]]; then
-    export LD_LIBRARY_PATH="${_NEW_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
-else
-    export LD_LIBRARY_PATH=${_NEW_LD_LIBRARY_PATH}
-fi
-
-# You may need to manually set your language environment
-export LC=en_US.UTF-8
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export EDITOR='vim'
+[ -f ${HOME}/.aliases ] && source ${HOME}/.aliases
 
 plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
 
@@ -88,22 +49,7 @@ plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 
-alias zshconfig="vim ~/.zshrc"
-alias editor="vim"
-alias vimconfig="vim ~/.vimrc"
-alias ohmyzsh="vim ~/.oh-my-zsh"
-alias vsp="vsplit_tab"
-alias cx="chmod +x "
-
 bindkey '^R' history-incremental-search-backward
-
-if [ -e "${HOME}/.local/usr/bin/g++" ]; then
-    export CXX=${HOME}/.local/usr/bin/g++
-fi
-
-if [ -e "${HOME}/.local/usr/bin/gcc" ]; then
-    export CC=${HOME}/.local/usr/bin/gcc
-fi
 
 
 if [ `uname` = "Darwin" ]; then

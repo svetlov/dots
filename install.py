@@ -101,6 +101,10 @@ class OhMyZSHInstaller(Installer):
             os.path.join(PWD, "all", "zsh", "zshrc"),
             os.path.join(HOME, ".zshrc")
         )
+        symlink(
+            os.path.join(PWD, "all", "zsh", "aliases"),
+            os.path.join(HOME, ".aliases")
+        )
         themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
         os.makedirs(themes, exist_ok=True)
         symlink(

@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e
 
-mkdir ${HOME}/build
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.1.tar.gz

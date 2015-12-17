@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e
 
-mkdir ${HOME}/build
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 readlineurl=http://git.savannah.gnu.org/cgit/readline.git/snapshot/readline-master.tar.gz

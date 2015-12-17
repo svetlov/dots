@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e
 
-mkdir ${HOME}/build
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 apt-get download libtinfo5

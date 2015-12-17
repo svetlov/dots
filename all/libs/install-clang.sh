@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e
 
-mkdir ${HOME}/build
+source ${HOME}/.aliases
+
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 wget http://llvm.org/releases/3.7.0/clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
