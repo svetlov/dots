@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import os
+import sys
 import argparse
 import subprocess as sb
 from contextlib import contextmanager
@@ -10,6 +11,8 @@ from contextlib import contextmanager
 PWD = os.path.abspath(__file__.rsplit(os.path.sep)[0])
 HOME = os.path.expanduser("~")
 INSTALLERS = {}
+
+ISLINUX = (sys.platform != 'darwin')
 
 
 @contextmanager
@@ -63,15 +66,21 @@ class LibraryInstaller(Installer):
 
     @staticmethod
     def install():
-        with PathGuard(os.path.join(PWD, 'all', 'libs')):
-            sb.call(['./install-gcc49.sh'])
-            sb.call(['./install-cmake.sh'])
-            sb.call(['./install-tinfo.sh'])
-            sb.call(['./install-ncurses.sh'])
-            sb.call(['./install-readline.sh'])
-            sb.call(['./install-libevent.sh'])
-            sb.call(['./install-lua.sh'])
-            sb.call(['./install-luajit.sh'])
+        if ISLINUX:
+            with PathGuard(os.path.join(PWD, 'all', 'libs')):
+                sb.call(['./install-gcc49.sh'])
+                sb.call(['./install-cmake.sh'])
+                sb.call(['./install-tinfo.sh'])
+                sb.call(['./install-ncurses.sh'])
+                sb.call(['./install-readline.sh'])
+                sb.call(['./install-libevent.sh'])
+                sb.call(['./install-lua.sh'])
+                sb.call(['./install-luajit.sh'])
+        else:
+            sb.call(['brew', 'install', 'gcc49'])
+            sb.call(['brew', 'install', 'cmake'])
+            sb.call(['brew', 'install', 'readline'])
+
 
 
 class GitConfigInstaller(Installer):
@@ -118,8 +127,11 @@ class VimInstaller(Installer):
 
     @staticmethod
     def install():
-        with PathGuard(os.path.join(PWD, 'all', 'vim')):
-            sb.call('./install-vim.sh')
+        if ISLINUX:
+            with PathGuard(os.path.join(PWD, 'all', 'vim')):
+                sb.call('./install-vim.sh')
+        else:
+            sb.call(['brew', 'reinstall', 'vim', '--with-lua'])
         symlink(
             os.path.join(PWD, "all", "vim", "vimrc"),
             os.path.join(HOME, ".vimrc")
