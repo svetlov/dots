@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mkdir ${HOME}/build
+mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 git clone https://github.com/vim/vim.git
@@ -20,4 +20,4 @@ cd vim/src
 make -j install
 
 cd ../..
-rm ${HOME}/build
+rm -r ${HOME}/build
