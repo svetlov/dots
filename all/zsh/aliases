@@ -38,7 +38,8 @@ fi
 export WORKON_HOME=$HOME/.virtualenvs
 export PROJECT_HOME=$PROJECTS
 
-if [[ `which virtualenvwrapper.sh > /dev/null` ]]; then
+which virtualenvwrapper.sh > /dev/null
+if [[ $? -ne 0 ]]; then
     pip install --user virtualenvwrapper
 fi
 
