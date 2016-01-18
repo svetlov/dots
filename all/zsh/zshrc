@@ -92,6 +92,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         alias svn='ya tool svn'
         svnst() { ya tool svn status "${@}" | grep '^[AM]' }
         svncdiff() { ya tool svn diff "${@}" | colordiff }
+        svnunstage() { ya tool svn rm --keep-local "${@}" }
 
         alias mapreduce="$ARCADIA_ROOT/quality/mapreduce/mapreduce"
         ## For Ya
