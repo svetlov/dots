@@ -4,7 +4,9 @@ mkdir -p ${HOME}/build
 cd ${HOME}/build
 
 git clone https://github.com/vim/vim.git
-cd vim/src
+cd vim
+git co c066246
+cd src
 
 ./configure --prefix=$HOME/.local \
             --with-features=huge \

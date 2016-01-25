@@ -59,10 +59,15 @@ Plugin 'vim-scripts/grep.vim'
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
 
+
 " Do things a bit different if we are at Yandex
-let yandex_config_path = $HOME . '/projects/arcadia/.vimrc'
-if filereadable(yandex_config_path)
-    exec 'source ' . yandex_config_path
+let arcadia_path = $HOME . "/projects/arcadia"
+if isdirectory(arcadia_path)
+    set rtp+=~/projects/arcadia
+    let yandex_config_path = $HOME . '/projects/arcadia/.vimrc'
+    if filereadable(yandex_config_path)
+        exec 'source ' . yandex_config_path
+    endif
 endif
 
 " =============================================================================
@@ -133,12 +138,16 @@ let g:ycm_key_list_previous_completion = ['<Up>']
 
 map gdf :YcmComplete GoToDefinition<CR>
 map gdc :YcmComplete GoToDeclaration<CR>
-autocmd FileType c,ccp,python nnoremap <buffer> <C-h> :YcmCompleter GetDoc<CR>
+autocmd FileType c,ccp,python nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
 
 " =============================================================================
 " ============================= UltiSnips Settings ============================
 " =============================================================================
-let g:UltiSnipsExpandTrigger="<C-j>"
+set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
+let g:UltiSnipsExpandTrigger = "<C-j>"
+let g:UltiSnipsEditSplit = 'vertical'
+let g:UltiSnipsSnippetsDir = $HOME."/projects/dots/all/vim/mysnippets"
+let g:UltiSnipsSnippetDirectories=["mysnippets", "UltiSnips"]
 
 " =============================================================================
 " ============================== Custom Functions =============================
@@ -203,6 +212,24 @@ function! NumberToggle()
   endif
 endfunc
 
+" file is large from 10mb
+let g:LargeFile = 1024 * 1024 * 10
+augroup LargeFile
+   autocmd BufReadPre * let f=getfsize(expand("<afile>")) | if f > g:LargeFile || f == -2 | call LargeFile() | endif
+augroup END
+
+function LargeFile()
+   " no syntax highlighting etc
+   set eventignore+=FileType
+   " save memory when other file is viewed
+   setlocal bufhidden=unload
+   " is read-only (write with :w new_filename)
+   setlocal buftype=nowrite
+   " no undo possible
+   setlocal undolevels=-1
+   " display message
+   autocmd VimEnter *  echo "The file is larger than " . (g:LargeFile / 1024 / 1024) . " MB, so some options are changed (see .vimrc for details)."
+endfunction
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
@@ -245,14 +272,14 @@ nnoremap S :%s/
 vnoremap s :s/
 
 " clist mappings
-nnoremap <C-C> :call Ctoggle()<cr>
-nmap gnl :cnext<CR>
-nmap gpl :cprev<CR>
+" nnoremap<C-C> :call Ctoggle()<cr>
+" nmap gnl :cnext<CR>
+" nmap gpl :cprev<CR>
 
 " llist mappings
-nnoremap <C-L> :call Ltoggle()<cr>
-nmap gnl :lnext<CR>
-nmap gpl :lprev<CR>
+" nnoremap <C-L> :call Ltoggle()<cr>
+" nmap gnl :lnext<CR>
+" nmap gpl :lprev<CR>
 
 " map <Tab> >>
 " map <S-Tab> <<

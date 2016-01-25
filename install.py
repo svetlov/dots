@@ -69,8 +69,11 @@ class LibraryInstaller(Installer):
         if ISLINUX:
             with PathGuard(os.path.join(PWD, 'all', 'libs')):
                 sb.call(['./install-gcc49.sh'])
+                sb.call(['./install-automake.sh'])
+                sb.call(['./install-libtool.sh'])
                 sb.call(['./install-cmake.sh'])
                 sb.call(['./install-tinfo.sh'])
+
                 sb.call(['./install-ncurses.sh'])
                 sb.call(['./install-readline.sh'])
                 sb.call(['./install-libevent.sh'])
