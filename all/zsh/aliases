@@ -48,8 +48,9 @@ alias editor="vim"
 alias vimlarge="vim -u NONE -U NONE -N"
 alias vimconfig="vim ~/.vimrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
-alias vsp="vsplit_tab"
 alias cx="chmod +x "
+alias rm="rm -i"
+alias mv="mv -i"
 
 svnvimdiff () {
     vimdiff ${6} ${7}
