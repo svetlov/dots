@@ -1,11 +1,12 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 mkdir -p ${HOME}/build
 cd ${HOME}/build
 
+source ${HOME}/.aliases
+
 git clone https://github.com/vim/vim.git
 cd vim
-git co c066246
 cd src
 
 ./configure --prefix=$HOME/.local \
@@ -22,4 +23,4 @@ cd src
 make -j install
 
 cd ../..
-rm -r ${HOME}/build
+rm -rf ${HOME}/build

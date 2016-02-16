@@ -73,10 +73,12 @@ class LibraryInstaller(Installer):
                 sb.call(['./install-libtool.sh'])
                 sb.call(['./install-cmake.sh'])
                 sb.call(['./install-tinfo.sh'])
+                sb.call(['./install-pkgconfig.sh'])
 
                 sb.call(['./install-ncurses.sh'])
                 sb.call(['./install-readline.sh'])
                 sb.call(['./install-libevent.sh'])
+                sb.call(['./install-freetype.sh'])
                 sb.call(['./install-lua.sh'])
                 sb.call(['./install-luajit.sh'])
         else:
@@ -175,6 +177,15 @@ class TmuxInstaller(Installer):
                 os.path.join(PWD, "all", "tmux", filename),
                 os.path.join(localBin, filename)
             )
+
+class OpenCVInstaller(Installer):
+    name = 'opencv'
+
+    @staticmethod
+    def install():
+        with PathGuard(os.path.join(PWD, 'all', 'opencv')):
+            sb.call(['./install-ffmpeg.sh'])
+            sb.call(['./install-opencv.sh'])
 
 
 def parseArgs():

@@ -12,10 +12,10 @@ tar zxf cmake-3.4.1.tar.gz
 
 cd cmake-3.4.1
 
-./bootstrap --prefix=${HOME}/.local/usr/
+./bootstrap --prefix=${HOME}/.local
 make -j
 make install
 
 cd ../..
 
-rm ${HOME}/build -r
+rm ${HOME}/build -rf

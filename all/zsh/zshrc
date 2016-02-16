@@ -98,10 +98,10 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         ## For Ya
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
         ## Use actual tools from 'ya tool'
-        # export CC=$(ya tool cc --print-path)
+        export CC=$(ya tool cc --print-path)
         ## After installation type
         alias gcc=$CC
-        # export CXX=$(ya tool c++ --print-path)
+        export CXX=$(ya tool c++ --print-path)
         ## After installation type
         alias g++=$CXX
         export OMP_NUM_THREADS=8
