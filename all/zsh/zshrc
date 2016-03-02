@@ -97,13 +97,11 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         alias mapreduce="$ARCADIA_ROOT/quality/mapreduce/mapreduce"
         ## For Ya
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
-        ## Use actual tools from 'ya tool'
+        # ## Use actual tools from 'ya tool'
         export CC=$(ya tool cc --print-path)
-        ## After installation type
-        alias gcc=$CC
+        # ## After installation type
         export CXX=$(ya tool c++ --print-path)
-        ## After installation type
-        alias g++=$CXX
+        # ## After installation type
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
         ## Binaries build with latest GCC require latest libstdc++:
