@@ -22,6 +22,7 @@ Plugin 'gmarik/Vundle.vim'
 " ============================ UI section =====================================
 " impowed status line
 Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 " fast fs tree navigation
 Plugin 'scrooloose/nerdtree'
 " nice tags about file
@@ -234,6 +235,11 @@ endfunction
 " =============================================================================
 " ================================= KeyMap Settings ===========================
 " =============================================================================
+
+" for ycm support of cuda
+autocmd FileType cuda set ft=cpp.cuda
+autocmd BufRead,BufNewFile *.cu set ft=cpp.cuda
+autocmd BufRead,BufNewFile *.cuh set ft=cpp.cuda
 
 " strip all trailing whitespaces at :w
 autocmd BufWritePre * :call Preserve("%s/\\s\\+$//e")
