@@ -11,3 +11,10 @@
     last = log -1 HEAD
 [user]
     name = Vsevolod Svetlov
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = true
+  pager = true
