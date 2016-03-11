@@ -23,7 +23,7 @@ ZSH_THEME="mytheme"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
@@ -105,7 +105,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
         ## Binaries build with latest GCC require latest libstdc++:
-        yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        # yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
         export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
 
         alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \

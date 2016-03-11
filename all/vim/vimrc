@@ -142,6 +142,12 @@ map gdc :YcmComplete GoToDeclaration<CR>
 autocmd FileType c,ccp,python nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
 
 " =============================================================================
+" ============================ ColorCoded Settings ============================
+" =============================================================================
+
+let g:color_coded_filetypes = ['c', 'cpp', 'cpp.cuda', 'objc']
+
+" =============================================================================
 " ============================= UltiSnips Settings ============================
 " =============================================================================
 set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
@@ -255,7 +261,6 @@ aug QFClose
   au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix"|q|endif
 aug END
 
-
 " toggle line number view
 nnoremap <C-n> :call NumberToggle()<cr>
 
@@ -268,11 +273,13 @@ nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
 nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
-" nnoremap <C-C>
+"tagbar mappings
+map gti :TagbarOpenAutoClose<cr>
+map gtt :TagbarToggle<cr>
 
+" nnoremap <C-C>
 map gnt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 map gns :Startify<CR>
-
 
 nnoremap S :%s/
 vnoremap s :s/

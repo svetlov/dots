@@ -1,0 +1,13 @@
+snippet fixme "fixme reminder" b!
+// FIXME (`echo $USER`${2}|`!v strftime("%Y-%m-%d")`): ${1:desc}
+endsnippet
+
+snippet todo "todo reminder" b!
+// TODO (`echo $USER`${2}|`!v strftime("%Y-%m-%d")`): ${1:desc}
+endsnippet
+
+snippet ns "namespace .. (namespace)"
+namespace ${1:`!p snip.rv = snip.basename or "name"`} {
+	${VISUAL}${0}
+}  // namespace $1
+endsnippet

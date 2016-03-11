@@ -1,8 +1,7 @@
 #!/usr/bin/env zsh
 
-set -e
-
 source ${HOME}/.aliases
+set -e
 
 mkdir -p ${HOME}/build
 cd ${HOME}/build

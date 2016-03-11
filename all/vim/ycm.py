@@ -66,6 +66,8 @@ def FlagsForFile(filename, **kwargs):
     final_flags = BASIC_CPP_FLAGS[:]
 
     dirname, file = os.path.split(filename)
+    if file.endswith('.cu') or file.endswith('.cuh'):
+        final_flags.extend(['-x', 'cuda'])
 
     while dirname != '/':
         if os.path.exists(os.path.join(dirname, 'include')):

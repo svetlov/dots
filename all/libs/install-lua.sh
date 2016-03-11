@@ -1,8 +1,7 @@
 #!/usr/bin/env zsh
 
-set -e
-
 source ${HOME}/.aliases
+set -e
 
 mkdir -p ${HOME}/build
 cd ${HOME}/build
@@ -17,4 +16,4 @@ make install INSTALL_TOP=$HOME/.local/usr
 
 cd ../..
 
-rm ${HOME}/build -r
+rm ${HOME}/build -rf
