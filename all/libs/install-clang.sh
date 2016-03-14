@@ -1,16 +1,19 @@
 #!/usr/bin/env zsh
 
 source ${HOME}/.aliases
+
 set -e
+
+VERSION="3.8.0"
 
 mkdir -p ${HOME}/build
 cd ${HOME}/build
 
-wget http://llvm.org/releases/3.7.0/clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
-tar xvfJ clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+wget http://llvm.org/releases/${VERSION}/clang+llvm-${VERSION}-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+tar xvfJ clang+llvm-${VERSION}-x86_64-linux-gnu-ubuntu-14.04.tar.xz
 
-cp clang+llvm-3.7.0-x86_64-linux-gnu-ubuntu-14.04/* $HOME/.local/usr/ -r
+cp clang+llvm-${VERSION}-x86_64-linux-gnu-ubuntu-14.04/* $HOME/.local/usr/ -r
 
 cd ../..
 
-rm ${HOME}/build -r
+rm ${HOME}/build -rf
