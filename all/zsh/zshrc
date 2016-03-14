@@ -84,7 +84,7 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         refresh
     }
 
-    export ARCADIA_ROOT="$HOME/projects/arcadia"
+    export ARCADIA_ROOT="$HOME/projects/arcadia.svn"
     if [ -e "$ARCADIA_ROOT/devtools/ya/ya" ]; then
         alias ya="$ARCADIA_ROOT/devtools/ya/ya"
         alias gdb='ya tool gdb'
