@@ -74,6 +74,7 @@ class LibraryInstaller(Installer):
                 sb.call(['./install-cmake.sh'])
                 sb.call(['./install-tinfo.sh'])
                 sb.call(['./install-pkgconfig.sh'])
+                sb.call(['./install-clang.sh'])
 
                 sb.call(['./install-ncurses.sh'])
                 sb.call(['./install-readline.sh'])
@@ -146,12 +147,29 @@ class VimInstaller(Installer):
         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
-            sb.call(["./install.py", "--clang-completer"])
+            sb.call(["./install.py", "--clang-completer", "--system-libclang"])
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
-            sb.call(["mkdir", "build"])
+            sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call(["cmake", "-DCMAKE_PREFIX_PATH=~/.local/usr/", ".."])
+                localusrlib = os.path.expanduser(os.path.join('~', '.local', 'usr', 'lib'))
+                lslibs = sb.Popen(["ls", localusrlib], stdout=sb.PIPE)
+                grepped = sb.Popen("grep LLVM".split(), stdin=lslibs.stdout, stdout=sb.PIPE)
+                libs = "".join(grepped.communicate()[0].decode("utf-8").strip().split('\n'))
+
+                # it doesn't work, install manually
+
+                cmakecmd = [
+                    "cmake",
+                    "-DCUSTOM_CLANG=1",
+                    "-DLLVM_ROOT_PATH=~/.local/usr",
+                    "-DLLVM_LIB_PATH=~/.local/usr/lib",
+                    "-DLLVM_LIBS=$(ls ~/.local/usr/lib | grep LLVM)", #{}".format(libs),
+                    "..",
+                ]
+                print(" ".join(cmakecmd))
+                raise RuntimeError("color_coded install is broken")
+                sb.call(cmakecmd, shell=True)
                 sb.call(["make"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
