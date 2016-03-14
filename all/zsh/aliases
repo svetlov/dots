@@ -34,17 +34,18 @@ _NEWPATH="${_LOCAL}/usr/bin:${_LOCAL}/bin:/usr/texbin:${_NEWPATH}"
 export PATH=$(_smart_append ${PATH} ${_NEWPATH})
 
 _NEW_CPATH="/usr/local/cuda/include"
+_NEW_CPATH="${_LOCAL}/usr/lib/gcc/4.9/gcc/x86_64-unknown-linux-gnu/4.9.3/include:${_NEW_CPATH}"
 _NEW_CPATH="${_LOCAL}/usr/include/c++/4.9.3/x86_64-unknown-linux-gnu:${_NEW_CPATH}"
 _NEW_CPATH="${_LOCAL}/usr/include/c++/4.9.3:${_NEW_CPATH}"
 _NEW_CPATH="${_LOCAL}/usr/include:${_LOCAL}/include:${_NEW_CPATH}"
 export CPATH=$(_smart_append ${CPATH} ${_NEW_CPATH})
 
-_NEW_LIBRARY_PATH="/usr/local/cuda/lib"
+_NEW_LIBRARY_PATH="/usr/local/cuda/lib64"
 _NEW_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64:${_NEW_LIBRARY_PATH}"
 _NEW_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LIBRARY_PATH}"
 export LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} ${_NEW_LIBRARY_PATH})
 
-_NEW_LD_LIBRARY_PATH="/usr/local/cuda/lib"
+_NEW_LD_LIBRARY_PATH="/usr/local/cuda/lib64"
 _NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib/gcc/lib64:${_NEW_LD_LIBRARY_PATH}"
 _NEW_LD_LIBRARY_PATH="${_LOCAL}/usr/lib:${_LOCAL}/lib:${_LOCAL}/usr/lib/x86_64-linux-gnu:${_NEW_LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} ${_NEW_LD_LIBRARY_PATH})
