@@ -10,7 +10,7 @@
     unstage = reset HEAD --
     last = log -1 HEAD
 [user]
-    name = Vsevolod Svetlov
+	name = Vsevolod Svetlov
 [color]
   diff = auto
   status = auto
