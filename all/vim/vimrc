@@ -101,7 +101,7 @@ let g:airline_inactive_collapse=1
 " =============================================================================
 let g:syntastic_python_checkers = ['flake8', 'pylint', 'pep8']
 let g:syntastic_python_pep8_args = ['--max-line-length=99']
-let g:syntastic_python_flake8_args = ['--max-line-length=99']
+let g:syntastic_python_flake8_args = ['--max-line-length=99', '--ignore=E402']
 let g:syntastic_python_pylint_post_args='--disable=C0103,C0111'
 
 " =============================================================================
@@ -313,6 +313,7 @@ set number			                    " Show line numbers
 set laststatus=2	                    " Always show the statusline
 set cursorline                          " Highlight current line
 set colorcolumn=121                     " color 121 characters in line
+autocmd BufRead,BufNewFile *.py set colorcolumn=100  " for python only
 " set showcmd		                        " Show (partial) command in status line.
 set showmatch	                        " Show matching brackets.
 
