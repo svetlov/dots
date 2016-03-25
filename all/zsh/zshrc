@@ -59,9 +59,9 @@ if [ `uname` = "Darwin" ]; then
     }
     nbstart () {
         if [[ $# == 1 ]]; then
-            workon $1 && ipython notebook
+            workon $1 && jupyter notebook
         elif [[ $# == 0 ]]; then
-            ipython notebook
+            jupyter notebook
         else;
             echo "Usage: $0 [venv]"
         fi
@@ -84,29 +84,30 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
         refresh
     }
 
+    alias wgetn="wget --no-check-certificate";
+
     export ARCADIA_ROOT="$HOME/projects/arcadia.svn"
     if [ -e "$ARCADIA_ROOT/devtools/ya/ya" ]; then
         alias ya="$ARCADIA_ROOT/devtools/ya/ya"
         alias gdb='ya tool gdb'
 
         alias svn='ya tool svn'
-        svnst() { ya tool svn status "${@}" | grep '^[AM]' }
+        svnst() { ya tool svn status "${@}" | grep '^[ADM]' }
         svncdiff() { ya tool svn diff "${@}" | colordiff }
+        svnvimdiff() { ya tool svn diff --diff-cmd=$HOME/projects/dots/all/vim/svnvimdiffcmd.sh }
         svnunstage() { ya tool svn rm --keep-local "${@}" }
 
         alias mapreduce="$ARCADIA_ROOT/quality/mapreduce/mapreduce"
         ## For Ya
+        unset CC;
+        unset CXX;
         export PATH="$ARCADIA_ROOT/devtools/ya:$PATH"
-        # ## Use actual tools from 'ya tool'
-        export CC=$(ya tool cc --print-path)
-        # ## After installation type
-        export CXX=$(ya tool c++ --print-path)
+        ## Binaries build with latest GCC require latest libstdc++:
+        yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
         # ## After installation type
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
-        ## Binaries build with latest GCC require latest libstdc++:
-        # yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
-        export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
 
         alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
             --add-result='.hpp' --add-result='.c' --add-result='.cc' \
@@ -115,14 +116,14 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     fi
 
     if [ -e "${HOME}/.yt/token" ]; then
-        export YT_PROXY=freud.yt.yandex.net
+        export YT_PROXY=banach.yt.yandex.net
         export YT_TOKEN=`cat ~/.yt/token`
-        export YT_HOME=//home/vision-duplicates/splinter
+        export YT_HOME=//home/cvtest/splinter
     fi
 
     nbstart () {
         workon $1 && \
-            ipython notebook \
+            jupyter notebook \
             --certfile=~/projects/dots/all/security/mycert.pem \
             --no-browser --port=7000
     }
