@@ -6,6 +6,8 @@ export EDITOR='vim'
 
 export _LOCAL=${HOME}/.local
 
+setopt aliases
+
 _str_contains() {
 	# check $2 is a substring of $1
 	[[ $1 == *$2* ]] && return 1 || return 0;
@@ -28,7 +30,8 @@ _smart_append() {
     fi
 }
 
-_NEWPATH="/usr/local/opt/coreutils/libexec/gnubin"
+_NEWPATH="/usr/local/bin"
+_NEWPATH="/usr/local/opt/coreutils/libexec/gnubin:${_NEWPATH}"
 _NEWPATH="/usr/local/cuda/bin:${_NEWPATH}"
 _NEWPATH="${_LOCAL}/usr/bin:${_LOCAL}/bin:/usr/texbin:${_NEWPATH}"
 export PATH=$(_smart_append ${PATH} ${_NEWPATH})
@@ -66,6 +69,7 @@ alias ohmyzsh="vim ~/.oh-my-zsh"
 alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
+alias wgetn="wget --no-check-certificate";
 
 svnvimdiff () {
     vimdiff ${6} ${7}
@@ -77,4 +81,53 @@ fi
 
 if [ -e "${HOME}/.local/usr/bin/gcc-4.9" ]; then
     export CC=${HOME}/.local/usr/bin/gcc-4.9
+fi
+
+if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
+    export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
+elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
+    export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
+fi
+
+if [ -n "${ARCADIA_ROOT}" ]; then
+    ya () { ${ARCADIA_ROOT}/devtools/ya/ya "$@"; }
+    arcadia_root_call() {
+        # $1 -- original cmd
+        # $2 -- arcadia cmd
+        if [[ $(pwd) == ${ARCADIA_ROOT}* ]]; then
+            array=( ${(s. .)"${2}"} )
+        else
+            array=( ${(s. .)"${1}"} )
+        fi
+        ${array[@]} ${@:3};
+    }
+
+    alias gdb='arcadia_root_call gdb "ya tool gdb"'
+
+    alias svn='ya tool svn'
+    svnst() { ya tool svn status "${@}" | grep '^[ADM]' }
+    svncdiff() { ya tool svn diff "${@}" | colordiff }
+    svnvimdiff() { ya tool svn diff --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
+    svnunstage() { ya tool svn rm --keep-local "${@}" }
+
+    alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
+
+
+    ## Binaries build with latest GCC require latest libstdc++:
+    yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+    export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
+    # for danet
+    export OMP_NUM_THREADS=8
+    export MKL_NUM_THREADS=8
+
+    alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
+        --add-result='.hpp' --add-result='.c' --add-result='.cc' \
+        --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+        --no-src-links --keep-going'
+fi
+
+if [ -e "${HOME}/.yt/token" ]; then
+    export YT_PROXY=banach.yt.yandex.net
+    export YT_TOKEN=`cat ~/.yt/token`
+    export YT_HOME=//home/cvtest/splinter
 fi
