@@ -23,8 +23,10 @@ def PathGuard(path):
     os.chdir(prev)
 
 def forceRemove(filename):
-    if os.path.exists(filename):
+    try:
         os.remove(filename)
+    except OSError:
+        pass
 
 def symlink(source, destination, force=True):
     if force:
