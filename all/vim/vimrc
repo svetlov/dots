@@ -62,10 +62,10 @@ filetype plugin indent on     " required by Vundle
 
 
 " Do things a bit different if we are at Yandex
-let arcadia_path = $HOME . "/projects/arcadia"
-if isdirectory(arcadia_path)
-    set rtp+=~/projects/arcadia
-    let yandex_config_path = $HOME . '/projects/arcadia/.vimrc'
+let arcadia_root = $ARCADIA_ROOT . '/'
+if arcadia_root != '/'
+    let &path.=',' . arcadia_root
+    let yandex_config_path = string(arcadia_root) . '.vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
     endif
