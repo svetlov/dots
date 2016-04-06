@@ -90,7 +90,7 @@ elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
 fi
 
 if [ -n "${ARCADIA_ROOT}" ]; then
-    ya () { ${ARCADIA_ROOT}/devtools/ya/ya "$@"; }
+    ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
     arcadia_root_call() {
         # $1 -- original cmd
         # $2 -- arcadia cmd
@@ -102,7 +102,9 @@ if [ -n "${ARCADIA_ROOT}" ]; then
         ${array[@]} ${@:3};
     }
 
-    alias gdb='arcadia_root_call gdb "ya tool gdb"'
+    alias gdb='arcadia_root_call gdb "ya tool gdb"';
+    arcadiavim () { (echo "UNSET CC CXX CPATH"; unset CC; unset CXX; unset CPATH; vim "$@";) };
+    alias vim='arcadia_root_call vim arcadiavim';
 
     alias svn='ya tool svn'
     svnst() { ya tool svn status "${@}" | grep '^[ADM]' }
