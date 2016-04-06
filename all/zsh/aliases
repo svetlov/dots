@@ -4,6 +4,7 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export EDITOR='vim'
 
+export HOME=$(cd ${HOME}; pwd -P);
 export _LOCAL=${HOME}/.local
 
 setopt aliases
@@ -94,7 +95,7 @@ if [ -n "${ARCADIA_ROOT}" ]; then
     arcadia_root_call() {
         # $1 -- original cmd
         # $2 -- arcadia cmd
-        if [[ $(pwd) == ${ARCADIA_ROOT}* ]]; then
+        if [[ $(pwd -P) == ${ARCADIA_ROOT}* ]]; then
             array=( ${(s. .)"${2}"} )
         else
             array=( ${(s. .)"${1}"} )
@@ -103,7 +104,7 @@ if [ -n "${ARCADIA_ROOT}" ]; then
     }
 
     alias gdb='arcadia_root_call gdb "ya tool gdb"';
-    arcadiavim () { (echo "UNSET CC CXX CPATH"; unset CC; unset CXX; unset CPATH; vim "$@";) };
+    arcadiavim () { ( unset CC; unset CXX; unset CPATH; vim "$@";) };
     alias vim='arcadia_root_call vim arcadiavim';
 
     alias svn='ya tool svn'
