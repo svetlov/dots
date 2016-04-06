@@ -25,10 +25,13 @@ Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 " fast fs tree navigation
 Plugin 'scrooloose/nerdtree'
+" buffer navigator like nerdtree
+Plugin 'jeetsukumaran/vim-buffergator'
 " nice tags about file
 Plugin 'majutsushi/tagbar'
 " fast mru files navigation
 Plugin 'ctrlpvim/ctrlp.vim'
+
 " tmux and vim integration
 Plugin 'christoomey/vim-tmux-navigator'
 " color theme molokai
@@ -60,7 +63,6 @@ Plugin 'vim-scripts/grep.vim'
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
 
-
 " Do things a bit different if we are at Yandex
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
@@ -72,7 +74,71 @@ if arcadia_root != '/'
 endif
 
 " =============================================================================
-" ============================= Airline Settings =============================
+" ============================== Custom Functions =============================
+" =============================================================================
+
+function! Preserve(command)
+    " Preparation: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " Do the business:
+    execute a:command
+    " Clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
+endfunction
+
+function! CallWithNormalizeSplints(command)
+    execute a:command
+    execute "wincmd ="
+endfunction
+
+function! PropagatePasteBufferToOSX()
+  let @n=getreg('"')
+  call system('pbcopy', @n)
+  echo "done"
+endfunction
+
+function! PopulatePasteBufferFromOSX()
+  let @"=system('pbpaste')
+  echo "done"
+endfunction
+
+let g:_ctoggled = 0
+function! Ctoggle()
+    if g:_ctoggled == 1
+        let g:_ctoggled = 0
+        cclose
+    else
+        let g:_ctoggled = 1
+        copen
+    endif
+endfunction
+
+let g:_ltoggled = 0
+function! Ltoggle()
+    if g:_ltoggled == 1
+        let g:_ltoggled = 0
+        lclose
+    else
+        let g:_ltoggled = 1
+        lopen
+    endif
+endfunction
+
+
+function! NumberToggle()
+  if(&relativenumber == 1)
+    set number
+    set relativenumber=0
+  else
+    let relativenumber=1
+  endif
+endfunc
+
+" =============================================================================
+" ============================= Airline Settings ==============================
 " =============================================================================
 
 set laststatus=2
@@ -150,6 +216,7 @@ let g:color_coded_filetypes = ['c', 'cpp', 'cpp.cuda', 'objc']
 " =============================================================================
 " ============================= UltiSnips Settings ============================
 " =============================================================================
+
 set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
 let g:UltiSnipsExpandTrigger = "<C-j>"
 let g:UltiSnipsEditSplit = 'vertical'
@@ -157,86 +224,26 @@ let g:UltiSnipsSnippetsDir = $HOME."/projects/dots/all/vim/mysnippets"
 let g:UltiSnipsSnippetDirectories=["mysnippets", "UltiSnips"]
 
 " =============================================================================
-" ============================== Custom Functions =============================
+" ============================== NerdTree Settings ============================
 " =============================================================================
 
-function! Preserve(command)
-    " Preparation: save last search, and cursor position.
-    let _s=@/
-    let l = line(".")
-    let c = col(".")
-    " Do the business:
-    execute a:command
-    " Clean up: restore previous search history, and cursor position
-    let @/=_s
-    call cursor(l, c)
-endfunction
+" auto close vim if NERDTree is only one opened window
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 
-function! CallWithNormalizeSplints(command)
-    execute a:command
-    execute "wincmd ="
-endfunction
+" =============================================================================
+" ============================ Buffergator Settings ===========================
+" =============================================================================
 
-function! PropagatePasteBufferToOSX()
-  let @n=getreg('"')
-  call system('pbcopy', @n)
-  echo "done"
-endfunction
+let g:buffergator_split_size = 100
+let g:buffergator_suppress_keymaps = 1
+map <leader>bg :BuffergatorToggle<CR>
 
-function! PopulatePasteBufferFromOSX()
-  let @"=system('pbpaste')
-  echo "done"
-endfunction
+" =============================================================================
+" ============================== TagBar Settings ==============================
+" =============================================================================
 
-let g:_ctoggled = 0
-function! Ctoggle()
-    if g:_ctoggled == 1
-        let g:_ctoggled = 0
-        cclose
-    else
-        let g:_ctoggled = 1
-        copen
-    endif
-endfunction
-
-let g:_ltoggled = 0
-function! Ltoggle()
-    if g:_ltoggled == 1
-        let g:_ltoggled = 0
-        lclose
-    else
-        let g:_ltoggled = 1
-        lopen
-    endif
-endfunction
-
-function! NumberToggle()
-  if(&relativenumber == 1)
-    set number
-    set relativenumber=0
-  else
-    let relativenumber=1
-  endif
-endfunc
-
-" file is large from 10mb
-let g:LargeFile = 1024 * 1024 * 10
-augroup LargeFile
-   autocmd BufReadPre * let f=getfsize(expand("<afile>")) | if f > g:LargeFile || f == -2 | call LargeFile() | endif
-augroup END
-
-function LargeFile()
-   " no syntax highlighting etc
-   set eventignore+=FileType
-   " save memory when other file is viewed
-   setlocal bufhidden=unload
-   " is read-only (write with :w new_filename)
-   setlocal buftype=nowrite
-   " no undo possible
-   setlocal undolevels=-1
-   " display message
-   autocmd VimEnter *  echo "The file is larger than " . (g:LargeFile / 1024 / 1024) . " MB, so some options are changed (see .vimrc for details)."
-endfunction
+map <leader>tb :TagbarToggle<cr>
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
@@ -252,9 +259,6 @@ autocmd BufWritePre * :call Preserve("%s/\\s\\+$//e")
 " resize all splits if vim resized
 autocmd VimResized * wincmd =
 
-" auto close vim if NERDTree is only one opened window
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
-
 " Automatically close Quickfix window if it is the last one.
 aug QFClose
   au!
@@ -269,16 +273,12 @@ map gf :vertical wincmd f<CR>
 " auto reindent entire file
 nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
 
-" buffers manipulating with localhost
+" copy/paste buffers manipulating with localhost
 nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
-"tagbar mappings
-map gti :TagbarOpenAutoClose<cr>
-map gtt :TagbarToggle<cr>
 
-" nnoremap <C-C>
-map gnt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
+
 map gns :Startify<CR>
 
 nnoremap S :%s/
@@ -302,7 +302,6 @@ vnoremap s :s/
 " =============================================================================
 set exrc                                " allow to use external rc files
 set secure                              " restrict usage of some commands in external rc files
-
 
 syntax on                               " set syntax support if there's syntax file
 set t_Co=256                            " add native colors for terminals except tty
@@ -330,7 +329,6 @@ set splitright                          " Open splits to the right
 
 let g:load_doxygen_syntax = 1           " For doxygen syntax highlight
 let g:python_highlight_all = 1          " For full python syntax highlight
-
 
 scriptencoding utf-8
 set encoding=utf-8
@@ -370,11 +368,9 @@ set wildmenu
 set completeopt=menu,menuone,longest
 set switchbuf=useopen,usetab
 
-
 " this makes sure that shell scripts are highlighted
 " as bash scripts and not sh scripts
 let g:is_posix = 1
-
 
 set backspace=indent,eol,start	" more powerful backspacing
 set dir=~/.vim/swap   " district directory for all swap files
