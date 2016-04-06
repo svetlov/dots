@@ -104,7 +104,13 @@ if [ -n "${ARCADIA_ROOT}" ]; then
     }
 
     alias gdb='arcadia_root_call gdb "ya tool gdb"';
-    arcadiavim () { ( unset CC; unset CXX; unset CPATH; vim "$@";) };
+    arcadiavim () {
+        # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
+        _CC=${CC}; _CXX=${CXX}; _CPATH=${CPATH};
+        unset CC; unset CXX; unset CPATH;
+        vim "$@";
+        export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
+    };
     alias vim='arcadia_root_call vim arcadiavim';
 
     alias svn='ya tool svn'
