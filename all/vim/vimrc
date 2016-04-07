@@ -40,6 +40,8 @@ Plugin 'svetlov/molokai'
 " ===================== code-style section ====================================
 " easy comment for common languages
 Plugin 'tpope/vim-commentary'
+" easy move of method argumets
+Plugin 'AndrewRadev/sideways.vim'
 " python pep8 auto indent
 Plugin 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
@@ -136,6 +138,17 @@ function! NumberToggle()
     let relativenumber=1
   endif
 endfunc
+
+
+function! SwitchSourceHeader()
+  "update!
+  if (expand ("%:e") == "cpp")
+    find %:t:r.h
+  else
+    find %:t:r.cpp
+  endif
+endfunction
+
 
 " =============================================================================
 " ============================= Airline Settings ==============================
@@ -235,7 +248,10 @@ map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 " ============================ Buffergator Settings ===========================
 " =============================================================================
 
-let g:buffergator_split_size = 100
+let g:buffergator_hsplit_size = 10
+let g:buffergator_viewport_split_policy="T"  " open at top
+
+
 let g:buffergator_suppress_keymaps = 1
 map <leader>bg :BuffergatorToggle<CR>
 
@@ -244,6 +260,13 @@ map <leader>bg :BuffergatorToggle<CR>
 " =============================================================================
 
 map <leader>tb :TagbarToggle<cr>
+
+" =============================================================================
+" ============================= SideWays Settings =============================
+" =============================================================================
+
+nnoremap <leader>h :SidewaysLeft<cr>
+nnoremap <leader>l :SidewaysRight<cr>
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
@@ -277,12 +300,10 @@ nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
 nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
-
-
-map gns :Startify<CR>
-
+nmap <leader>s :call SwitchSourceHeader()<CR>
 nnoremap S :%s/
 vnoremap s :s/
+
 
 " clist mappings
 " nnoremap<C-C> :call Ctoggle()<cr>
