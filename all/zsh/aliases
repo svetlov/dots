@@ -116,7 +116,7 @@ if [ -n "${ARCADIA_ROOT}" ]; then
     alias svn='ya tool svn'
     svnst() { ya tool svn status "${@}" | grep '^[ADM]' }
     svncdiff() { ya tool svn diff "${@}" | colordiff }
-    svnvimdiff() { ya tool svn diff --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
+    svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
     svnunstage() { ya tool svn rm --keep-local "${@}" }
 
     alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
