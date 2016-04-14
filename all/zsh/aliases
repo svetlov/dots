@@ -88,6 +88,12 @@ svnvimdiff () {
     vimdiff ${6} ${7}
 }
 
+yaclone() {
+    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool
+    ${HOME}/.yatool/ya clone $@
+    rm -rf ~/.yatool
+}
+
 if [ -e "${HOME}/.local/usr/bin/g++-4.9" ]; then
     export CXX=${HOME}/.local/usr/bin/g++-4.9
 fi
