@@ -9,15 +9,15 @@ export _LOCAL=${HOME}/.local
 
 
 # Regular Colors
-export COLOR_OFF='\\\\e[0m'             # Text Reset
-export COLOR_BLACK='\\\\e[0;30m'        # Black
-export COLOR_RED='\\\\e[0;31m'          # Red
-export COLOR_GREEN='\\\\e[0;32m'        # Green
-export COLOR_YELLOW='\\\\e[0;33m'       # Yellow
-export COLOR_BLUE='\\\\e[0;34m'         # Blue
-export COLOR_PURPLE='\\\\e[0;35m'       # Purple
-export COLOR_CYAN='\\\\e[0;36m'         # Cyan
-export COLOR_WHITE='\\\\e[0;37m'        # White
+export COLOR_OFF=$'\e[0m'             # Text Reset
+export COLOR_BLACK=$'\e[0;30m'        # Black
+export COLOR_RED=$'\e[0;31m'          # Red
+export COLOR_GREEN=$'\e[0;32m'        # Green
+export COLOR_YELLOW=$'\e[0;33m'       # Yellow
+export COLOR_BLUE=$'\e[0;34m'         # Blue
+export COLOR_PURPLE=$'\e[0;35m'       # Purple
+export COLOR_CYAN=$'\e[0;36m'         # Cyan
+export COLOR_WHITE=$'\e[0;37m'        # White
 
 setopt aliases
 
@@ -134,11 +134,11 @@ if [ -n "${ARCADIA_ROOT}" ]; then
     alias svn='ya tool svn'
     svnst() {
         ya tool svn status "${@}" | \
-        grep '^[ADM]' | \
-        sed 's/^A\(.*\)/A'"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/' |
-        sed 's/^D\(.*\)/D'"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
-        sed 's/^M\(.*\)/M'"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
-        xargs -I {} echo -e "\t{}";
+        grep --line-buffered -E "(?:(?.*/)*| )[^ .]+\..+" |
+        sed 's/^\? *\(.*\)/    \?  '"${COLOR_CYAN}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^A *\(.*\)/    A  '"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^D *\(.*\)/    D  '"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^M *\(.*\)/    M  '"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/'
     }
     svncdiff() { ya tool svn diff "${@}" | colordiff }
     svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
