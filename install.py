@@ -74,7 +74,7 @@ class GitConfigInstaller(Installer):
     gitconfig = os.path.join(HOME, ".gitconfig")
 
     @classmethod
-    def install():
+    def install(cls):
         symlink(os.path.join(PWD, "files", "git", "gitconfig"), cls.gitconfig)
 
 
