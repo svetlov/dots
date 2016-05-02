@@ -127,6 +127,10 @@ class TmuxInstaller(Installer):
     @classmethod
     def install(cls):
         symlink(os.path.join(PWD, "all", "tmux", "tmux.conf"), cls.tmuxconf)
+        symlink(
+            os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
+            os.path.join(LOCAL_BIN, "tmux-vim-select-pane")
+        )
         for filename in ['pbcopy', 'pbpaste']:
             symlink(
                 os.path.join(PWD, "all", "tmux", filename),
