@@ -12,6 +12,7 @@ ISLINUX = (sys.platform != 'darwin')
 PWD = os.path.abspath(__file__.rsplit(os.path.sep)[0])
 HOME = os.path.expanduser("~")
 LOCAL_BIN = os.path.join(HOME, ".local", "bin")
+HOMEBREW_HOME = os.path.join(HOME, ".brew") if ISLINUX else os.path.join("usr", "local")
 os.makedirs(LOCAL_BIN, exist_ok=True)
 
 INSTALLERS = {}
@@ -99,6 +100,7 @@ class OhMyZshInstaller(Installer):
 class VimInstaller(Installer):
     name = 'vim'
     vimrc = os.path.join(HOME, ".vimrc")
+    llvmpath = os.path.join(HOMEBREW_HOME, "Cellar", "llvm", "HEAD")
 
     @classmethod
     def install(cls):
@@ -113,11 +115,10 @@ class VimInstaller(Installer):
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call(["cmake", ".."])
+                sb.call(["cmake", "-DCUSTOM_CLANG=1", "-DLLVM_ROOT_PATH={}".format(cls.llvmpath), ".."])
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
-                sb.call(["make", "clean_clang"])
 
 
 class TmuxInstaller(Installer):
