@@ -1,57 +1,204 @@
-# Path to your oh-my-zsh installation.
+export LC=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export EDITOR='vim'
+export HOME=$(cd ${HOME}; pwd -P);
+export WORKON_HOME=${HOME}/.virtualenvs
+export PROJECT_HOME=${PROJECTS}
+
+# Regular Colors
+export COLOR_OFF=$'\e[0m'             # Text Reset
+export COLOR_BLACK=$'\e[0;30m'        # Black
+export COLOR_RED=$'\e[0;31m'          # Red
+export COLOR_GREEN=$'\e[0;32m'        # Green
+export COLOR_YELLOW=$'\e[0;33m'       # Yellow
+export COLOR_BLUE=$'\e[0;34m'         # Blue
+export COLOR_PURPLE=$'\e[0;35m'       # Purple
+export COLOR_CYAN=$'\e[0;36m'         # Cyan
+export COLOR_WHITE=$'\e[0;37m'        # White
+
+setopt aliases
+
+alias zshconfig="vim ~/.zshrc"
+alias editor="vim"
+alias vimlarge="vim -u NONE -U NONE -N"
+alias vimconfig="vim ~/.vimrc"
+alias ohmyzsh="vim ~/.oh-my-zsh"
+alias cx="chmod +x "
+alias rm="rm -i"
+alias mv="mv -i"
+alias wgetn="wget --no-check-certificate";
+
+_str_contains() {
+	# check $2 is a substring of $1
+	[[ $1 == *$2* ]] && return 1 || return 0;
+}
+
+_smart_append() {
+    # join $2 to $1 with ':' if $1 exists, else return $2
+    # echo "$# $@" 1>&2;
+    if [[ "$#" -eq 2 ]]; then
+        _str_contains $1 $2;
+        if [[ $? -eq 0  && -d $2 ]] ; then
+            echo "$2:$1";  # $2 is not substring of $1 and exists
+        else
+            echo "$1";
+        fi
+    elif [[ "$#" -eq 1 ]]; then
+        echo "$1";
+    else
+        echo "Illegal number of paramters in _smart_append function" 1>&2;
+    fi
+}
+
+# =====================================================================================================================
+# =============================================== Env Creator Settings ================================================
+# =====================================================================================================================
+
+_update_env() {
+    PATH=$(_smart_append ${PATH} "/usr/local/bin");
+    PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
+    PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
+    PATH=$(_smart_append ${PATH} "/usr/texbin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
+    PATH=$(_smart_append ${PATH} "${HOME}/.brew/bin");
+
+    CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
+    CPATH=$(_smart_append ${CPATH} "/usr/local/include");
+    CPATH=$(_smart_append ${CPATH} "${HOME}/.brew/include")
+
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.brew/lib");
+
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
+
+    MANPATH=$(_smart_append ${MANPATH} "/usr/share/man");
+    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.brew/share/man");
+    MANPATH=$(_smart_append ${MANPATH} "/usr/local/share/man");
+
+    INFOPATH=$(_smart_append ${INFOPATH} "/usr/share/info");
+    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.brew/share/info");
+    INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
+
+    # contains ruby, required for brew on linux
+    if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
+        source ${HOME}/.rvm/scripts/rvm;
+    fi
+}
+
+_update_env;
+
+# =====================================================================================================================
+# ================================================= OhMyZsh Settings ==================================================
+# =====================================================================================================================
+
 export ZSH=$HOME/.oh-my-zsh
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="mytheme"
+if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
+    git clone git://github.com/robbyrussell/oh-my-zsh.git ${ZSH};
+fi
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+if [[ -f "/place/home/splinter/.oh-my-zsh/themes/mytheme.zsh-theme" ]]; then
+    ZSH_THEME="mytheme";
+else
+    ZSH_THEME="maran";
+fi
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
 ENABLE_CORRECTION="false"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-[ -f ${HOME}/.aliases ] && source ${HOME}/.aliases
+HIST_STAMPS="yyyy-mm-dd"
 
 plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
 
-# export MANPATH="/usr/local/man:$MANPATH"
-
 source $ZSH/oh-my-zsh.sh
-
 bindkey '^R' history-incremental-search-backward
 
+# =====================================================================================================================
+# ================================================= Arcadia Settings ==================================================
+# =====================================================================================================================
 
+svnvimdiff () {
+    vimdiff ${6} ${7}
+}
+
+delpoy_arc() {
+    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool
+    ${HOME}/.yatool/ya clone $@
+    rm -rf ~/.yatool
+}
+
+if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
+    export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
+elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
+    export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
+fi
+
+if [ -n "${ARCADIA_ROOT}" ]; then
+    ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+    arcadia_root_call() {
+        # $1 -- original cmd
+        # $2 -- arcadia cmd
+        if [[ $(pwd -P) == ${ARCADIA_ROOT}* ]]; then
+            array=( ${(s. .)"${2}"} )
+        else
+            array=( ${(s. .)"${1}"} )
+        fi
+        ${array[@]} ${@:3};
+    }
+
+    alias gdb='arcadia_root_call gdb "ya tool gdb"';
+    arcadiavim () {
+        # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
+        _CC=${CC}; _CXX=${CXX}; _CPATH=${CPATH};
+        unset CC; unset CXX; unset CPATH;
+        vim "$@";
+        export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
+    };
+    alias vim='arcadia_root_call vim arcadiavim';
+
+    alias svn='ya tool svn'
+    svnst() {
+        ya tool svn status "${@}" | \
+        grep --line-buffered -E "(?:(?.*/)*| )[^ .]+\..+" |
+        sed 's/^\? *\(.*\)/    \?  '"${COLOR_CYAN}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^A *\(.*\)/    A  '"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^D *\(.*\)/    D  '"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
+        sed 's/^M *\(.*\)/    M  '"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/'
+    }
+    svncdiff() { ya tool svn diff "${@}" | colordiff }
+    svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
+    svnunstage() { ya tool svn rm --keep-local "${@}" }
+
+    alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
+
+    ## Binaries build with latest GCC require latest libstdc++:
+    yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+    export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
+    # for danet
+    export OMP_NUM_THREADS=8
+    export MKL_NUM_THREADS=8
+
+    alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
+        --add-result='.hpp' --add-result='.c' --add-result='.cc' \
+        --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+        --no-src-links --keep-going'
+fi
+
+if [ -e "${HOME}/.yt/token" ]; then
+    export YT_PROXY=banach.yt.yandex.net
+    export YT_TOKEN=`cat ~/.yt/token`
+    export YT_HOME=//home/cvtest/splinter
+fi
+
+# =====================================================================================================================
+# =============================================== OS Specific Settings ================================================
+# =====================================================================================================================
 if [ `uname` = "Darwin" ]; then
     nbtunnel () {
         ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
@@ -93,3 +240,51 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
 else
 
 fi
+
+# =====================================================================================================================
+# ================================================= Deploy Function ===================================================
+# =====================================================================================================================
+
+deploy_env() {
+    which brew > /dev/null;
+    if [[ $? -ne 0 ]]; then
+        if [[ `uname` = "Darwin" ]]; then
+            echo "TODO on darwin for deploy brew";
+        elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+            which rvm > /dev/null;
+            if [[ $? -ne 0 ]]; then  # install ruby for brew if required
+                gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
+                curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
+            fi
+            git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.brew
+            _update_env;
+        else
+            echo "Unknown system: $(uname)";
+            exit 1;
+        fi
+        brew doctor;
+    fi
+    brew install cmake;
+    brew install gcc;
+    brew install tmux;
+    brew install ctags;
+    brew install python;
+    brew install vim --with-python3 --with-lua --without-ruby --HEAD;
+    brew install llvm --with-lldb --with-clang --with-clang-extra-tools --with-python --HEAD;
+
+    which virtualenvwrapper.sh > /dev/null;
+    if [[ $? -ne 0 ]]; then
+        pip install --user virtualenvwrapper;
+        _update_env;
+    fi
+
+    # install configs
+    mkdir -p ${HOME}/projects;
+    (
+        cd ${HOME}/projects
+        git clone git@github.com:svetlov/dots.git;
+        cd dots;
+        ./install.py install configs;
+    );
+    _update_env;
+}
