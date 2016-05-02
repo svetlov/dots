@@ -24,11 +24,6 @@ def PathGuard(path):
     yield
     os.chdir(prev)
 
-def forceRemove(filename):
-    try:
-        os.remove(filename)
-    except OSError:
-        pass
 
 def get_free_name(path):
     index = 0
@@ -40,12 +35,15 @@ def get_free_name(path):
 
 
 def symlink(source, destination):
-    if os.path.exists(destination):
-        if os.path.realpath(source) == os.path.realpath(destination):
+    if os.path.lexists(destination):
+        if os.path.islink(destination) and not os.path.exists(destination):  # broken symbolic link
+            os.remove(destination)
+        elif os.path.realpath(source) == os.path.realpath(destination):  # same link
             return
-        olddestination = get_free_name(destination + ".old")
-        print("Warning: {} path already exists, move it to {}".format(destination, olddestination))
-        os.rename(destination, olddestination)
+        else:
+            olddestination = get_free_name(destination + ".old")
+            print("Warning: {} path already exists, move it to {}".format(destination, olddestination))
+            os.rename(destination, olddestination)
     os.symlink(source, destination)
 
 

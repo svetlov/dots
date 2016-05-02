@@ -73,8 +73,9 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.brew/lib");
 
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
+    # see https://github.com/Linuxbrew/linuxbrew/issues/321 for details
+    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
+    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
 
     MANPATH=$(_smart_append ${MANPATH} "/usr/share/man");
     MANPATH=$(_smart_append ${MANPATH} "${HOME}/.brew/share/man");
@@ -89,6 +90,10 @@ _update_env() {
     # contains ruby, required for brew on linux
     if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
         source ${HOME}/.rvm/scripts/rvm;
+    fi
+
+    if [[ -e ${HOME}/.brew/cacert.pem ]]; then
+        export SSL_CERT_FILE=${HOME}/.brew/cacert.pem
     fi
 }
 
@@ -214,7 +219,7 @@ if [ `uname` = "Darwin" ]; then
         fi
     }
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
-    if [ -z "$TMUX" ]; then
+    if [[ -z "$TMUX" && -e "${HOME}/.zshrc" ]]; then
         function refresh { }
         if [[ -n "$SSH_AUTH_SOCK" && \
             "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
@@ -257,6 +262,7 @@ deploy_env() {
                 curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
             fi
             git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.brew
+            curl https://curl.haxx.se/ca/cacert.pem > ${HOME}/.brew/cacert.pem
             _update_env;
         else
             echo "Unknown system: $(uname)";
@@ -269,6 +275,7 @@ deploy_env() {
     brew install tmux;
     brew install ctags;
     brew install python;
+    brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
     brew install llvm --with-lldb --with-clang --with-clang-extra-tools --with-python --HEAD;
 
