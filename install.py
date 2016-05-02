@@ -73,7 +73,7 @@ class GitConfigInstaller(Installer):
 
     @classmethod
     def install(cls):
-        symlink(os.path.join(PWD, "files", "git", "gitconfig"), cls.gitconfig)
+        symlink(os.path.join(PWD, "all", "git", "gitconfig"), cls.gitconfig)
 
 
 class OhMyZshInstaller(Installer):
