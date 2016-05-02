@@ -141,7 +141,7 @@ class ConfigsInstall(Installer):
 
     @staticmethod
     def install():
-        OhMyZSHInstaller.install()
+        OhMyZshInstaller.install()
         GitConfigInstaller.install()
         TmuxInstaller.install()
         VimInstaller.install()
