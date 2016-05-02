@@ -274,7 +274,7 @@ deploy_env() {
     brew install gcc;
     brew install tmux;
     brew install ctags;
-    brew install python;
+    brew install python3;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
     brew install llvm --with-lldb --with-clang --with-clang-extra-tools --with-python --HEAD;
@@ -289,7 +289,9 @@ deploy_env() {
     mkdir -p ${HOME}/projects;
     (
         cd ${HOME}/projects
-        git clone git@github.com:svetlov/dots.git;
+        if [[ ! -d "${HOME}/projects/dots" ]]; then
+            git clone git@github.com:svetlov/dots.git;
+        fi
         cd dots;
         ./install.py install configs;
     );
