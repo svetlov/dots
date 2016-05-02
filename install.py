@@ -44,7 +44,7 @@ def symlink(source, destination):
         if os.path.realpath(source) == os.path.realpath(destination):
             return
         olddestination = get_free_name(destination + ".old")
-        print("Warning: {} path already exists, move it to {}".format(olddestination))
+        print("Warning: {} path already exists, move it to {}".format(destination, olddestination))
         os.rename(destination, olddestination)
     os.symlink(source, destination)
 
