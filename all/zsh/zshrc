@@ -274,7 +274,7 @@ deploy_env() {
     brew install gcc;
     brew install tmux;
     brew install ctags;
-    brew install python3;
+    brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
     brew install llvm --with-lldb --with-clang --with-clang-extra-tools --with-python --HEAD;
