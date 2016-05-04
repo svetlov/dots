@@ -270,7 +270,7 @@ deploy_env() {
         fi
         brew doctor;
         if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-            brew install glibc https://raw.github.com/svetlov/dots/master/all/libs/glibc.rb;
+            brew install https://raw.github.com/svetlov/dots/master/all/libs/glibc219.rb;
         fi
     fi
     brew install git;

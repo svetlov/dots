@@ -1,4 +1,4 @@
-class Glibc < Formula
+class Glibc219 < Formula
   desc "The GNU C Library"
   homepage "https://www.gnu.org/software/libc/download.html"
   url "http://ftpmirror.gnu.org/glibc/glibc-2.19.tar.bz2"
