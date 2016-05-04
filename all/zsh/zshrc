@@ -62,15 +62,15 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
-    PATH=$(_smart_append ${PATH} "${HOME}/.brew/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/bin");
 
     CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
-    CPATH=$(_smart_append ${CPATH} "${HOME}/.brew/include")
+    CPATH=$(_smart_append ${CPATH} "${HOME}/.linuxbrew/include")
 
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.brew/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
     # see https://github.com/Linuxbrew/linuxbrew/issues/321 for details
@@ -78,11 +78,11 @@ _update_env() {
     # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
 
     MANPATH=$(_smart_append ${MANPATH} "/usr/share/man");
-    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.brew/share/man");
+    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.linuxbrew/share/man");
     MANPATH=$(_smart_append ${MANPATH} "/usr/local/share/man");
 
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/share/info");
-    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.brew/share/info");
+    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
 
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
@@ -92,9 +92,9 @@ _update_env() {
         source ${HOME}/.rvm/scripts/rvm;
     fi
 
-    if [[ -e ${HOME}/.brew/cacert.pem ]]; then
-        export SSL_CERT_FILE=${HOME}/.brew/cacert.pem
-    fi
+    # if [[ -e ${HOME}/.linuxbrew/cacert.pem ]]; then
+    #     export SSL_CERT_FILE=${HOME}/.linuxbrew/cacert.pem
+    # fi
 }
 
 _update_env;
@@ -219,22 +219,18 @@ if [ `uname` = "Darwin" ]; then
         fi
     }
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
-    if [[ -z "$TMUX" && -L "${HOME}/.zshrc" ]]; then
-        function refresh { }
-        if [[ -n "$SSH_AUTH_SOCK" && \
-            "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
-            ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+    if [[ -L "${HOME}/.zshrc" ]]; then
+        if [[ -z "$TMUX" ]]; then
+            if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
+                ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
+            fi
+            tmux attach || tmux new -A
+        else
+            function preexec {
+                export $(tmux show-environment | grep "^SSH_AUTH_SOCK")
+            }
         fi
-        tmux attach || tmux new -A
-    else
-        function refresh {
-            export $(tmux show-environment | grep "^SSH_AUTH_SOCK")
-        }
     fi
-
-    function preexec {
-        refresh
-    }
 
     nbstart () {
         workon $1 && \
@@ -261,19 +257,21 @@ deploy_env() {
                 gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
                 curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
             fi
-            git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.brew
-            curl https://curl.haxx.se/ca/cacert.pem > ${HOME}/.brew/cacert.pem
+            git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew
+
             _update_env;
+            brew doctor;
+
+            wget https://raw.githubusercontent.com/svetlov/dots/master/all/libs/glibc.rb -O glibc.rb;
+            mv -f glibc.rb ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core/Formula/glibc.rb;
         else
             echo "Unknown system: $(uname)";
             exit 1;
         fi
-        brew doctor;
-        if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-            brew install https://raw.github.com/svetlov/dots/master/all/libs/glibc219.rb;
-        fi
+        brew install openssl --build-from-source;
+        brew install curl --build-from-source;
     fi
-    brew install git;
+    brew install git --with-brewed-openssl --with-brewed-curl;
     brew install cmake;
     brew install gcc;
     brew install tmux;
@@ -295,8 +293,11 @@ deploy_env() {
         cd ${HOME}/projects
         if [[ ! -d "${HOME}/projects/dots" ]]; then
             git clone git@github.com:svetlov/dots.git;
+            cd dots
+        else
+            cd dots;
+            git checkout master && git pull origin master;
         fi
-        cd dots;
         ./install.py install configs;
     );
     _update_env;
