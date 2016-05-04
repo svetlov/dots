@@ -270,9 +270,10 @@ deploy_env() {
         fi
         brew doctor;
         if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-            brew install glibc --force-bottle;
+            brew install glibc https://raw.github.com/svetlov/dots/master/all/libs/glibc.rb;
         fi
     fi
+    brew install git;
     brew install cmake;
     brew install gcc;
     brew install tmux;
