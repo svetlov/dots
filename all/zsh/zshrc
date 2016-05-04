@@ -269,6 +269,9 @@ deploy_env() {
             exit 1;
         fi
         brew doctor;
+        if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+            brew install glibc --force-bottle;
+        fi
     fi
     brew install cmake;
     brew install gcc;
