@@ -18,7 +18,7 @@ export COLOR_PURPLE=$'\e[0;35m'       # Purple
 export COLOR_CYAN=$'\e[0;36m'         # Cyan
 export COLOR_WHITE=$'\e[0;37m'        # White
 
-setopt aliases
+# setopt aliases
 
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
@@ -62,6 +62,7 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
+    PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/sbin");
     PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/bin");
 
     CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
@@ -138,61 +139,63 @@ delpoy_arc() {
     rm -rf ~/.yatool
 }
 
-if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
-    export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
-elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
-    export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
-fi
+if [[ ! -n ${ARCADIA_ROOT} ]]; then
+    if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
+        export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
+    elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
+        export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
+    fi
 
-if [ -n "${ARCADIA_ROOT}" ]; then
-    ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
-    arcadia_root_call() {
-        # $1 -- original cmd
-        # $2 -- arcadia cmd
-        if [[ $(pwd -P) == ${ARCADIA_ROOT}* ]]; then
-            array=( ${(s. .)"${2}"} )
-        else
-            array=( ${(s. .)"${1}"} )
-        fi
-        ${array[@]} ${@:3};
-    }
+    if [ -n "${ARCADIA_ROOT}" ]; then
+        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+        arcadia_root_call() {
+            # $1 -- original cmd
+            # $2 -- arcadia cmd
+            if [[ $(pwd -P) == ${ARCADIA_ROOT}* ]]; then
+                array=( ${(s. .)"${2}"} )
+            else
+                array=( ${(s. .)"${1}"} )
+            fi
+            ${array[@]} ${@:3};
+        }
 
-    alias gdb='arcadia_root_call gdb "ya tool gdb"';
-    arcadiavim () {
-        # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
-        _CC=${CC}; _CXX=${CXX}; _CPATH=${CPATH};
-        unset CC; unset CXX; unset CPATH;
-        vim "$@";
-        export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
-    };
-    alias vim='arcadia_root_call vim arcadiavim';
+        alias gdb='arcadia_root_call gdb "ya tool gdb"';
+        arcadiavim () {
+            # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
+            _CC=${CC}; _CXX=${CXX}; _CPATH=${CPATH};
+            unset CC; unset CXX; unset CPATH;
+            vim "$@";
+            export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
+        };
+        alias vim='arcadia_root_call vim arcadiavim';
 
-    alias svn='ya tool svn'
-    svnst() {
-        ya tool svn status "${@}" | \
-        grep --line-buffered -E "(?:(?.*/)*| )[^ .]+\..+" |
-        sed 's/^\? *\(.*\)/    \?  '"${COLOR_CYAN}"'\1'"${COLOR_OFF}"'/' |
-        sed 's/^A *\(.*\)/    A  '"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
-        sed 's/^D *\(.*\)/    D  '"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
-        sed 's/^M *\(.*\)/    M  '"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/'
-    }
-    svncdiff() { ya tool svn diff "${@}" | colordiff }
-    svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
-    svnunstage() { ya tool svn rm --keep-local "${@}" }
+        alias svn='ya tool svn'
+        svnst() {
+            ya tool svn status "${@}" | \
+            grep --line-buffered -E "(?:(?.*/)*| )[^ .]+\..+" |
+            sed 's/^\? *\(.*\)/    \?  '"${COLOR_CYAN}"'\1'"${COLOR_OFF}"'/' |
+            sed 's/^A *\(.*\)/    A  '"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
+            sed 's/^D *\(.*\)/    D  '"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
+            sed 's/^M *\(.*\)/    M  '"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/'
+        }
+        svncdiff() { ya tool svn diff "${@}" | colordiff }
+        svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
+        svnunstage() { ya tool svn rm --keep-local "${@}" }
 
-    alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
+        alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
 
-    ## Binaries build with latest GCC require latest libstdc++:
-    yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
-    export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
-    # for danet
-    export OMP_NUM_THREADS=8
-    export MKL_NUM_THREADS=8
+        ## Binaries build with latest GCC require latest libstdc++:
+        yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
+        # for danet
+        export OMP_NUM_THREADS=8
+        export MKL_NUM_THREADS=8
 
-    alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
-        --add-result='.hpp' --add-result='.c' --add-result='.cc' \
-        --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
-        --no-src-links --keep-going'
+        alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
+            --add-result='.hpp' --add-result='.c' --add-result='.cc' \
+            --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+            --no-src-links --keep-going'
+    fi
 fi
 
 if [ -e "${HOME}/.yt/token" ]; then
@@ -276,6 +279,7 @@ deploy_env() {
     brew install gcc;
     brew install tmux;
     brew install ctags;
+    brew install python --with-unicode-ucs4;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/llvm38.rb --with clang;
@@ -307,9 +311,13 @@ mkmathvirtualenv() {
     mkvirtualenv $@;
     local version=$(python --version 2>&1 | sed 's/Python \([0-9]\)\.[0-9]\.[0-9]*/\1/');
     [[ $version = 2 ]] && local pipcmd=pip || local pipcmd=pip3;
-    $pipcmd install -U setuptools pip;
-    $pipcmd install -U numpy scipy pandas;
+    $pipcmd install -U setuptools
+    $pipcmd install -U pip;
+    $pipcmd install -U numpy;
+    $pipcmd install -U scipy;
+    $pipcmd install -U pandas;
     brew install freetype libpng;
     $pipcmd install -U matplotlib;
     $pipcmd install -U 'ipython[all]';
+    deactivate; workon ${@:$#};
 }
