@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 ISLINUX = (sys.platform != 'darwin')
 
-PWD = os.path.abspath(__file__.rsplit(os.path.sep)[0])
+PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
 LOCAL_BIN = os.path.join(HOME, ".local", "bin")
 HOMEBREW_HOME = os.path.join(HOME, ".brew") if ISLINUX else os.path.join("usr", "local")
@@ -119,6 +119,7 @@ class VimInstaller(Installer):
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
+        open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
 
 
 class TmuxInstaller(Installer):

@@ -278,8 +278,8 @@ deploy_env() {
     brew install ctags;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
+    brew install https://raw.github.com/svetlov/dots/master/all/libs/llvm38.rb --with clang;
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
-    brew install llvm --with-lldb --with-clang --with-clang-extra-tools --with-python --HEAD;
 
     which virtualenvwrapper.sh > /dev/null;
     if [[ $? -ne 0 ]]; then
