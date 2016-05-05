@@ -283,7 +283,7 @@ deploy_env() {
 
     which virtualenvwrapper.sh > /dev/null;
     if [[ $? -ne 0 ]]; then
-        pip install --user virtualenvwrapper;
+        pip3 install -U virtualenvwrapper;
         _update_env;
     fi
 
@@ -301,4 +301,15 @@ deploy_env() {
         ./install.py install configs;
     );
     _update_env;
+}
+
+mkmathvirtualenv() {
+    mkvirtualenv $@;
+    local version=$(python --version 2>&1 | sed 's/Python \([0-9]\)\.[0-9]\.[0-9]*/\1/');
+    [[ $version = 2 ]] && local pipcmd=pip || local pipcmd=pip3;
+    $pipcmd install -U setuptools pip;
+    $pipcmd install -U numpy scipy pandas;
+    brew install freetype libpng;
+    $pipcmd install -U matplotlib;
+    $pipcmd install -U 'ipython[all]';
 }
