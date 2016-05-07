@@ -35,6 +35,16 @@ class Lua < Formula
   # See: https://github.com/Homebrew/homebrew/pull/5043
   patch :DATA if OS.mac?
 
+  patch do
+    url "https://raw.github.com/splinter/dots/all/libs/lua-mac.patch"
+    # sha1 "1e151d4ff3ce83d635cf794acf0c781e1b748ff1"
+  end if OS.mac?
+
+  patch do
+    url "https://raw.github.com/splinter/dots/all/libs/lua-linux.patch"
+    # sha1 "1e151d4ff3ce83d635cf794acf0c781e1b748ff1"
+  end if OS.linux?
+
   # completion provided by advanced readline power patch
   # See http://lua-users.org/wiki/LuaPowerPatches
   if build.with? "completion"
