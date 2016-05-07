@@ -40,6 +40,8 @@ index 8c9ee67..7f92407 100644
 -	$(AR) $@ $(BASE_O)
 -	$(RANLIB) $@
 +	$(CC) -dynamiclib -o liblua.5.2.4.so $^
++
++
 
  $(LUA_T): $(LUA_O) $(LUA_A)
 -	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
