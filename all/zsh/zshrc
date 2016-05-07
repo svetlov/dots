@@ -139,14 +139,14 @@ delpoy_arc() {
     rm -rf ~/.yatool
 }
 
-if [[ ! -n ${ARCADIA_ROOT} ]]; then
+_update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
     elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
     fi
 
-    if [ -n "${ARCADIA_ROOT}" ]; then
+    if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
         ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
         arcadia_root_call() {
             # $1 -- original cmd
@@ -196,13 +196,15 @@ if [[ ! -n ${ARCADIA_ROOT} ]]; then
             --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
             --no-src-links --keep-going'
     fi
-fi
 
-if [ -e "${HOME}/.yt/token" ]; then
-    export YT_PROXY=banach.yt.yandex.net
-    export YT_TOKEN=`cat ~/.yt/token`
-    export YT_HOME=//home/cvtest/splinter
-fi
+    if [ -e "${HOME}/.yt/token" ]; then
+        export YT_PROXY=banach.yt.yandex.net
+        export YT_TOKEN=`cat ~/.yt/token`
+        export YT_HOME=//home/cvtest/splinter
+    fi
+}
+
+_update_arcadia_env;
 
 # =====================================================================================================================
 # =============================================== OS Specific Settings ================================================
@@ -265,8 +267,9 @@ deploy_env() {
             _update_env;
             brew doctor;
 
-            wget https://raw.githubusercontent.com/svetlov/dots/master/all/libs/glibc.rb -O glibc.rb;
-            mv -f glibc.rb ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core/Formula/glibc.rb;
+            wget https://raw.githubusercontent.com/svetlov/dots/master/all/libs/glibc.rb -O .downloaded_glibc.rb;
+            mv -f .downloaded_glibc.rb ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core/Formula/glibc.rb;
+            brew install glibc;
         else
             echo "Unknown system: $(uname)";
             exit 1;
@@ -274,15 +277,20 @@ deploy_env() {
         brew install openssl --build-from-source;
         brew install curl --build-from-source;
     fi
-    brew install git --with-brewed-openssl --with-brewed-curl;
-    brew install cmake;
     brew install gcc;
-    brew install tmux;
-    brew install ctags;
+
     brew install python --with-unicode-ucs4;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
-    brew install https://raw.github.com/svetlov/dots/master/all/libs/llvm38.rb --with clang;
+
+    brew install git --with-brewed-openssl --with-brewed-curl;
+    brew install cmake;
+    brew install llvm --with-clang --with-clang-extra-tools --with-utils --with-python \
+        --with-lld --with-lldb --with-rtti --HEAD;
+
+    brew install tmux;
+    brew install ctags;
+
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
 
     which virtualenvwrapper.sh > /dev/null;
@@ -300,7 +308,9 @@ deploy_env() {
             cd dots
         else
             cd dots;
-            git checkout master && git pull origin master;
+            git stash;
+            git checkout master;
+            git pull origin master;
         fi
         ./install.py install configs;
     );
