@@ -219,6 +219,9 @@ let g:ycm_key_list_previous_completion = ['<Up>']
 map gdf :YcmComplete GoToDefinition<CR>
 map gdc :YcmComplete GoToDeclaration<CR>
 autocmd FileType c,ccp,python nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
+" for auto ident one symbol at left in case of errors
+autocmd BufEnter * sign define dummy
+autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
 
 " =============================================================================
 " ============================ ColorCoded Settings ============================

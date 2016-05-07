@@ -73,7 +73,7 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
+    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
     # see https://github.com/Linuxbrew/linuxbrew/issues/321 for details
     # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
     # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
@@ -86,7 +86,7 @@ _update_env() {
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
 
-    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
+    export PATH; export CPATH; export LIBRARY_PATH; export MANPATH; export INFOPATH;
 
     # contains ruby, required for brew on linux
     if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
@@ -133,10 +133,11 @@ svnvimdiff () {
     vimdiff ${6} ${7}
 }
 
-delpoy_arc() {
-    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool
-    ${HOME}/.yatool/ya clone $@
-    rm -rf ~/.yatool
+yaclone() {
+    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool;
+    ${HOME}/.yatool/ya clone $@;
+    rm -rf ~/.yatool;
+    _update_arcadia_env;
 }
 
 _update_arcadia_env () {
@@ -185,8 +186,8 @@ _update_arcadia_env () {
         alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
 
         ## Binaries build with latest GCC require latest libstdc++:
-        yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
-        export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
+        # yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
+        # export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
         # for danet
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
@@ -194,7 +195,7 @@ _update_arcadia_env () {
         alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
             --add-result='.hpp' --add-result='.c' --add-result='.cc' \
             --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
-            --no-src-links --keep-going'
+            --no-src-links --keep-going --checkout'
     fi
 
     if [ -e "${HOME}/.yt/token" ]; then
