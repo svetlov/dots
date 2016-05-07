@@ -36,12 +36,12 @@ class Lua < Formula
   patch :DATA if OS.mac?
 
   patch do
-    url "https://raw.github.com/splinter/dots/all/libs/lua-mac.patch"
+    url "https://raw.github.com/svetlov/dots/master/all/libs/lua-mac.patch"
     # sha1 "1e151d4ff3ce83d635cf794acf0c781e1b748ff1"
   end if OS.mac?
 
   patch do
-    url "https://raw.github.com/splinter/dots/all/libs/lua-linux.patch"
+    url "https://raw.github.com/svetlov/dots/master/all/libs/lua-linux.patch"
     # sha1 "1e151d4ff3ce83d635cf794acf0c781e1b748ff1"
   end if OS.linux?
 
