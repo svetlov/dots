@@ -7,6 +7,8 @@ export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs
 export PROJECT_HOME=${PROJECTS}
 
+
+
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
 export COLOR_BLACK=$'\e[0;30m'        # Black
@@ -271,6 +273,8 @@ deploy_env() {
             wget https://raw.githubusercontent.com/svetlov/dots/master/all/libs/glibc.rb -O .downloaded_glibc.rb;
             mv -f .downloaded_glibc.rb ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core/Formula/glibc.rb;
             brew install glibc;
+
+
         else
             echo "Unknown system: $(uname)";
             exit 1;
@@ -283,6 +287,14 @@ deploy_env() {
     brew install python --with-unicode-ucs4;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
     brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
+
+    _update_env;
+    export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
+    if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+        export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
+    elif [[ `uname` = "Darwin" ]]; then
+        export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib;
+    fi
 
     brew install git --with-brewed-openssl --with-brewed-curl;
     brew install cmake;
