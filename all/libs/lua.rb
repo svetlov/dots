@@ -71,7 +71,7 @@ class Lua < Formula
     ENV.universal_binary if build.universal?
 
     # Subtitute formula prefix in `src/Makefile` for install name (dylib ID).
-    inreplace "src/Makefile", "@LUA_PREFIX@", prefix if OS.mac?
+    inreplace "src/Makefile", "@LUA_PREFIX@", prefix
 
     # Use our CC/CFLAGS to compile.
     inreplace "src/Makefile" do |s|
