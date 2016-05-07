@@ -39,9 +39,7 @@ index 8c9ee67..7f92407 100644
  $(LUA_A): $(BASE_O)
 -	$(AR) $@ $(BASE_O)
 -	$(RANLIB) $@
-+	$(CC) -dynamiclib -install_name @LUA_PREFIX@/lib/liblua.5.2.so \
-+		-compatibility_version 5.2 -current_version 5.2.4 \
-+		-o liblua.5.2.4.so $^
++	$(CC) -dynamiclib -o liblua.5.2.4.so $^
 
  $(LUA_T): $(LUA_O) $(LUA_A)
 -	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
