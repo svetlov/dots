@@ -111,10 +111,10 @@ class VimInstaller(Installer):
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
 
-            prefix = sb.check_output(['python-config', '--prefix']).strip()
-            py2library = os.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
-            py2include = os.join(prefix, 'include')
-            custom_env = os.env.deepcopy()
+            prefix = sb.check_output(['python-config', '--prefix']).strip().decode('utf8')
+            py2library = os.path.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
+            py2include = os.path.join(prefix, 'include', 'python2.7')
+            custom_env = os.environ.copy()
             custom_env['EXTRA_CMAKE_ARGS'] = \
                 '-DPYTHON_LIBRARY={} -DPYTHON_INCLUDE_DIR={}'.format(py2library, py2include)
             sb.call(["./install.py", "--clang-completer", "--system-libclang"], env=custom_env)
