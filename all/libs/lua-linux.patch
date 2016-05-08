@@ -18,9 +18,6 @@ index 7fa91c8..dccf485 100644
 +	ln -sf $(LUA_SO).$(R) $(INSTALL_LIB)/$(LUA_SO).$(V)
 +	ln -sf $(LUA_SO).$(R) $(INSTALL_LIB)/$(LUA_SO)
 diff --git a/Makefile b/Makefile
-index bd9515f..5940ba9 100644
---- a/Makefile
-+++ b/Makefile
 index 2e7a412..fa5769f 100644
 --- a/src/Makefile
 +++ b/src/Makefile
