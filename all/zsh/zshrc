@@ -6,8 +6,7 @@ export EDITOR='vim'
 export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs
 export PROJECT_HOME=${PROJECTS}
-
-
+export CUDA_HOME="/usr/local/cuda"
 
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
@@ -69,24 +68,24 @@ _update_env() {
 
     CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
+    CPATH=$(_smart_append ${CPATH} "${HOME}/.local/include")
     CPATH=$(_smart_append ${CPATH} "${HOME}/.linuxbrew/include")
 
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
-    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
-    # see https://github.com/Linuxbrew/linuxbrew/issues/321 for details
-    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
-    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.brew/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
 
-    MANPATH=$(_smart_append ${MANPATH} "/usr/share/man");
-    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.linuxbrew/share/man");
     MANPATH=$(_smart_append ${MANPATH} "/usr/local/share/man");
+    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.local/share/man");
+    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.linuxbrew/share/man");
 
-    INFOPATH=$(_smart_append ${INFOPATH} "/usr/share/info");
-    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
+    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.local/share/info");
+    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
 
     export PATH; export CPATH; export LIBRARY_PATH; export MANPATH; export INFOPATH;
 
@@ -94,10 +93,6 @@ _update_env() {
     if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
         source ${HOME}/.rvm/scripts/rvm;
     fi
-
-    # if [[ -e ${HOME}/.linuxbrew/cacert.pem ]]; then
-    #     export SSL_CERT_FILE=${HOME}/.linuxbrew/cacert.pem
-    # fi
 }
 
 _update_env;
@@ -145,6 +140,8 @@ yaclone() {
 _update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
+    elif [ -e "${HOME}/projects/arcadia/devtools/ya/ya" ]; then
+        export ARCADIA_ROOT="${HOME}/projects/arcadia"
     elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
     fi
