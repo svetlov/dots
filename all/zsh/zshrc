@@ -76,6 +76,10 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
+    # do not use it cause libc.so and other system libs are stored in /lib/x86_64-linux-gnu
+    # simply symlink all required libs (like libpcre) to the ${HOME}/.local/lib
+    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/lib/x86_64-linux-gnu");
+
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu");  # for drivers like cuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
@@ -98,6 +102,7 @@ _update_env() {
         source ${HOME}/.rvm/scripts/rvm;
     fi
 
+    # it's required by some cmake scripts, which trying to find custom python libs and includes
     export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
     if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
@@ -173,7 +178,7 @@ _update_arcadia_env () {
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         arcadiavim () {
             # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
-            _CC=${CC}; _CXX=${CXX}; _CPATH=${CPATH};
+            local _CC=${CC}; local _CXX=${CXX}; local _CPATH=${CPATH};
             unset CC; unset CXX; unset CPATH;
             vim "$@";
             export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
@@ -195,10 +200,6 @@ _update_arcadia_env () {
 
         alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
 
-        ## Binaries build with latest GCC require latest libstdc++:
-        # yaldpath="$(ya tool c++ --print-toolchain-path)/gcc/lib"
-        # export LD_LIBRARY_PATH="${yaldpath}:${LD_LIBRARY_PATH}"
-        # for danet
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
 
@@ -326,13 +327,25 @@ deploy_env() {
         fi
         ./install.py install configs;
     );
+
+    # required by some libs like qb2 or others
+    ls /lib/x86_64-linux-gnu | grep pcre | xargs -I {} ln -s /lib/x86_64-linux-gnu/{} ${HOME}/.local/lib;
+    ls /lib/x86_64-linux-gnu | grep tinfo | xargs -I {} ln -s /lib/x86_64-linux-gnu/{} ${HOME}/.local/lib;
     _update_env;
 }
 
 mkmathvirtualenv() {
     mkvirtualenv $@;
-    local version=$(python --version 2>&1 | sed 's/Python \([0-9]\)\.[0-9]\.[0-9]*/\1/');
-    [[ $version = 2 ]] && local pipcmd=pip || local pipcmd=pip3;
+
+    local version=$(python --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
+    [[ $version =~ "2." ]] && local pipcmd=pip || local pipcmd=pip3;
+    if [[ "$@" =~ "--system-site-packages" ]]; then
+        local envname=${@:$#};
+        local pthpath="${HOME}/.virtualenvs/${envname}/lib/python${version}/site-packages/system.pth";
+        echo "/usr/lib/python${version}/dist-packages" >> ${pthpath};
+        echo "/usr/lib/pymodules/python${version}" >> ${pthpath};
+    fi
+
     $pipcmd install -U setuptools
     $pipcmd install -U pip;
     $pipcmd install -U numpy;
@@ -341,5 +354,5 @@ mkmathvirtualenv() {
     brew install freetype libpng;
     $pipcmd install -U matplotlib;
     $pipcmd install -U 'ipython[all]';
-    deactivate; workon ${@:$#};
+    deactivate; workon ${@:$#};  # for recheck ipython and others binaries
 }
