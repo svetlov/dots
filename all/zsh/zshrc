@@ -305,6 +305,8 @@ deploy_env() {
     brew install ctags;
 
     brew install vim --with-python3 --with-lua --without-ruby --HEAD;
+    brew install libyaml;  # required by statbox-bindings2 for nile
+    brew install pcre; ln -s ${HOME}/.linuxbrew/lib/libpcre.so{,.3};  # required by statbox-bindings2 for nile
 
     which virtualenvwrapper.sh > /dev/null;
     if [[ $? -ne 0 ]]; then
@@ -327,20 +329,16 @@ deploy_env() {
         fi
         ./install.py install configs;
     );
-
-    # required by some libs like qb2 or others
-    ls /lib/x86_64-linux-gnu | grep pcre | xargs -I {} ln -s /lib/x86_64-linux-gnu/{} ${HOME}/.local/lib;
-    ls /lib/x86_64-linux-gnu | grep tinfo | xargs -I {} ln -s /lib/x86_64-linux-gnu/{} ${HOME}/.local/lib;
     _update_env;
 }
 
 mkmathvirtualenv() {
     mkvirtualenv $@;
+    local envname=${@:$#};
 
     local version=$(python --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
     [[ $version =~ "2." ]] && local pipcmd=pip || local pipcmd=pip3;
     if [[ "$@" =~ "--system-site-packages" ]]; then
-        local envname=${@:$#};
         local pthpath="${HOME}/.virtualenvs/${envname}/lib/python${version}/site-packages/system.pth";
         echo "/usr/lib/python${version}/dist-packages" >> ${pthpath};
         echo "/usr/lib/pymodules/python${version}" >> ${pthpath};
