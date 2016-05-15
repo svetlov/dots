@@ -276,8 +276,7 @@ deploy_env() {
             fi
             git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew
 
-            _update_env;
-            brew doctor;
+            _update_env; brew doctor; brew update; brew upgrade;
 
             wget https://raw.githubusercontent.com/svetlov/dots/master/all/libs/glibc.rb -O .downloaded_glibc.rb;
             mv -f .downloaded_glibc.rb ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core/Formula/glibc.rb;
@@ -286,32 +285,33 @@ deploy_env() {
             echo "Unknown system: $(uname)";
             exit 1;
         fi
-        brew install openssl --build-from-source;
-        brew install curl --build-from-source;
     fi
-    brew install gcc;
-    brew install python --with-unicode-ucs4;
-    brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb;
-    brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
 
-    _update_env;
+    brew install xz --build-from-source; _update_env;
+    brew install openssl --build-from-source; _update_env;
+    brew install curl --build-from-source; _update_env;
+    brew install gcc; _update_env;
+    brew install python --with-unicode-ucs4; _update_env;
+    brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb; _update_env;
+    brew install https://raw.github.com/svetlov/dots/master/all/libs/lua.rb; _update_env;
+    brew install ruby;
+    brew install git --with-brewed-openssl --with-brewed-curl; _update_env;
+    brew install cmake; _update_env;
 
-    brew install git --with-brewed-openssl --with-brewed-curl;
-    brew install cmake;
+    unset LD_LIBRARY_PATH;
     brew install llvm --with-clang --with-clang-extra-tools --with-utils --with-python \
         --with-lld --with-lldb --with-rtti --HEAD;
+    _update_env;
+    brew install tmux; _update_env;
+    brew install ctags; _update_env;
 
-    brew install tmux;
-    brew install ctags;
-
-    brew install vim --with-python3 --with-lua --without-ruby --HEAD;
-    brew install libyaml;  # required by statbox-bindings2 for nile
-    brew install pcre; ln -s ${HOME}/.linuxbrew/lib/libpcre.so{,.3};  # required by statbox-bindings2 for nile
+    brew install vim --with-python3 --with-lua --without-ruby --HEAD; _update_env;
+    brew install libyaml; _update_env; # required by statbox-bindings2 for nile
+    brew install pcre; _update_env; ln -s ${HOME}/.linuxbrew/lib/libpcre.so{,.3};  # required by statbox-bindings2 for nile
 
     which virtualenvwrapper.sh > /dev/null;
     if [[ $? -ne 0 ]]; then
-        pip3 install -U virtualenvwrapper;
-        _update_env;
+        pip3 install -U virtualenvwrapper; _update_env;
     fi
 
     # install configs
@@ -327,9 +327,8 @@ deploy_env() {
             git checkout master;
             git pull origin master;
         fi
-        ./install.py install configs;
+        ./install.py install configs; _update_env;
     );
-    _update_env;
 }
 
 mkmathvirtualenv() {
