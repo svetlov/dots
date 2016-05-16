@@ -100,7 +100,7 @@ class OhMyZshInstaller(Installer):
 class VimInstaller(Installer):
     name = 'vim'
     vimrc = os.path.join(HOME, ".vimrc")
-    llvmpath = os.path.join(HOMEBREW_HOME, "Cellar", "llvm", "HEAD")
+    llvmpath = os.path.join(HOMEBREW_HOME, "Cellar", "llvm38", "3.8.0")
 
     @classmethod
     def install(cls):
