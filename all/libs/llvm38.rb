@@ -151,7 +151,7 @@ class Llvm38 < Formula
 
     args << "-DLINK_POLLY_INTO_TOOLS:Bool=ON" if build.with? "polly"
     # Fix for LineEditor.cpp:17:22: fatal error: histedit.h: No such file or directory
-    args << "-DCMAKE_CXX_FLAGS=#{ENV["CPPFLAGS"]} #{ENV["CXXFLAGS"]}" unless OS.mac?
+    args << "-DCMAKE_CXX_FLAGS=#{ENV["CPPFLAGS"]} -I#{Formula["ncurses"].opt_prefix}/include/ncursesw #{ENV["CXXFLAGS"]}" unless OS.mac?
 
     mktemp do
       system "cmake", "-G", "Unix Makefiles", buildpath, *(std_cmake_args + args)
