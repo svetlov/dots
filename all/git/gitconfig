@@ -1,5 +1,5 @@
 [core]
-    excludesfile = /Users/splinter/.gitignore
+    excludesfile = ~/.gitignore
     editor = vim
 [alias]
     co = checkout

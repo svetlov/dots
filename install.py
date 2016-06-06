@@ -71,10 +71,12 @@ class Installer(object, metaclass=RegisterInstallerMetaclass):
 class GitConfigInstaller(Installer):
     name = 'git'
     gitconfig = os.path.join(HOME, ".gitconfig")
+    gitignore = os.path.join(HOME, ".gitignore")
 
     @classmethod
     def install(cls):
         symlink(os.path.join(PWD, "all", "git", "gitconfig"), cls.gitconfig)
+        symlink(os.path.join(PWD, "all", "git", "gitignore"), cls.gitignore)
 
 
 class OhMyZshInstaller(Installer):
