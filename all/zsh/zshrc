@@ -142,28 +142,22 @@ bindkey '^R' history-incremental-search-backward
 # ================================================= Arcadia Settings ==================================================
 # =====================================================================================================================
 
-svnvimdiff () {
-    vimdiff ${6} ${7}
-}
-
 yaclone() {
     svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool;
-    ${HOME}/.yatool/ya clone $@;
+    [[ -z "$1" ]] && local root=$1 || local root="${HOME}/projects/arcadia.git";
+    ${HOME}/.yatool/ya clone ${root};
     rm -rf ~/.yatool;
     _update_arcadia_env;
+    (cd ${root}; git init; git-svn-update-arcadia-master;)
+    (cd ${root}; python junk/splinter/ycm/ycm_to_color_coded.py > .color_coded;)
 }
 
 _update_arcadia_env () {
-    if [ -e "${HOME}/projects/arcadia.svn/devtools/ya/ya" ]; then
-        export ARCADIA_ROOT="${HOME}/projects/arcadia.svn"
-    elif [ -e "${HOME}/projects/arcadia/devtools/ya/ya" ]; then
-        export ARCADIA_ROOT="${HOME}/projects/arcadia"
-    elif [ -e "${HOME}/projects/yandex/arcadia/devtools/ya/ya" ]; then
-        export ARCADIA_ROOT="${HOME}/projects/yandex/arcadia"
+    if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
+        export ARCADIA_ROOT="${HOME}/projects/arcadia.git"
     fi
 
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
-        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
         arcadia_root_call() {
             # $1 -- original cmd
             # $2 -- arcadia cmd
@@ -175,7 +169,6 @@ _update_arcadia_env () {
             ${array[@]} ${@:3};
         }
 
-        alias gdb='arcadia_root_call gdb "ya tool gdb"';
         arcadiavim () {
             # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
             local _CC=${CC}; local _CXX=${CXX}; local _CPATH=${CPATH};
@@ -183,21 +176,24 @@ _update_arcadia_env () {
             vim "$@";
             export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
         };
-        alias vim='arcadia_root_call vim arcadiavim';
 
-        alias svn='ya tool svn'
-        svnst() {
-            ya tool svn status "${@}" | \
-            grep --line-buffered -E "(?:(?.*/)*| )[^ .]+\..+" |
-            sed 's/^\? *\(.*\)/    \?  '"${COLOR_CYAN}"'\1'"${COLOR_OFF}"'/' |
-            sed 's/^A *\(.*\)/    A  '"${COLOR_GREEN}"'\1'"${COLOR_OFF}"'/' |
-            sed 's/^D *\(.*\)/    D  '"${COLOR_RED}"'\1'"${COLOR_OFF}"'/' |
-            sed 's/^M *\(.*\)/    M  '"${COLOR_YELLOW}"'\1'"${COLOR_OFF}"'/'
+        git-svn-update-arcadia-master () {
+            if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
+                echo "Please cd to ${ARCADIA_ROOT} directory"; return 1;
+            fi
+            local branch=`git branch | grep -e "^*" | cut -f2 -d\ `;
+            git co master;
+            (cd ${ARCADIA_ROOT}; svn update;)
+            git add --all;
+            git commit -m "update from svn update call";
+            git co $branch;
         }
-        svncdiff() { ya tool svn diff "${@}" | colordiff }
-        svnvimdiff() { ya tool svn diff "${@}" --diff-cmd=${HOME}/projects/dots/all/vim/svnvimdiffcmd.sh }
-        svnunstage() { ya tool svn rm --keep-local "${@}" }
 
+        ya () { (unset CC; unset CXX; unset CPATH; workon system; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+        yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
+        alias gdb='arcadia_root_call gdb "ya tool gdb"';
+        alias svn='arcadia_root_call svn "ya tool svn"';
+        alias vim='arcadia_root_call vim arcadiavim';
         alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
 
         export OMP_NUM_THREADS=8
@@ -333,6 +329,7 @@ deploy_env() {
         fi
         ./install.py install configs; _update_env;
     );
+    mkmathvirtualenv --system-site-packages -p/usr/bin/python2 system;
 }
 
 mkmathvirtualenv() {
