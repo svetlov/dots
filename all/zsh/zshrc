@@ -289,7 +289,7 @@ deploy_env() {
     brew install gcc; _update_env;
 
     brew install python --with-unicode-ucs4; _update_env;
-    brew install https://raw.github.com/svetlov/dots/master/all/libs/python34.rb; _update_env;
+    brew install python3; _update_env;
 
     which virtualenvwrapper.sh > /dev/null;
     if [[ $? -ne 0 ]]; then
