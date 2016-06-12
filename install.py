@@ -158,8 +158,7 @@ class SSHInstaller(Installer):
         else:
             symlink(os.path.join(PWD, "all", "ssh", "pbopen-local"), os.path.join(LOCAL_BIN, "pbopen"))
         symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
-        sb.check_call(["chown", os.environ.get("USER"), os.path.join(HOME, ".ssh", "config")])
-        sb.check_call(["chmod", "644", os.path.join(HOME, ".ssh", "config")])
+        os.chmod(os.path.join(HOME, ".ssh", "config"), 0o644)
 
 
 class ConfigsInstall(Installer):
