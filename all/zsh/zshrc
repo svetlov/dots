@@ -6,7 +6,7 @@ export EDITOR='vim';
 export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
-
+export CUDA_HOME=/usr/local/cuda;
 
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
@@ -76,12 +76,8 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
-    # do not use it cause libc.so and other system libs are stored in /lib/x86_64-linux-gnu
-    # simply symlink all required libs (like libpcre) to the ${HOME}/.local/lib
-    # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/lib/x86_64-linux-gnu");
-
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu");  # for drivers like cuda
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
 
     MANPATH=$(_smart_append ${MANPATH} "/usr/local/share/man");
@@ -92,7 +88,7 @@ _update_env() {
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.local/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
 
-    export PATH; export CPATH; export LIBRARY_PATH; export MANPATH; export INFOPATH;
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
