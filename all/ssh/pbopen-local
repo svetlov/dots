@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e;
+
+mkdir -p ${HOME}/tmp/pbopen/;
+
+timestamp=`date +"%Y-%m-%d %H:%M:%S"`;
+cat "${1:-/dev/stdin}" > "${HOME}/tmp/pbopen/${timestamp}";
+open "${HOME}/tmp/pbopen/${timestamp}";
