@@ -150,14 +150,16 @@ class SSHInstaller(Installer):
     @staticmethod
     def install():
         if ISLINUX:
-            for filename in ['pbcopy-remote', 'pbpaste-remote', 'pbopen-remote']:
+            for filename in ['pbcopy', 'pbpaste', 'pbopen']:
                 symlink(
-                    os.path.join(PWD, "all", "ssh", filename),
+                    os.path.join(PWD, "all", "ssh", filename + "-remote"),
                     os.path.join(LOCAL_BIN, filename)
                 )
         else:
             symlink(os.path.join(PWD, "all", "ssh", "pbopen-local"), os.path.join(LOCAL_BIN, "pbopen"))
         symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
+        sb.check_call(["chown", os.environ.get("USER"), os.path.join(HOME, ".ssh", "config")])
+        sb.check_call(["chmod", "644", os.path.join(HOME, ".ssh", "config")])
 
 
 class ConfigsInstall(Installer):
