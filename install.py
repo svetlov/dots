@@ -3,9 +3,14 @@
 
 import os
 import sys
+import pwd
+import grp
 import argparse
 import subprocess as sb
 from contextlib import contextmanager
+
+UID = pwd.getpwnam(os.environ.get("USER")).pw_uid
+GID = grp.getgrnam("nogroup").gr_gid
 
 ISLINUX = (sys.platform != 'darwin')
 
@@ -158,8 +163,8 @@ class SSHInstaller(Installer):
         else:
             symlink(os.path.join(PWD, "all", "ssh", "pbopen-local"), os.path.join(LOCAL_BIN, "pbopen"))
         symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
-        sb.check_call(["chown", os.environ.get("USER"), os.path.join(HOME, ".ssh", "config")])
-        sb.check_call(["chmod", "644", os.path.join(HOME, ".ssh", "config")])
+        os.chown(os.path.join(HOME, ".ssh", "config"), UID, GID)
+        os.chmod(os.path.join(HOME, ".ssh", "config"), 0o644)
 
 
 class ConfigsInstall(Installer):
