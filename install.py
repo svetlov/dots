@@ -142,11 +142,24 @@ class TmuxInstaller(Installer):
             os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
             os.path.join(LOCAL_BIN, "tmux-vim-select-pane")
         )
-        for filename in ['pbcopy', 'pbpaste']:
-            symlink(
-                os.path.join(PWD, "all", "tmux", filename),
-                os.path.join(LOCAL_BIN, filename)
-            )
+
+
+class SSHInstaller(Installer):
+    name = "ssh"
+
+    @staticmethod
+    def install():
+        if ISLINUX:
+            for filename in ['pbcopy', 'pbpaste', 'pbopen']:
+                symlink(
+                    os.path.join(PWD, "all", "ssh", filename + "-remote"),
+                    os.path.join(LOCAL_BIN, filename)
+                )
+        else:
+            symlink(os.path.join(PWD, "all", "ssh", "pbopen-local"), os.path.join(LOCAL_BIN, "pbopen"))
+        symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
+        sb.check_call(["chown", os.environ.get("USER"), os.path.join(HOME, ".ssh", "config")])
+        sb.check_call(["chmod", "644", os.path.join(HOME, ".ssh", "config")])
 
 
 class ConfigsInstall(Installer):
@@ -155,6 +168,7 @@ class ConfigsInstall(Installer):
     @staticmethod
     def install():
         OhMyZshInstaller.install()
+        SSHInstaller.install()
         GitConfigInstaller.install()
         TmuxInstaller.install()
         VimInstaller.install()
