@@ -176,7 +176,12 @@ _update_arcadia_env () {
 
         git-svn-update-arcadia-master () {
             if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
-                echo "Please cd to ${ARCADIA_ROOT} directory"; return 1;
+                echo "${COLOR_RED}Error${COLOR_OFF}: Please cd to ${ARCADIA_ROOT} directory." 1>&2;
+                return 1;
+            fi
+            if [[ $(git status --porcelain | wc -c) -ne 0 ]]; then
+                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes and untracked files." 1>&2;
+                return 1;
             fi
             local branch=`git branch | grep -e "^*" | cut -f2 -d\ `;
             git co master;
@@ -221,11 +226,11 @@ if [ `uname` = "Darwin" ]; then
     }
     nbstart () {
         if [[ $# == 1 ]]; then
-            workon $1 && jupyter notebook
+            workon $1 && jupyter notebook;
         elif [[ $# == 0 ]]; then
-            jupyter notebook
-        else;
-            echo "Usage: $0 [venv]"
+            jupyter notebook;
+        else
+            echo "Usage: $0 [venv]" 1>&2;
         fi
     }
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
@@ -270,7 +275,7 @@ deploy_env() {
             git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew;
             _update_env; brew doctor; brew update; brew upgrade;
         else
-            echo "Unknown system: $(uname)";
+            echo "Unknown system: $(uname)" 1>&2;
             return 1;
         fi
     fi
