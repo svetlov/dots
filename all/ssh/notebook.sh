@@ -2,8 +2,6 @@
 
 source ${HOME}/.zshrc
 
-set -e;
-
 print_usage() {
     echo "${COLOR_RED}Usage: nb ( open | start venvname | tunnel hostname )${COLOR_OFF}" 1>&2;
 }
