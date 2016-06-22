@@ -251,9 +251,9 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
 
     nbstart () {
         workon $1;
+        sleep 2 && call-nbtunnel &  # async call for host to forward ports and open safari
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
             --no-browser --port=${REMOTE_IPYTHON_PORT};
-        call-nbtunnel;  # call for host to forward ports and open safari
     }
 else
 
