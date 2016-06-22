@@ -222,19 +222,7 @@ _update_arcadia_env;
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
 if [ `uname` = "Darwin" ]; then
-    nbtunnel () {
-        ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} $1;
-        open -a safari https://localhost:${LOCAL_IPYTHON_PORT};
-    }
-    nbstart () {
-        if [[ $# == 1 ]]; then
-            workon $1 && jupyter notebook;
-        elif [[ $# == 0 ]]; then
-            jupyter notebook;
-        else
-            echo "Usage: $0 [venv]" 1>&2; return 1;
-        fi
-    }
+
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     if [[ -L "${HOME}/.zshrc" ]]; then
         if [[ -z "$TMUX" ]]; then
@@ -248,15 +236,8 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
             }
         fi
     fi
-
-    nbstart () {
-        workon $1;
-        sleep 2 && call-nbtunnel &  # async call for host to forward ports and open safari
-        jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
-            --no-browser --port=${REMOTE_IPYTHON_PORT};
-    }
 else
-
+    echo "${COLOR_RED}Unknown host $(uname -s)${COLOR_OFF}";
 fi
 
 # =====================================================================================================================
