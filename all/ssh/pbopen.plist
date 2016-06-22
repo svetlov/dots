@@ -6,7 +6,7 @@
      <string>localhost.pbopen</string>
      <key>ProgramArguments</key>
      <array>
-         <string>/Users/splinter/.local/bin/pbopen</string>
+         <string>/Users/splinter/projects/dots/all/ssh/pbopen.sh</string>
      </array>
      <key>inetdCompatibility</key>
      <dict>
