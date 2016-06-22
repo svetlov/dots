@@ -150,13 +150,14 @@ class SSHInstaller(Installer):
     @staticmethod
     def install():
         if ISLINUX:
-            for filename in ['pbcopy', 'pbpaste', 'pbopen']:
+            for filename in ['pbcopy', 'pbpaste', 'pbopen', 'call-nbtunnel']:
                 symlink(
                     os.path.join(PWD, "all", "ssh", filename + "-remote"),
                     os.path.join(LOCAL_BIN, filename)
                 )
         else:
             symlink(os.path.join(PWD, "all", "ssh", "pbopen-local"), os.path.join(LOCAL_BIN, "pbopen"))
+            symlink(os.path.join(PWD, "all", "ssh", "call-nbtunnel-local"), os.path.join(LOCAL_BIN, "call-nbtunnel"))
         symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
         os.chmod(os.path.join(HOME, ".ssh", "config"), 0o644)
 

@@ -7,6 +7,8 @@ export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
 export CUDA_HOME=/usr/local/cuda;
+export LOCAL_IPYTHON_PORT=6500;
+export REMOTE_IPYTHON_PORT=7000;
 
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
@@ -221,8 +223,8 @@ _update_arcadia_env;
 # =====================================================================================================================
 if [ `uname` = "Darwin" ]; then
     nbtunnel () {
-        ssh -q -N -f -L localhost:6500:localhost:7000 $1 \
-            && open -a safari https://localhost:6500
+        ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} $1;
+        open -a safari https://localhost:${LOCAL_IPYTHON_PORT};
     }
     nbstart () {
         if [[ $# == 1 ]]; then
@@ -230,7 +232,7 @@ if [ `uname` = "Darwin" ]; then
         elif [[ $# == 0 ]]; then
             jupyter notebook;
         else
-            echo "Usage: $0 [venv]" 1>&2;
+            echo "Usage: $0 [venv]" 1>&2; return 1;
         fi
     }
 elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
@@ -248,10 +250,10 @@ elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
     fi
 
     nbstart () {
-        workon $1 && \
-            jupyter notebook \
-            --certfile=~/projects/dots/all/security/mycert.pem \
-            --no-browser --port=7000
+        workon $1;
+        jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
+            --no-browser --port=${REMOTE_IPYTHON_PORT};
+        call-nbtunnel;  # call for host to forward ports and open safari
     }
 else
 

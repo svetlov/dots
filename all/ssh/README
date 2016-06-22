@@ -1,6 +1,7 @@
-pbcopy, pbpaste and pbopen you have to put in ~/Libarary/LaunchAgents/
+pbcopy, pbpaste, pbopen and call-nbtunnel you have to put in ~/Libarary/LaunchAgents/
 
 and run:
 $ launchctl load ~/Library/LaunchAgents/pbcopy.plist
 $ launchctl load ~/Library/LaunchAgents/pbpaste.plist
 $ launchctl load ~/Library/LaunchAgents/pbopen.plist
+$ launchctl load ~/Library/LaunchAgents/call-nbtunnel.plist

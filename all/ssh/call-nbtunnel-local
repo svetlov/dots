@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e;
+
+server=$(cat "${1:-/dev/stdin}");
+ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} ${server};
+open -a safari https://localhost:${LOCAL_IPYTHON_PORT};
