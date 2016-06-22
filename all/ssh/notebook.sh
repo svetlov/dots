@@ -32,9 +32,11 @@ elif [[ $1 == "tunnel" ]]; then
     fi
 
     if [[ `uname` = "Darwin" ]]; then
+        if [[ $2 == '--read-host-from-pipe' ]];then
+            $2 = $(cat ${1:-/dev/stdin});
+        fi
         ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} $2;
         notebook open;
-
     elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
         if [[ $2 != "localhost" ]]; then
             echo "${COLOR_RED}On linux machine only localhost hostname is allowed${COLOR_OFF}";
