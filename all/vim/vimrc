@@ -42,6 +42,8 @@ Plugin 'svetlov/molokai'
 Plugin 'tpope/vim-commentary'
 " easy move of method argumets
 Plugin 'AndrewRadev/sideways.vim'
+" easy motion
+Plugin 'easymotion/vim-easymotion'
 " python pep8 auto indent
 Plugin 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
@@ -62,6 +64,7 @@ Plugin 'honza/vim-snippets'
 
 " Comfortable grep
 Plugin 'vim-scripts/grep.vim'
+
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
 
@@ -270,6 +273,22 @@ map <leader>tb :TagbarToggle<cr>
 
 nnoremap <leader>h :SidewaysLeft<cr>
 nnoremap <leader>l :SidewaysRight<cr>
+
+" =============================================================================
+" =========================== EasyMotion Settings =============================
+" =============================================================================
+
+" <Leader>f{char} to move to {char}
+map  <Leader>f <Plug>(easymotion-bd-f)
+nmap <Leader>f <Plug>(easymotion-overwin-f)
+
+" Move to line
+map <Leader>L <Plug>(easymotion-bd-jk)
+nmap <Leader>L <Plug>(easymotion-overwin-line)
+"
+" Move to word
+map  <Leader>w <Plug>(easymotion-bd-w)
+nmap <Leader>w <Plug>(easymotion-overwin-w)
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
