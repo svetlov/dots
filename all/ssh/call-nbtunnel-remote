@@ -1,3 +1,0 @@
-#!/bin/sh
-
-cat $HOST | nc localhost 2227

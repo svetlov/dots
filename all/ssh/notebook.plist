@@ -3,11 +3,13 @@
 <plist version="1.0">
 <dict>
      <key>Label</key>
-     <string>localhost.pbopen</string>
+     <string>localhost.notebook</string>
      <key>ProgramArguments</key>
-     <array>
-         <string>/Users/splinter/.local/bin/call-nbtunnel</string>
-     </array>
+         <array>
+             <string>/Users/splinter/.local/bin/notebook</string>
+             <string>tunnel</string>
+             <string>--read-hostname-from-pipe</string>
+         </array>
      <key>inetdCompatibility</key>
      <dict>
           <key>Wait</key>

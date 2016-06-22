@@ -21,9 +21,11 @@ if [[ $1 == "start" ]]; then
     if [[ `uname` = "Darwin" ]]; then
         jupyter notebook --port=${REMOTE_IPYTHON_PORT};
     elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-        (sleep 2 && notebook tunnel localhost) &  # async call for host to forward ports and open safari
+        (sleep 1 && notebook tunnel localhost) &  # async call for host to forward ports and open safari
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
             --no-browser --port=${REMOTE_IPYTHON_PORT};
+    else
+        echo "${COLOR_RED}Unknown host $(uname)${COLOR_OFF}";
     fi
 elif [[ $1 == "tunnel" ]]; then
     if [[ $# -ne 2 ]]; then
