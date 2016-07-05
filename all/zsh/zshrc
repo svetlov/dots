@@ -153,7 +153,8 @@ yaclone() {
 
 _update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
-        export ARCADIA_ROOT="${HOME}/projects/arcadia.git"
+        export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
+        export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
     fi
 
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
@@ -194,7 +195,9 @@ _update_arcadia_env () {
         }
 
         ya () { (unset CC; unset CXX; unset CPATH; workon system; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+        yadev () { (unset CC; unset CXX; unset CPATH; workon system; ${ARCADIA_ROOT}/devtools/ya-dev/ya "$@";) }
         yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
+        yadevmake () { yadev make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
         alias vim='arcadia_root_call vim arcadiavim';
