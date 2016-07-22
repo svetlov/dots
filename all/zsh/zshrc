@@ -65,6 +65,7 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
     PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
+    PATH=$(_smart_append ${PATH} "/place/berkanavt/bin");  # for mr_apps
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
     PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/sbin");
     PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/bin");
@@ -201,7 +202,6 @@ _update_arcadia_env () {
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
         alias vim='arcadia_root_call vim arcadiavim';
-        alias mapreduce="${ARCADIA_ROOT}/quality/mapreduce/mapreduce"
 
         export OMP_NUM_THREADS=8
         export MKL_NUM_THREADS=8
