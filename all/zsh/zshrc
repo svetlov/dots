@@ -155,7 +155,9 @@ yaclone() {
 _update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
+        export ARCADIA_ROOT_BIN="${HOME}/projects/arcadia.git/bin";
         export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
+        export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
     fi
 
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
