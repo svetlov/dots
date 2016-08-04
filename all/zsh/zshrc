@@ -21,8 +21,6 @@ export COLOR_PURPLE=$'\e[0;35m'       # Purple
 export COLOR_CYAN=$'\e[0;36m'         # Cyan
 export COLOR_WHITE=$'\e[0;37m'        # White
 
-# setopt aliases
-
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
 alias vimlarge="vim -u NONE -U NONE -N"
@@ -293,7 +291,7 @@ deploy_env() {
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
     brew_install_and_update cmake;
 
-    brew_install_and_update llvm --with-clang --with-clang-extra-tools --with-lldb --HEAD;
+    brew_install_and_update llvm;
     brew link --overwrite llvm;
 
     brew_install_and_update tmux;
