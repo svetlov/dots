@@ -1,7 +1,6 @@
 #!/usr/bin/env zsh
 
 source ${HOME}/.zshrc;
-echo "sourced";
 
 if [[ `uname` = "Darwin" ]]; then
     mkdir -p ${HOME}/tmp/pbopen/;
