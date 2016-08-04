@@ -7,7 +7,7 @@
      <key>ProgramArguments</key>
          <array>
              <string>/Users/splinter/.local/bin/notebook</string>
-             <string>tunnel</string>
+             <string>open</string>
              <string>--read-hostname-from-pipe</string>
          </array>
      <key>inetdCompatibility</key>

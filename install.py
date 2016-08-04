@@ -153,6 +153,28 @@ class SSHInstaller(Installer):
             symlink(os.path.join(PWD, "all", "ssh","pbcopy-remote.sh"), os.path.join(LOCAL_BIN, "pbcopy"))
             symlink(os.path.join(PWD, "all", "ssh","pbpaste-remote.sh"), os.path.join(LOCAL_BIN, "pbpaste"))
             symlink(os.path.join(PWD, "all", "ssh","pbopen.sh"), os.path.join(LOCAL_BIN, "pbopen"))
+        else:
+            launch_agents_path = os.path.join(HOME, "Library", "LaunchAgents")
+
+            pbcopy_agent = os.path.join(launch_agents_path, "pbcopy.plist")
+            sb.call(['launchctl', 'unload', pbcopy_agent])
+            symlink(os.path.join(PWD, "all", "ssh", "pbcopy.plist"), pbcopy_agent)
+            sb.check_call(['launchctl', 'load', pbcopy_agent])
+
+            pbpaste_agent = os.path.join(launch_agents_path, "pbpaste.plist")
+            sb.call(['launchctl', 'unload', pbpaste_agent])
+            symlink(os.path.join(PWD, "all", "ssh", "pbpaste.plist"), pbpaste_agent)
+            sb.check_call(['launchctl', 'load', pbpaste_agent])
+
+            pbopen_agent = os.path.join(launch_agents_path, "pbopen.plist")
+            sb.call(['launchctl', 'unload', pbopen_agent])
+            symlink(os.path.join(PWD, "all", "ssh", "pbopen.plist"), pbopen_agent)
+            sb.check_call(['launchctl', 'load', pbopen_agent])
+
+            notebook_agent = os.path.join(launch_agents_path, "notebook.plist")
+            sb.call(['launchctl', 'unload', notebook_agent])
+            symlink(os.path.join(PWD, "all", "ssh", "notebook.plist"), notebook_agent)
+            sb.check_call(['launchctl', 'load', notebook_agent])
 
         symlink(os.path.join(PWD, "all", "ssh", "notebook.sh"), os.path.join(LOCAL_BIN, "notebook"))
         symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
