@@ -75,7 +75,7 @@ elif [[ $1 == "open" ]]; then
 
         echo "${COLOR_CYAN}Trying to open notebook on local machine${COLOR_OFF}";
         # write hostname to port, then 'read-from-port | notebook tunnel --read-hostname-from-pipe' will be called
-        echo ${HOST} | nc localhost 2227;
+        echo ${HOST} | (nc localhost 2227 & pid=$! && sleep 2 && kill -9 $pid);
     # =================================================================================================================
     # =========================================== Unknown host ========================================================
     # =================================================================================================================
