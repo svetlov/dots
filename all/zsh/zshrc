@@ -103,6 +103,7 @@ _update_env() {
     # it's required by some cmake scripts, which trying to find custom python libs and includes
     export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
     if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+        export CMAKE_PREFIX=${HOME}/.linuxbrew;
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
     elif [[ `uname` = "Darwin" ]]; then
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib;
