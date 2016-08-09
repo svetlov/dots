@@ -120,7 +120,6 @@ class VimInstaller(Installer):
             py2library = os.path.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
             py2include = os.path.join(prefix, 'include', 'python2.7')
 
-
             custom_env = os.environ.copy()
             custom_env['EXTRA_CMAKE_ARGS'] = (
                 '-DPYTHON_LIBRARY={} '
@@ -133,7 +132,13 @@ class VimInstaller(Installer):
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call(["cmake", "-DCUSTOM_CLANG=1", "-DLLVM_ROOT_PATH={}".format(llvmpath), ".."])
+                sb.call([
+                    "cmake",
+                    "-DCMAKE_PREFIX_PATH={}".format(HOMEBREW_HOME),
+                    "-DCUSTOM_CLANG=1",
+                    "-DLLVM_ROOT_PATH={}".format(llvmpath),
+                    ".."
+                ])
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
