@@ -259,14 +259,14 @@ deploy_env() {
                 gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
                 curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
             fi
-            git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew;
+            git clone https://github.com/Linuxbrew/brew.git ${HOME}/.linuxbrew;
+            _update_env; brew doctor; brew update; brew upgrade;
             (
-                cd ${HOME}/.linuxbrew/Library/Taps/homebrew;
+                cd ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core;
                 git remote add self git@github.com:svetlov/homebrew-core.git;
                 git fetch self master:self-master;
                 git checkout self-master;
             )
-            _update_env; brew doctor; brew update; brew upgrade;
         else
             echo "Unknown system: $(uname)" 1>&2;
             return 1;

@@ -116,7 +116,9 @@ class VimInstaller(Installer):
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
 
-            prefix = sb.check_output(['python-config', '--prefix']).strip().decode('utf8')
+            python_config_path = os.path.join(HOMEBREW_HOME, 'bin', 'python-config')
+
+            prefix = sb.check_output([python_config_path, '--prefix']).strip().decode('utf8')
             py2library = os.path.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
             py2include = os.path.join(prefix, 'include', 'python2.7')
 
