@@ -71,7 +71,7 @@
  	$(AR) $@ $(BASE_O)
  	$(RANLIB) $@
 
-+$(LUA_SO): $(BASE_0)
++$(LUA_SO): $(BASE_O)
 +	$(CC) -shared -ldl -Wl,-soname,$(LUA_SO).$(V) -o $@.$(R) $? -lm $(LDFLAGS) $(CFLAGS)
 +
  $(LUA_T): $(LUA_O) $(LUA_A)
