@@ -293,7 +293,6 @@ deploy_env() {
     brew_install_and_update cmake;
 
     brew_install_and_update llvm;
-    brew link --overwrite llvm;
 
     brew_install_and_update tmux;
     brew_install_and_update ctags;
