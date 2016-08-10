@@ -260,6 +260,12 @@ deploy_env() {
                 curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
             fi
             git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew;
+            (
+                cd ${HOME}/.linuxbrew/Library/Taps/homebrew;
+                git remote add self git@github.com:svetlov/homebrew-core.git;
+                git fetch self master:self-master;
+                git checkout self-master;
+            )
             _update_env; brew doctor; brew update; brew upgrade;
         else
             echo "Unknown system: $(uname)" 1>&2;
@@ -287,7 +293,7 @@ deploy_env() {
     fi
     _update_env;
 
-    brew_install_and_update https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
+    brew_install_and_update lua;
     brew_install_and_update ruby;
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
     brew_install_and_update cmake;
