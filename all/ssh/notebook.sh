@@ -30,7 +30,7 @@ if [[ $1 == "start" ]]; then
     # ============================================= Linux =============================================================
     # =================================================================================================================
     elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-        (sleep 2 && notebook tunnel localhost) &  # async call for host to forward ports and open safari
+        (sleep 2 && notebook open) &  # async call for host to forward ports and open safari
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
             --no-browser --port=${REMOTE_IPYTHON_PORT};
     # =================================================================================================================
