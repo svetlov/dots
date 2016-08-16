@@ -6,8 +6,7 @@ export EDITOR='vim';
 export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
-export LOCAL_IPYTHON_PORT=6500;
-export REMOTE_IPYTHON_PORT=7000;
+export IPYTHON_PORT=6500;
 
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset

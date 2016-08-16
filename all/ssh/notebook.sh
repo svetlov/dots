@@ -25,14 +25,14 @@ if [[ $1 == "start" ]]; then
     # =========================================== Darwin ==============================================================
     # =================================================================================================================
     if [[ `uname` = "Darwin" ]]; then
-        jupyter notebook --port=${LOCAL_IPYTHON_PORT};
+        jupyter notebook --port=${IPYTHON_PORT};
     # =================================================================================================================
     # ============================================= Linux =============================================================
     # =================================================================================================================
     elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
         (sleep 2 && notebook open) &  # async call for host to forward ports and open safari
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
-            --no-browser --port=${REMOTE_IPYTHON_PORT};
+            --no-browser --port=${IPYTHON_PORT};
     # =================================================================================================================
     # =========================================== Unknown host ========================================================
     # =================================================================================================================
@@ -49,7 +49,7 @@ elif [[ $1 == "open" ]]; then
     # =================================================================================================================
     if [[ `uname` = "Darwin" ]]; then
         if [[ $# -eq 1 ]]; then
-            open -a safari https://localhost:${LOCAL_IPYTHON_PORT};
+            open -a safari https://localhost:${IPYTHON_PORT};
         elif [[ $# -eq 2 ]]; then
             if [[ $2 == '--read-hostname-from-pipe' ]];then
                 echo "${COLOR_CYAN}Reading hostname from pipe ${COLOR_OFF}";
@@ -60,12 +60,12 @@ elif [[ $1 == "open" ]]; then
             fi
             # kill existing connection.
             ps aux \
-                | grep 'ssh -q -N -f -L localhost:6500:localhost:7000' \
+                | grep "ssh -q -N -f -L localhost:${IPYTHON_PORT}:localhost:${IPYTHON_PORT}" \
                 | grep -v "grep" \
                 | tr -s " " \
                 | cut -d " " -f2 \
                 | xargs -I {} kill -9 {};
-            ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} ${hostname};
+            ssh -q -N -f -L localhost:${IPYTHON_PORT}:localhost:${IPYTHON_PORT} ${hostname};
             notebook open;
         else
             print_usage;
