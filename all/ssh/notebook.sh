@@ -58,6 +58,13 @@ elif [[ $1 == "open" ]]; then
             else
                 hostname=$2;
             fi
+            # kill existing connection.
+            ps aux \
+                | grep 'ssh -q -N -f -L localhost:6500:localhost:7000' \
+                | grep -v "grep" \
+                | tr -s " " \
+                | cut -d " " -f2 \
+                | xargs -I {} kill -9 {};
             ssh -q -N -f -L localhost:${LOCAL_IPYTHON_PORT}:localhost:${REMOTE_IPYTHON_PORT} ${hostname};
             notebook open;
         else
