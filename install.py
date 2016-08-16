@@ -12,7 +12,7 @@ ISLINUX = (sys.platform != 'darwin')
 PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
 LOCAL_BIN = os.path.join(HOME, ".local", "bin")
-HOMEBREW_HOME = os.path.join(HOME, ".brew") if ISLINUX else os.path.join("usr", "local")
+HOMEBREW_HOME = os.path.join(HOME, ".linuxbrew") if ISLINUX else os.path.join("usr", "local")
 os.makedirs(LOCAL_BIN, exist_ok=True)
 
 INSTALLERS = {}
@@ -102,7 +102,7 @@ class OhMyZshInstaller(Installer):
 class VimInstaller(Installer):
     name = 'vim'
     vimrc = os.path.join(HOME, ".vimrc")
-    llvmpath = os.path.join(HOMEBREW_HOME, "Cellar", "llvm38", "3.8.0")
+
 
     @classmethod
     def install(cls):
@@ -110,21 +110,37 @@ class VimInstaller(Installer):
         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
         os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+
+        llvmpath = os.path.join(HOMEBREW_HOME, "opt", "llvm")
+
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
 
-            prefix = sb.check_output(['python-config', '--prefix']).strip().decode('utf8')
+            python_config_path = os.path.join(HOMEBREW_HOME, 'bin', 'python-config')
+
+            prefix = sb.check_output([python_config_path, '--prefix']).strip().decode('utf8')
             py2library = os.path.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
             py2include = os.path.join(prefix, 'include', 'python2.7')
+
             custom_env = os.environ.copy()
-            custom_env['EXTRA_CMAKE_ARGS'] = \
-                '-DPYTHON_LIBRARY={} -DPYTHON_INCLUDE_DIR={}'.format(py2library, py2include)
+            custom_env['EXTRA_CMAKE_ARGS'] = (
+                '-DPYTHON_LIBRARY={} '
+                '-DPYTHON_INCLUDE_DIR={} '
+                '-DPATH_TO_LLVM_ROOT={}'
+            ).format(py2library, py2include, llvmpath)
+
             sb.call(["./install.py", "--clang-completer", "--system-libclang"], env=custom_env)
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call(["cmake", "-DCUSTOM_CLANG=1", "-DLLVM_ROOT_PATH={}".format(cls.llvmpath), ".."])
+                sb.call([
+                    "cmake",
+                    "-DCMAKE_PREFIX_PATH={}".format(HOMEBREW_HOME),
+                    "-DCUSTOM_CLANG=1",
+                    "-DLLVM_ROOT_PATH={}".format(llvmpath),
+                    ".."
+                ])
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])

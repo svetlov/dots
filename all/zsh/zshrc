@@ -6,7 +6,6 @@ export EDITOR='vim';
 export HOME=$(cd ${HOME}; pwd -P);
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
-export CUDA_HOME=/usr/local/cuda;
 export LOCAL_IPYTHON_PORT=6500;
 export REMOTE_IPYTHON_PORT=7000;
 
@@ -20,8 +19,6 @@ export COLOR_BLUE=$'\e[0;34m'         # Blue
 export COLOR_PURPLE=$'\e[0;35m'       # Purple
 export COLOR_CYAN=$'\e[0;36m'         # Cyan
 export COLOR_WHITE=$'\e[0;37m'        # White
-
-# setopt aliases
 
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
@@ -97,6 +94,14 @@ _update_env() {
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
     fi
+
+    if [[ -d /opt/openmpi-1.10.2 ]]; then
+        export MPI_PATH=/opt/openmpi-1.10.2;
+        export CPLUS_INCLUDE_PATH=${MPI_PATH}/include;
+        export LIBRARY_PATH=${MPI_PATH}/lib:${LIBRARY_PATH};
+        export LD_LIBRARY_PATH=${MPI_PATH}/lib:${LD_LIBRARY_PATH};
+    fi
+
     # contains ruby, required for brew on linux
     if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
         source ${HOME}/.rvm/scripts/rvm;
@@ -105,6 +110,7 @@ _update_env() {
     # it's required by some cmake scripts, which trying to find custom python libs and includes
     export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
     if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+        export CMAKE_PREFIX=${HOME}/.linuxbrew;
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
     elif [[ `uname` = "Darwin" ]]; then
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib;
@@ -148,8 +154,15 @@ yaclone() {
     ${HOME}/.yatool/ya clone ${root};
     rm -rf ~/.yatool;
     _update_arcadia_env;
-    (cd ${root}; git init; git-svn-update-arcadia-master;)
-    (cd ${root}; python junk/splinter/ycm/ycm_to_color_coded.py > .color_coded;)
+    (
+        cd ${root};
+        yamake --checkout cv/imgclassifiers -j0;
+
+        git init;
+        git add --all;
+        git commit -m "initial commit";
+        python junk/splinter/ycm/ycm_to_color_coded.py > ${root}/.color_coded;
+    )
 }
 
 _update_arcadia_env () {
@@ -260,8 +273,14 @@ deploy_env() {
                 gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
                 curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
             fi
-            git clone https://github.com/Linuxbrew/linuxbrew.git ${HOME}/.linuxbrew;
+            git clone https://github.com/Linuxbrew/brew.git ${HOME}/.linuxbrew;
             _update_env; brew doctor; brew update; brew upgrade;
+            (
+                cd ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core;
+                git remote add self git@github.com:svetlov/homebrew-core.git;
+                git fetch self master:self-master;
+                git checkout self-master;
+            )
         else
             echo "Unknown system: $(uname)" 1>&2;
             return 1;
@@ -288,13 +307,12 @@ deploy_env() {
     fi
     _update_env;
 
-    brew_install_and_update https://raw.github.com/svetlov/dots/master/all/libs/lua.rb;
+    brew_install_and_update lua;
     brew_install_and_update ruby;
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
     brew_install_and_update cmake;
 
-    brew_install_and_update llvm --with-clang --with-clang-extra-tools --with-lldb --HEAD;
-    brew link --overwrite llvm;
+    brew_install_and_update llvm;
 
     brew_install_and_update tmux;
     brew_install_and_update ctags;

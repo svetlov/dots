@@ -1,4 +1,5 @@
 .svn
 .svnignore
+svn-commit*
 .color_coded
 bin/**
