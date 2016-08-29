@@ -31,6 +31,8 @@ Plugin 'jeetsukumaran/vim-buffergator'
 Plugin 'majutsushi/tagbar'
 " fast mru files navigation
 Plugin 'ctrlpvim/ctrlp.vim'
+" fast switch of header and source c/cpp files
+Plugin 'derekwyatt/vim-fswitch'
 
 " tmux and vim integration
 Plugin 'christoomey/vim-tmux-navigator'
@@ -143,16 +145,6 @@ function! NumberToggle()
     let relativenumber=1
   endif
 endfunc
-
-
-function! SwitchSourceHeader()
-  "update!
-  if (expand ("%:e") == "cpp")
-    find %:t:r.h
-  else
-    find %:t:r.cpp
-  endif
-endfunction
 
 
 " =============================================================================
@@ -308,6 +300,9 @@ let g:multi_cursor_quit_key='<Esc>'
 " ================================= KeyMap Settings ===========================
 " =============================================================================
 
+" danet config support
+au BufRead,BufNewFile *.cfg set filetype=danet-config
+
 " for ycm support of cuda
 autocmd FileType cuda set ft=cpp.cuda
 autocmd BufRead,BufNewFile *.cu set ft=cpp.cuda
@@ -336,7 +331,13 @@ nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
 nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
-nmap <leader>s :call SwitchSourceHeader()<CR>
+let b:fsnonewfiles = "on"
+au BufEnter *.h let b:fswitchdst  = 'cpp,cc'
+au BufEnter *.h let b:fswitchlocs = 'rel:./'
+au BufEnter *.cc let b:fswitchdst  = 'h,hpp'
+au BufEnter *.cc let b:fswitchlocs = 'rel:./'
+nmap <silent> <leader>s :FSHere<CR>
+
 nnoremap S :%s/
 vnoremap s :s/
 
