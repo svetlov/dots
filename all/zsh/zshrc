@@ -60,6 +60,16 @@ _smart_append() {
 # =============================================== Env Creator Settings ================================================
 # =====================================================================================================================
 
+_to_clean_env() {
+    echo "${COLOR_RED}don't forget call 'tmux detach'${COLOR_OFF}";
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+    CPATH="/usr/local/include";
+    LIBRARY_PATH="/usr/local/lib";
+    LD_LIBRARY_PATH="usr/local/lib";
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH;
+}
+
 _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
