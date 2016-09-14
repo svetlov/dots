@@ -30,7 +30,7 @@ if [[ $1 == "start" ]]; then
     # ============================================= Linux =============================================================
     # =================================================================================================================
     elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
-        (sleep 2 && notebook open) &  # async call for host to forward ports and open safari
+        (sleep 2 && notebook open) &  # async call for host to forward ports and open in default browser
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
             --no-browser --port=${IPYTHON_PORT};
     # =================================================================================================================
@@ -49,7 +49,7 @@ elif [[ $1 == "open" ]]; then
     # =================================================================================================================
     if [[ `uname` = "Darwin" ]]; then
         if [[ $# -eq 1 ]]; then
-            open -a safari https://localhost:${IPYTHON_PORT};
+            open https://localhost:${IPYTHON_PORT};
         elif [[ $# -eq 2 ]]; then
             if [[ $2 == '--read-hostname-from-pipe' ]];then
                 echo "${COLOR_CYAN}Reading hostname from pipe ${COLOR_OFF}";
