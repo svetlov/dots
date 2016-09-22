@@ -314,7 +314,10 @@ deploy_env() {
     fi
     _update_env;
 
+    brew_install_and_update lua;
     brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/lua.rb;
+    brew switch lua 5.2.4_9999;  # switch to custom lua with fPIC for color_coded vim plugin
+
     brew_install_and_update ruby;
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
     brew_install_and_update cmake;
