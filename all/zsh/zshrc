@@ -288,12 +288,6 @@ deploy_env() {
             fi
             git clone https://github.com/Linuxbrew/brew.git ${HOME}/.linuxbrew;
             _update_env; brew doctor; brew update; brew upgrade;
-            (
-                cd ${HOME}/.linuxbrew/Library/Taps/homebrew/homebrew-core;
-                git remote add self git@github.com:svetlov/homebrew-core.git;
-                git fetch self master:self-master;
-                git checkout self-master;
-            )
         else
             echo "Unknown system: $(uname)" 1>&2;
             return 1;
@@ -320,7 +314,7 @@ deploy_env() {
     fi
     _update_env;
 
-    brew_install_and_update lua;
+    brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/lua.rb;
     brew_install_and_update ruby;
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
     brew_install_and_update cmake;
