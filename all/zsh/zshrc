@@ -362,6 +362,7 @@ mkmathvirtualenv() {
 
     $pipcmd install -U setuptools
     $pipcmd install -U pip;
+    $pipcmd install -U virtualenvwrapper;
     $pipcmd install -U flake8;
     $pipcmd install -U numpy;
     $pipcmd install -U scipy;
