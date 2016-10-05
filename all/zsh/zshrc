@@ -314,7 +314,7 @@ deploy_env() {
     fi
     _update_env;
 
-    brew_install_and_update lua;
+    brew_install_and_update lua; brew unlink lua;  # for dependency of other libs
     brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/lua.rb;
     brew switch lua 5.2.4_9999;  # switch to custom lua with fPIC for color_coded vim plugin
 
