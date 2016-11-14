@@ -103,13 +103,19 @@ class VimInstaller(Installer):
     name = 'vim'
     vimrc = os.path.join(HOME, ".vimrc")
 
-
     @classmethod
     def install(cls):
         symlink(os.path.join(PWD, "all", "vim", "vimrc"), cls.vimrc)
         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
+
+        os.makedirs(os.path.join(HOME, ".vim", "syntax"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+
+        symlink(
+            os.path.join(PWD, "all", "vim", "danet-config.vim"),
+            os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
+        )
 
         llvmpath = os.path.join(HOMEBREW_HOME, "opt", "llvm")
 
