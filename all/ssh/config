@@ -32,7 +32,7 @@ Host n4
     HostName nikola4.search.yandex.net
 
 Host n5
-    HostName nikola6.search.yandex.net
+    HostName nikola5.search.yandex.net
 
 Host n6
     HostName nikola6.search.yandex.net
@@ -69,6 +69,27 @@ Host n16
 
 Host n17
     HostName nikola17.search.yandex.net
+
+Host cv6
+    HostName cv-sas-006.search.yandex.net
+
+Host cv7
+    HostName cv-sas-007.search.yandex.net
+
+Host cv8
+    HostName cv-sas-008.search.yandex.net
+
+Host cv9
+    HostName cv-sas-009.search.yandex.net
+
+Host cv10
+    HostName cv-sas-010.search.yandex.net
+
+Host cv11
+    HostName cv-sas-011.search.yandex.net
+
+Host cv12
+    HostName cv-sas-012.search.yandex.net
 
 Host cv13
     HostName cv-sas-013.search.yandex.net

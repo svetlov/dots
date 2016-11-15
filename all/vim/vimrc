@@ -178,7 +178,7 @@ let g:airline_inactive_collapse=1
 let g:syntastic_python_checkers = ['flake8', 'pylint', 'pep8']
 let g:syntastic_python_pep8_args = ['--max-line-length=119']
 let g:syntastic_python_flake8_args = ['--max-line-length=119', '--ignore=E402']
-let g:syntastic_python_pylint_post_args='--disable=C0103,C0111'
+let g:syntastic_python_pylint_post_args='--disable=C0103,C0111,C0301,R0902,R0903'
 
 " =============================================================================
 " ================================ YCM Settings ===============================
