@@ -16,6 +16,12 @@ Host viola
 Host jones
     HostName jones.search.yandex.net
 
+Host dnncv1
+    HostName 2a02:6b8:c01:104:0:696:0:40
+
+Host dnncv2
+    HostName 2a02:6b8:c01:102:0:696:0:31
+
 Host n0
     HostName nikola0.search.yandex.net
 
@@ -132,3 +138,7 @@ Host h
 # dolenko lab server
 Host hermes
     HostName 213.131.9.60
+
+Host data-lab
+    HostName 213.131.9.38
+    Port 26262
