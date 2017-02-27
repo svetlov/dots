@@ -8,6 +8,9 @@ export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
 export IPYTHON_PORT=6500;
 
+[[ `expr substr $(uname -s) 1 5` = "Linux" ]] && is_linux=true || is_linux=false;
+[[ `uname` = "Darwin" ]] && is_darwin=true || is_darwin=false;
+
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
 export COLOR_BLACK=$'\e[0;30m'        # Black
@@ -122,11 +125,17 @@ _update_env() {
 
     # it's required by some cmake scripts, which trying to find custom python libs and includes
     export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
-    if [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+    if [[ $is_linux == true ]]; then
         export CMAKE_PREFIX=${HOME}/.linuxbrew;
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
-    elif [[ `uname` = "Darwin" ]]; then
+    elif [[ $is_darwin == true ]]; then
         export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib;
+    fi
+
+    if [[ $is_linux == true ]]; then
+        export HOMEBREW_HOME="${HOME}/.linuxbrew";
+    elif [[ $is_darwin == true ]]; then
+        export HOMEBREW_HOME="/usr/local";
     fi
 }
 
@@ -252,9 +261,9 @@ _update_arcadia_env;
 # =====================================================================================================================
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
-if [ `uname` = "Darwin" ]; then
+if [[ $is_darwin == true ]]; then
 
-elif [ `expr substr $(uname -s) 1 5` = "Linux" ]; then
+elif [[ $is_linux == true ]]; then
     if [[ -L "${HOME}/.zshrc" ]]; then
         if [[ -z "$TMUX" ]]; then
             if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
@@ -274,6 +283,18 @@ fi
 # =====================================================================================================================
 # ================================================= Deploy Function ===================================================
 # =====================================================================================================================
+
+_generate_system_pth_for_brew() {
+    local version2=$(python2 --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
+    local pthpath2="${HOMEBREW_HOME}/lib/python${version2}/site-packages/system.pth";
+    echo "/usr/lib/python${version2}/dist-packages" >> ${pthpath2};
+    echo "/usr/lib/pymodules/python${version2}" >> ${pthpath2};
+
+    local version3=$(python3 --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
+    local pthpath3="${HOMEBREW_HOME}/lib/python${version3}/site-packages/system.pth";
+    echo "/usr/lib/python${version3}/dist-packages" >> ${pthpath3};
+    echo "/usr/lib/pymodules/python${version3}" >> ${pthpath3};
+}
 
 deploy_env() {
     which brew > /dev/null;
@@ -313,6 +334,7 @@ deploy_env() {
         pip3 install -U pip setuptools; pip3 install -U virtualenvwrapper;
     fi
     _update_env;
+    _generate_system_pth_for_brew;
 
     brew_install_and_update lua; brew unlink lua;  # for dependency of other libs
     brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/lua.rb;
@@ -343,22 +365,15 @@ deploy_env() {
         fi
         ./install.py install configs; _update_env;
     );
-    mkmathvirtualenv --system-site-packages -p/usr/bin/python2 system;
 }
 
 mkmathvirtualenv() {
     mkvirtualenv $@;
     local envname=${@:$#};
+    workon ${envname};
 
     local version=$(python --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
     [[ $version =~ "2." ]] && local pipcmd=pip || local pipcmd=pip3;
-    if [[ "$@" =~ "--system-site-packages" ]]; then
-        # for custom python system-site-packages point to smth like ~/.linuxbrew/Cellar/python2.7/ ... ,
-        # so we need to add real system-site-packages manually
-        local pthpath="${HOME}/.virtualenvs/${envname}/lib/python${version}/site-packages/system.pth";
-        echo "/usr/lib/python${version}/dist-packages" >> ${pthpath};
-        echo "/usr/lib/pymodules/python${version}" >> ${pthpath};
-    fi
 
     $pipcmd install -U setuptools
     $pipcmd install -U pip;
@@ -370,5 +385,8 @@ mkmathvirtualenv() {
     brew install freetype libpng;
     $pipcmd install -U matplotlib;
     $pipcmd install -U 'ipython[all]';
-    deactivate; workon ${@:$#};  # for recheck ipython and others binaries
+
+    # for recheck ipython and others binaries
+    deactivate;
+    workon ${envname};
 }
