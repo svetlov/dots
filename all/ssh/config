@@ -22,6 +22,9 @@ Host dnncv1
 Host dnncv2
     HostName 2a02:6b8:c01:102:0:696:0:31
 
+Host dnncv5
+    HostName 2a02:6b8:c01:101:0:696:0:3e
+
 Host n0
     HostName nikola0.search.yandex.net
 
