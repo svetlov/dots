@@ -143,8 +143,6 @@ class VimInstaller(Installer):
                 sb.call([
                     "cmake",
                     "-DCMAKE_PREFIX_PATH={}".format(HOMEBREW_HOME),
-                    "-DCUSTOM_CLANG=1",
-                    "-DLLVM_ROOT_PATH={}".format(llvmpath),
                     ".."
                 ])
                 sb.call(["make", "-j"])
