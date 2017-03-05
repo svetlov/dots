@@ -348,7 +348,7 @@ deploy_env() {
 
     brew_install_and_update tmux;
     brew_install_and_update ctags;
-    brew_install_and_update vim --with-python3 --with-lua --without-ruby --HEAD;
+    brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/vim7.rb --with-python3 --with-lua --without-ruby;
 
     # install configs
     mkdir -p ${HOME}/projects;
