@@ -8,8 +8,8 @@ export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
 export IPYTHON_PORT=6500;
 
-[[ `expr substr $(uname -s) 1 5` = "Linux" ]] && is_linux=true || is_linux=false;
-[[ `uname` = "Darwin" ]] && is_darwin=true || is_darwin=false;
+[[ `uname` == "Linux" ]] && is_linux=true || is_linux=false;
+[[ `uname` == "Darwin" ]] && is_darwin=true || is_darwin=false;
 
 # Regular Colors
 export COLOR_OFF=$'\e[0m'             # Text Reset
@@ -299,9 +299,9 @@ _generate_system_pth_for_brew() {
 deploy_env() {
     which brew > /dev/null;
     if [[ $? -ne 0 ]]; then
-        if [[ `uname` = "Darwin" ]]; then
+        if [[ $is_darwin == true ]]; then
             echo "TODO on darwin for deploy brew";
-        elif [[ `expr substr $(uname -s) 1 5` = "Linux" ]]; then
+        elif [[ $is_linux == true ]]; then
             which rvm > /dev/null;
             if [[ $? -ne 0 ]]; then  # install ruby for brew if required
                 gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
