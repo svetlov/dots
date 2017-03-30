@@ -201,6 +201,14 @@ class SSHInstaller(Installer):
         os.chmod(os.path.join(HOME, ".ssh", "config"), 0o644)
 
 
+class MercurialInstaller(Installer):
+    name = 'hg'
+
+    @staticmethod
+    def install():
+        symlink(os.path.join(PWD, "all", "hgrc"), os.path.join(HOME, ".hgrc"))
+
+
 class ConfigsInstall(Installer):
     name = 'configs'
 
@@ -209,6 +217,7 @@ class ConfigsInstall(Installer):
         OhMyZshInstaller.install()
         SSHInstaller.install()
         GitConfigInstaller.install()
+        MercurialInstaller.install()
         TmuxInstaller.install()
         VimInstaller.install()
 

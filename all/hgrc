@@ -1,0 +1,47 @@
+# example user config (see 'hg help config' for more info)
+[ui]
+# name and email, e.g.
+# username = Jane Doe <jdoe@example.com>
+username = Vsevolod Svetlov svetlov.vsevolod@gmail.com
+merge = vimdiff
+# merge = internal:merge
+
+[merge-tools]
+vimdiff.executable = vimdiff
+vimdiff.args = -f -d $output $local $base $other -c "wincmd J"
+vimdiff.premerge = keep
+
+
+[alias]
+h = log --template "{label('custom.rev', rev)}\t{label('custom.phase',phase)}\t{label('custom.tag',tags)}\t{desc|firstline} {label('custom.age', date|age)} {label('custom.user', author|user)}\n" -G
+history = log --template "{label('custom.rev', rev)}\t{label('custom.phase',phase)}\t{label('custom.tag',tags)}\t{desc|firstline} {label('custom.age', date|age)} {label('custom.user', author|user)}\n"
+
+[color]
+# configure colors for each possible hg status
+status.modified = green
+status.added = green
+status.removed = red
+status.deleted = cyan
+status.unknown = white
+status.ignored = white
+# and for hg diff output also
+diff.diffline = bold
+diff.extended = cyan bold
+diff.file_a = red bold
+diff.file_b = green bold
+diff.hunk = magenta
+diff.deleted = red
+diff.inserted = green
+diff.changed = white
+diff.trailingwhitespace = bold red_background
+
+[extensions]
+# uncomment these lines to enable some popular extensions
+# (see 'hg help extensions' for more info)
+#
+# pager =
+color =
+graphlog =
+fetch =
+
+
