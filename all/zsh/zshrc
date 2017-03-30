@@ -68,9 +68,11 @@ _to_clean_env() {
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
     CPATH="/usr/local/include";
     LIBRARY_PATH="/usr/local/lib";
-    LD_LIBRARY_PATH="usr/local/lib";
+    LD_LIBRARY_PATH="/usr/local/lib";
 
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH;
+
+    function preexec { }
 }
 
 _update_env() {
