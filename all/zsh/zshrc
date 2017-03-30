@@ -161,7 +161,7 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git python osx brew history-substring-search virtualenvwrapper vi-mode)
+plugins=(git mercurial python osx brew history-substring-search virtualenvwrapper vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 bindkey '^R' history-incremental-search-backward
