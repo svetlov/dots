@@ -3,3 +3,5 @@
 svn-commit*
 .color_coded
 bin/**
+
+*egg-info/

@@ -35,6 +35,9 @@ diff.inserted = green
 diff.changed = white
 diff.trailingwhitespace = bold red_background
 
+[web]
+cacerts = /etc/ssl/certs/ca-certificates.crt
+
 [extensions]
 # uncomment these lines to enable some popular extensions
 # (see 'hg help extensions' for more info)

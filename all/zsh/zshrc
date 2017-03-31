@@ -240,10 +240,8 @@ _update_arcadia_env () {
         yadevmake () { yadev make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
+        alias hg='arcadia_root_call svn "ya tool hg"';
         alias vim='arcadia_root_call vim arcadiavim';
-
-        export OMP_NUM_THREADS=8
-        export MKL_NUM_THREADS=8
 
         alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
             --add-result='.hpp' --add-result='.c' --add-result='.cc' \
@@ -344,6 +342,7 @@ deploy_env() {
 
     brew_install_and_update ruby;
     brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
+    brew_install_and_update mercurial;
     brew_install_and_update cmake;
 
     brew_install_and_update llvm;
