@@ -3,3 +3,6 @@
 svn-commit*
 .color_coded
 bin/**
+
+*.pyc
+*.json
