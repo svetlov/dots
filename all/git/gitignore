@@ -5,4 +5,6 @@ svn-commit*
 bin/**
 
 *.pyc
+*egg-info/
+
 *.json
