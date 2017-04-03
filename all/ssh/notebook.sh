@@ -28,7 +28,8 @@ if [[ $1 == "start" ]]; then
     # ============================================= Linux =============================================================
     # =================================================================================================================
     elif [[ $is_linux == true ]]; then
-        (sleep 2 && notebook open) &  # async call for host to forward ports and open in default browser
+        # async call(cause jupyter run in daemon mode) for host to forward ports and open in default browser
+        (sleep 2 && notebook open) &
         jupyter notebook --certfile=${HOME}/projects/dots/all/security/mycert.pem \
             --no-browser --port=${IPYTHON_PORT};
     # =================================================================================================================
@@ -80,7 +81,7 @@ elif [[ $1 == "open" ]]; then
 
         echo "${COLOR_CYAN}Trying to open notebook on local machine${COLOR_OFF}";
         # write hostname to port, then 'read-from-port | notebook tunnel --read-hostname-from-pipe' will be called
-        echo ${HOST} | (nc localhost 2227 & pid=$! && sleep 2 && kill -9 $pid);
+        echo ${HOST} | (nc localhost 2227 & pid=$! && sleep 2 && kill -9 $pid 2> /dev/null);
     # =================================================================================================================
     # =========================================== Unknown host ========================================================
     # =================================================================================================================
