@@ -234,13 +234,13 @@ _update_arcadia_env () {
             git co $branch;
         }
 
-        ya () { (unset CC; unset CXX; unset CPATH; workon system; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
-        yadev () { (unset CC; unset CXX; unset CPATH; workon system; ${ARCADIA_ROOT}/devtools/ya-dev/ya "$@";) }
+        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+        yadev () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya-dev/ya "$@";) }
         yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         yadevmake () { yadev make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
-        alias hg='arcadia_root_call svn "ya tool hg"';
+        alias hg='arcadia_root_call hg "ya tool hg"';
         alias vim='arcadia_root_call vim arcadiavim';
 
         alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
