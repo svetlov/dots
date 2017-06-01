@@ -67,7 +67,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 
 " Comfortable grep
-Plugin 'vim-scripts/grep.vim'
+Plugin 'rosenfeld/rgrep.vim'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
@@ -295,6 +295,12 @@ let g:multi_cursor_next_key='<C-n>'
 let g:multi_cursor_prev_key='<C-p>'
 let g:multi_cursor_skip_key='<C-x>'
 let g:multi_cursor_quit_key='<Esc>'
+
+" =============================================================================
+" ============================ RGrep Settings =================================
+" =============================================================================
+
+set grepprg=grep\ -nr
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
