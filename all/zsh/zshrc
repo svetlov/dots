@@ -195,6 +195,8 @@ _update_arcadia_env () {
         export ARCADIA_ROOT_BIN="${HOME}/projects/arcadia.git/bin";
         export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
         export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
+        export JUNK="${ARCADIA_ROOT}/junk/splinter";
+        export JUNK_BIN="${ARCADIA_ROOT_BIN}/junk/splinter";
     fi
 
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
