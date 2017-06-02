@@ -8,6 +8,8 @@ export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
 export IPYTHON_PORT=6500;
 
+export TENSORFLOW_PATH="${HOME}/projects/tensorflow";
+
 [[ `uname` == "Linux" ]] && is_linux=true || is_linux=false;
 [[ `uname` == "Darwin" ]] && is_darwin=true || is_darwin=false;
 
@@ -95,6 +97,7 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/extras/CUPTI/lib64");  # libcupti
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
@@ -106,8 +109,6 @@ _update_env() {
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.local/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
-
-    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
@@ -139,6 +140,20 @@ _update_env() {
     elif [[ $is_darwin == true ]]; then
         export HOMEBREW_HOME="/usr/local";
     fi
+
+    if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/protobuf/src");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/eigen_archive");
+
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+
+    fi
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 }
 
 _update_env;
