@@ -194,8 +194,8 @@ let g:ycm_error_symbol = '☓'
 let g:ycm_warning_symbol = '☝'
 let g:ycm_filetype_specific_completion_to_disable = {
     \ 'csv' : 1,
-    \ 'diff' : 1,
     \ 'gitcommit' : 1,
+    \ 'diff' : 1,
     \ 'help' : 1,
     \ 'infolog' : 1,
     \ 'mail' : 1,
@@ -248,12 +248,12 @@ map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 " ============================ Buffergator Settings ===========================
 " =============================================================================
 
-let g:buffergator_hsplit_size = 10
+let g:buffergator_hsplit_size = 20
 let g:buffergator_viewport_split_policy="T"  " open at top
 
 
 let g:buffergator_suppress_keymaps = 1
-map <leader>bg :BuffergatorToggle<CR>
+map <leader>b :BuffergatorToggle<CR>
 
 " =============================================================================
 " ============================== TagBar Settings ==============================

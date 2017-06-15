@@ -8,8 +8,6 @@ export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${PROJECTS};
 export IPYTHON_PORT=6500;
 
-export TENSORFLOW_PATH="${HOME}/projects/tensorflow";
-
 [[ `uname` == "Linux" ]] && is_linux=true || is_linux=false;
 [[ `uname` == "Darwin" ]] && is_darwin=true || is_darwin=false;
 
@@ -141,7 +139,11 @@ _update_env() {
         export HOMEBREW_HOME="/usr/local";
     fi
 
+
+    TENSORFLOW_PATH="${HOME}/projects/tensorflow";
     if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
+        export TENSORFLOW_PATH;
+        tf () { cd "${TENSORFLOW_PATH}"; };
         CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
         CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
         CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
@@ -231,10 +233,10 @@ _update_arcadia_env () {
 
         arcadiavim () {
             # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
-            local _CC=${CC}; local _CXX=${CXX}; local _CPATH=${CPATH};
-            unset CC; unset CXX; unset CPATH;
+            local _CC=${CC}; local _CXX=${CXX};#  local _CPATH=${CPATH};
+            unset CC; unset CXX;#  unset CPATH;
             vim "$@";
-            export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
+            export CC=${_CC}; export CXX=${_CXX};#  export CPATH=${_CPATH};
         };
 
         git-svn-update-arcadia-master () {
