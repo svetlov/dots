@@ -16,6 +16,9 @@ Host viola
 Host jones
     HostName jones.search.yandex.net
 
+Host hinton
+    HostName hinton.search.yandex.net
+
 Host dnncv1
     HostName 2a02:6b8:c01:104:0:696:0:40
 
