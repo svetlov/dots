@@ -11,8 +11,10 @@ ISLINUX = (sys.platform != 'darwin')
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
-LOCAL_BIN = os.path.join(HOME, ".local", "bin")
-HOMEBREW_HOME = os.path.join(HOME, ".linuxbrew") if ISLINUX else os.path.join("usr", "local")
+LOCAL = os.path.join(HOME, ".local")
+LOCAL_BIN = os.path.join(LOCAL, "bin")
+
+os.makedirs(LOCAL, exist_ok=True)
 os.makedirs(LOCAL_BIN, exist_ok=True)
 
 INSTALLERS = {}
@@ -117,38 +119,28 @@ class VimInstaller(Installer):
             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
         )
 
-        llvmpath = os.path.join(HOMEBREW_HOME, "opt", "llvm")
-
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
 
-            python_config_path = os.path.join(HOMEBREW_HOME, 'bin', 'python-config')
-
-            prefix = sb.check_output([python_config_path, '--prefix']).strip().decode('utf8')
-            py2library = os.path.join(prefix, 'lib', 'libpython2.7' + '.so' if ISLINUX else '.dylib')
-            py2include = os.path.join(prefix, 'include', 'python2.7')
-
             custom_env = os.environ.copy()
-            custom_env['EXTRA_CMAKE_ARGS'] = (
-                '-DPYTHON_LIBRARY={} '
-                '-DPYTHON_INCLUDE_DIR={} '
-                '-DPATH_TO_LLVM_ROOT={}'
-            ).format(py2library, py2include, llvmpath)
+            custom_env["CC"] = "/usr/bin/clang-3.9"
+            custom_env["CXX"] = "/usr/bin/clang++-3.9"
 
-            sb.call(["./install.py", "--clang-completer", "--system-libclang"], env=custom_env)
+            sb.call(["./install.py", "--clang-completer"], env=custom_env)
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call([
-                    "cmake",
-                    "-DCMAKE_PREFIX_PATH={}".format(HOMEBREW_HOME),
-                    ".."
-                ])
+                custom_env = os.environ.copy()
+                custom_env["CC"] = "/usr/bin/clang-3.9"
+                custom_env["CXX"] = "/usr/bin/clang++-3.9"
+
+                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."], env=custom_env)
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
-        open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
+
+            open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
 
 
 class TmuxInstaller(Installer):
