@@ -95,6 +95,7 @@ _update_env() {
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/extras/CUPTI/lib64");  # libcupti
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
@@ -106,8 +107,6 @@ _update_env() {
     INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.local/share/info");
     INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
-
-    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
@@ -139,6 +138,24 @@ _update_env() {
     elif [[ $is_darwin == true ]]; then
         export HOMEBREW_HOME="/usr/local";
     fi
+
+
+    TENSORFLOW_PATH="${HOME}/projects/tensorflow";
+    if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
+        export TENSORFLOW_PATH;
+        tf () { cd "${TENSORFLOW_PATH}"; };
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/protobuf/src");
+        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/eigen_archive");
+
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+
+    fi
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 }
 
 _update_env;
@@ -193,8 +210,13 @@ _update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
         export ARCADIA_ROOT_BIN="${HOME}/projects/arcadia.git/bin";
+        arc () { cd ${ARCADIA_ROOT}; };
         export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
         export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
+        danet () { cd ${DANET}; };
+        export JUNK="${ARCADIA_ROOT}/junk/splinter";
+        export JUNK_BIN="${ARCADIA_ROOT_BIN}/junk/splinter";
+        junk () { cd ${JUNK}; };
     fi
 
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
@@ -211,10 +233,10 @@ _update_arcadia_env () {
 
         arcadiavim () {
             # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
-            local _CC=${CC}; local _CXX=${CXX}; local _CPATH=${CPATH};
-            unset CC; unset CXX; unset CPATH;
+            local _CC=${CC}; local _CXX=${CXX};#  local _CPATH=${CPATH};
+            unset CC; unset CXX;#  unset CPATH;
             vim "$@";
-            export CC=${_CC}; export CXX=${_CXX}; export CPATH=${_CPATH};
+            export CC=${_CC}; export CXX=${_CXX};#  export CPATH=${_CPATH};
         };
 
         git-svn-update-arcadia-master () {

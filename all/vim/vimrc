@@ -67,7 +67,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 
 " Comfortable grep
-Plugin 'vim-scripts/grep.vim'
+Plugin 'rosenfeld/rgrep.vim'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
@@ -194,8 +194,8 @@ let g:ycm_error_symbol = '☓'
 let g:ycm_warning_symbol = '☝'
 let g:ycm_filetype_specific_completion_to_disable = {
     \ 'csv' : 1,
-    \ 'diff' : 1,
     \ 'gitcommit' : 1,
+    \ 'diff' : 1,
     \ 'help' : 1,
     \ 'infolog' : 1,
     \ 'mail' : 1,
@@ -248,12 +248,12 @@ map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 " ============================ Buffergator Settings ===========================
 " =============================================================================
 
-let g:buffergator_hsplit_size = 10
+let g:buffergator_hsplit_size = 20
 let g:buffergator_viewport_split_policy="T"  " open at top
 
 
 let g:buffergator_suppress_keymaps = 1
-map <leader>bg :BuffergatorToggle<CR>
+map <leader>b :BuffergatorToggle<CR>
 
 " =============================================================================
 " ============================== TagBar Settings ==============================
@@ -295,6 +295,12 @@ let g:multi_cursor_next_key='<C-n>'
 let g:multi_cursor_prev_key='<C-p>'
 let g:multi_cursor_skip_key='<C-x>'
 let g:multi_cursor_quit_key='<Esc>'
+
+" =============================================================================
+" ============================ RGrep Settings =================================
+" =============================================================================
+
+set grepprg=grep\ -nr
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
