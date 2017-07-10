@@ -121,21 +121,12 @@ class VimInstaller(Installer):
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"])
-
-            custom_env = os.environ.copy()
-            custom_env["CC"] = "/usr/bin/clang-3.9"
-            custom_env["CXX"] = "/usr/bin/clang++-3.9"
-
-            sb.call(["./install.py", "--clang-completer"], env=custom_env)
+            sb.call(["./install.py", "--clang-completer"])
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                custom_env = os.environ.copy()
-                custom_env["CC"] = "/usr/bin/clang-3.9"
-                custom_env["CXX"] = "/usr/bin/clang++-3.9"
-
-                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."], env=custom_env)
+                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."])
                 sb.call(["make", "-j"])
                 sb.call(["make", "install"])
                 sb.call(["make", "clean"])
