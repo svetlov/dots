@@ -4,9 +4,15 @@ export LC_ALL=en_US.UTF-8;
 export LANG=en_US.UTF-8;
 export EDITOR='vim';
 export HOME=$(cd ${HOME}; pwd -P);
+export LOCAL=${HOME}/.local;
 export WORKON_HOME=${HOME}/.virtualenvs;
-export PROJECT_HOME=${PROJECTS};
+export PROJECT_HOME=${HOME}/projects;
 export IPYTHON_PORT=6500;
+export CLANG39_CC="/usr/bin/clang-3.9";
+export CLANG39_CXX="/usr/bin/clang++-3.9";
+
+export LUA_VERSION="5.3";
+export TMUX_VERSION="2.5";
 
 [[ `uname` == "Linux" ]] && is_linux=true || is_linux=false;
 [[ `uname` == "Darwin" ]] && is_darwin=true || is_darwin=false;
@@ -80,33 +86,19 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
     PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
-    PATH=$(_smart_append ${PATH} "/place/berkanavt/bin");  # for mr_apps
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
-    PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/sbin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.linuxbrew/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/vim/bin");
 
     CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
-    CPATH=$(_smart_append ${CPATH} "${HOME}/.local/include")
-    CPATH=$(_smart_append ${CPATH} "${HOME}/.linuxbrew/include")
 
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.linuxbrew/lib");
 
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/extras/CUPTI/lib64");  # libcupti
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
-
-    MANPATH=$(_smart_append ${MANPATH} "/usr/local/share/man");
-    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.local/share/man");
-    MANPATH=$(_smart_append ${MANPATH} "${HOME}/.linuxbrew/share/man");
-
-    INFOPATH=$(_smart_append ${INFOPATH} "/usr/local/share/info");
-    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.local/share/info");
-    INFOPATH=$(_smart_append ${INFOPATH} "${HOME}/.linuxbrew/share/info");
 
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
@@ -118,27 +110,6 @@ _update_env() {
         export LIBRARY_PATH=${MPI_PATH}/lib:${LIBRARY_PATH};
         export LD_LIBRARY_PATH=${MPI_PATH}/lib:${LD_LIBRARY_PATH};
     fi
-
-    # contains ruby, required for brew on linux
-    if [[ -e ${HOME}/.rvm/scripts/rvm ]]; then
-        source ${HOME}/.rvm/scripts/rvm;
-    fi
-
-    # it's required by some cmake scripts, which trying to find custom python libs and includes
-    export PYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7;
-    if [[ $is_linux == true ]]; then
-        export CMAKE_PREFIX=${HOME}/.linuxbrew;
-        export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.so;
-    elif [[ $is_darwin == true ]]; then
-        export PYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib;
-    fi
-
-    if [[ $is_linux == true ]]; then
-        export HOMEBREW_HOME="${HOME}/.linuxbrew";
-    elif [[ $is_darwin == true ]]; then
-        export HOMEBREW_HOME="/usr/local";
-    fi
-
 
     TENSORFLOW_PATH="${HOME}/projects/tensorflow";
     if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
@@ -180,7 +151,7 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git mercurial python osx brew history-substring-search virtualenvwrapper vi-mode)
+plugins=(git mercurial tmux python osx brew history-substring-search virtualenvwrapper vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 bindkey '^R' history-incremental-search-backward
@@ -306,74 +277,87 @@ fi
 # ================================================= Deploy Function ===================================================
 # =====================================================================================================================
 
-_generate_system_pth_for_brew() {
-    local version2=$(python2 --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
-    local pthpath2="${HOMEBREW_HOME}/lib/python${version2}/site-packages/system.pth";
-    echo "/usr/lib/python${version2}/dist-packages" >> ${pthpath2};
-    echo "/usr/lib/pymodules/python${version2}" >> ${pthpath2};
-
-    local version3=$(python3 --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
-    local pthpath3="${HOMEBREW_HOME}/lib/python${version3}/site-packages/system.pth";
-    echo "/usr/lib/python${version3}/dist-packages" >> ${pthpath3};
-    echo "/usr/lib/pymodules/python${version3}" >> ${pthpath3};
+_install_clang39() {
+    wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    sudo apt-get install clang-3.9 libclang-3.9-dev lldb-3.9 clang-format-3.9 python-clang-3.9
 }
 
-deploy_env() {
-    which brew > /dev/null;
-    if [[ $? -ne 0 ]]; then
-        if [[ $is_darwin == true ]]; then
-            echo "TODO on darwin for deploy brew";
-        elif [[ $is_linux == true ]]; then
-            which rvm > /dev/null;
-            if [[ $? -ne 0 ]]; then  # install ruby for brew if required
-                gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3;
-                curl -sSL https://get.rvm.io | bash -s -- --ruby --ignore-dotfiles;
-            fi
-            git clone https://github.com/Linuxbrew/brew.git ${HOME}/.linuxbrew;
-            _update_env; brew doctor; brew update; brew upgrade;
-        else
-            echo "Unknown system: $(uname)" 1>&2;
-            return 1;
+_install_tmux() {
+    which tmux > /dev/null;
+    if [[ $? -eq 0 ]]; then
+        local tmux_version=$(tmux -V | sed 's/tmux //g');
+        if [[ ${tmux_version} -eq ${TMUX_VERSION} ]]; then
+            return;
         fi
+        rm -rf ${LOCAL}/tmux;
     fi
 
-    brew_install_and_update() {
-        brew install $@;
-        _update_env;
-    }
+    mkdir -p ${HOME}/.tmp.build.packages; cd ${HOME}/.tmp.build.packages;
 
-    brew_install_and_update xz --build-from-source;
-    brew_install_and_update openssl --build-from-source;
-    brew_install_and_update curl --build-from-source;
-    brew_install_and_update gcc;
+    sudo apt-get install -y libevent-dev libncurses-dev
+    git clone https://github.com/tmux/tmux
+    cd tmux
+    git checkout ${TMUX_VERSION}
+    ./autogen.sh
+    ./configure --prefix=${LOCAL}/tmux
+    make -j
+    make install
 
-    brew_install_and_update python --with-unicode-ucs4;
-    brew_install_and_update python3;
+    rm -rf ${HOME}/.tmp.build.packages
 
-    which virtualenvwrapper.sh > /dev/null;
-    if [[ $? -ne 0 ]]; then
-        pip install -U pip setuptools; pip install -U virtualenvwrapper;
-        pip3 install -U pip setuptools; pip3 install -U virtualenvwrapper;
-    fi
     _update_env;
-    _generate_system_pth_for_brew;
+}
 
-    brew_install_and_update lua; brew unlink lua;  # for dependency of other libs
-    brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/lua.rb;
-    brew switch lua 5.2.4_9999;  # switch to custom lua with fPIC for color_coded vim plugin
+_install_lua() {
+    if [[ -e "${LOCAL}/lua/version" ]]; then
+        local lua_version=$(cat "${LOCAL}/lua/version");
+        if [[ ${lua_version} -eq ${LUA_VERSION} ]]; then
+            return;
+        fi
+        rm -rf ${LOCAL}/lua;
+    fi
 
-    brew_install_and_update ruby;
-    brew_install_and_update git --with-brewed-openssl --with-brewed-curl;
-    brew_install_and_update mercurial;
-    brew_install_and_update cmake;
+    sudo apt-get install lua${LUA_VERSION} liblua${LUA_VERSION}-dev
+    mkdir -p ${LOCAL}/lua/include
+    ln -s /usr/include/lua${LUA_VERSION}/*.h ${LOCAL}/lua/include/
+    mkdir -p ${LOCAL}/lua/lib
+    ln -s /usr/lib/x86_64-linux-gnu/liblua${LUA_VERSION}.so ${LOCAL}/lua/lib/liblua.so
+    echo "${LUA_VERSION}" > ${LOCAL}/lua/version;
 
-    brew_install_and_update llvm;
+    _update_env;
+}
 
-    brew_install_and_update tmux;
-    brew_install_and_update ctags;
-    brew_install_and_update https://raw.githubusercontent.com/svetlov/homebrew-core/master/Formula/vim7.rb --with-python3 --with-lua --without-ruby;
+_install_last_vim() {
+    rm -rf ${LOCAL}/vim
+    mkdir -p ${HOME}/.tmp.build.packages; cd ${HOME}/.tmp.build.packages;
 
-    # install configs
+    sudo apt-get install -y \
+        libncurses5-dev \
+        libxpm-dev \
+        libxt-dev \
+        python-dev \
+        ruby-dev
+    git clone https://github.com/vim/vim.git
+    cd vim
+    ./configure \
+       --prefix=${LOCAL}/vim \
+       --with-features=huge \
+       --enable-multibyte \
+       --enable-rubyinterp=yes \
+       --enable-pythoninterp=yes \
+       --with-python-config-dir=/usr/lib/python2.7/config \
+       --enable-luainterp=yes \
+       --with-lua-prefix=${LOCAL}/lua \
+       --enable-cscope
+    make VIMRUNTIMEDIR=${LOCAL}/vim/share/vim/vim80 -j
+    make install
+
+    rm -rf ${HOME}/.tmp.build.packages
+
+    _update_env;
+}
+
+_reinstall_dots() {
     mkdir -p ${HOME}/projects;
     (
         cd ${HOME}/projects
@@ -390,26 +374,18 @@ deploy_env() {
     );
 }
 
-mkmathvirtualenv() {
-    mkvirtualenv $@;
-    local envname=${@:$#};
-    workon ${envname};
+deploy_env() {
+    sudo apt-get install make git;
+    _install_clang39;
+    export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
+    _install_tmux;
+    _install_lua;
+    _install_last_vim;
 
-    local version=$(python --version 2>&1 | sed 's/Python \([0-9]\.[0-9]\)\.[0-9]*/\1/');
-    [[ $version =~ "2." ]] && local pipcmd=pip || local pipcmd=pip3;
+    pip2 install -U --user pip setuptools;
+    sudo pip2 install -U virtualenvwrapper;
+    pip2 install -U --user 'ipython[all]'==5.4.1;
 
-    $pipcmd install -U setuptools
-    $pipcmd install -U pip;
-    $pipcmd install -U virtualenvwrapper;
-    $pipcmd install -U flake8;
-    $pipcmd install -U numpy;
-    $pipcmd install -U scipy;
-    $pipcmd install -U pandas;
-    brew install freetype libpng;
-    $pipcmd install -U matplotlib;
-    $pipcmd install -U 'ipython[all]';
-
-    # for recheck ipython and others binaries
-    deactivate;
-    workon ${envname};
+    _reinstall_dots;
+    unset CC; unset CXX;
 }
