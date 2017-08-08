@@ -180,7 +180,7 @@ yaclone() {
 _update_arcadia_env () {
     if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
-        export ARCADIA_ROOT_BIN="${HOME}/projects/arcadia.git/bin";
+        export ARCADIA_ROOT_BIN="${ARCADIA_ROOT}/bin";
         arc () { cd ${ARCADIA_ROOT}; };
         export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
         export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
@@ -210,24 +210,26 @@ _update_arcadia_env () {
             export CC=${_CC}; export CXX=${_CXX};#  export CPATH=${_CPATH};
         };
 
-        git-svn-update-arcadia-master () {
+        _git-svn-update-arcadia-master () {
             if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
                 echo "${COLOR_RED}Error${COLOR_OFF}: Please cd to ${ARCADIA_ROOT} directory." 1>&2;
                 return 1;
             fi
-            if [[ $(git status --porcelain | wc -c) -ne 0 ]]; then
-                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes and untracked files." 1>&2;
+            if [[ $(git status --porcelain | grep -v "??" | wc -l) -ne 0 ]]; then
+                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes." 1>&2;
                 return 1;
             fi
+            git staash;
             local branch=`git branch | grep -e "^*" | cut -f2 -d\ `;
             git co master;
             (cd ${ARCADIA_ROOT}; svn update;)
             git add --all :/;
             git commit -m "update from svn update call";
             git co $branch;
+            git stash pop;
         }
 
-        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya/ya "$@";) }
+        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
         yadev () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya-dev/ya "$@";) }
         yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         yadevmake () { yadev make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
