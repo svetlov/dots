@@ -77,8 +77,6 @@ _to_clean_env() {
     LD_LIBRARY_PATH="/usr/local/lib";
 
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH;
-
-    function preexec { }
 }
 
 _update_env() {
@@ -265,10 +263,6 @@ elif [[ $is_linux == true ]]; then
                 ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
             fi
             tmux attach || tmux new -A
-        else
-            function preexec {
-                export $(tmux show-environment | grep "^SSH_AUTH_SOCK")
-            }
         fi
     fi
 else
