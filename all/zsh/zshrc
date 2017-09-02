@@ -371,6 +371,7 @@ _reinstall_dots() {
 }
 
 deploy_env() {
+    set -e;
     sudo apt-get install make git;
     _install_clang39;
     export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
@@ -384,4 +385,5 @@ deploy_env() {
 
     _reinstall_dots;
     unset CC; unset CXX;
+    set +e;
 }
