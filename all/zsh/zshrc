@@ -390,8 +390,11 @@ deploy_env() {
     _install_last_vim;
 
     pip2 install -U --user pip setuptools;
-    sudo pip2 install -U virtualenvwrapper;
-    pip2 install -U --user 'ipython[all]'==5.4.1;
+    pip2 install -U --user virtualenvwrapper;
+    pip2 install -U --user matplotlib;
+    pip2 install -U --user pillow;
+    pip2 install -U --user 'ipython[all]';
+    pip2 install -U --user 'jupyter[all]';
 
     _reinstall_dots;
     unset CC; unset CXX;
