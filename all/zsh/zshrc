@@ -243,7 +243,7 @@ _update_arcadia_env () {
     fi
 
     if [ -e "${HOME}/.yt/token" ]; then
-        export YT_PROXY=banach.yt.yandex.net
+        export YT_PROXY=hahn.yt.yandex.net
         export YT_TOKEN=`cat ~/.yt/token`
         export YT_HOME=//home/cvtest/splinter
     fi
