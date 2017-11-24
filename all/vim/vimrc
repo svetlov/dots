@@ -56,8 +56,6 @@ Plugin 'vim-scripts/DoxyGen-Syntax'
 Plugin 'scrooloose/syntastic'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
-" multi cursor like sublime
-Plugin 'terryma/vim-multiple-cursors'
 
 Plugin 'jeaye/color_coded'
 
@@ -65,9 +63,6 @@ Plugin 'jeaye/color_coded'
 Plugin 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
 Plugin 'honza/vim-snippets'
-
-" Comfortable grep
-Plugin 'rosenfeld/rgrep.vim'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
@@ -285,24 +280,6 @@ map  <Leader>w <Plug>(easymotion-bd-w)
 nmap <Leader>w <Plug>(easymotion-overwin-w)
 
 " =============================================================================
-" ======================= MultipleCursors Settings ============================
-" =============================================================================
-
-let g:multi_cursor_use_default_mapping=0
-
-let g:multi_cursor_start_key='gmc'
-let g:multi_cursor_next_key='<C-n>'
-let g:multi_cursor_prev_key='<C-p>'
-let g:multi_cursor_skip_key='<C-x>'
-let g:multi_cursor_quit_key='<Esc>'
-
-" =============================================================================
-" ============================ RGrep Settings =================================
-" =============================================================================
-
-set grepprg=grep\ -nr
-
-" =============================================================================
 " ================================= KeyMap Settings ===========================
 " =============================================================================
 
@@ -347,20 +324,7 @@ nmap <silent> <leader>s :FSHere<CR>
 nnoremap S :%s/
 vnoremap s :s/
 
-
-" clist mappings
-" nnoremap<C-C> :call Ctoggle()<cr>
-" nmap gnl :cnext<CR>
-" nmap gpl :cprev<CR>
-
-" llist mappings
-" nnoremap <C-L> :call Ltoggle()<cr>
-" nmap gnl :lnext<CR>
-" nmap gpl :lprev<CR>
-
-" map <Tab> >>
-" map <S-Tab> <<
-
+nnoremap <C-M> :MaximizerToggle<CR>
 " =============================================================================
 " ================================= Global Settings ===========================
 " =============================================================================
