@@ -177,7 +177,7 @@ let g:airline_inactive_collapse=1
 " =============================================================================
 let g:syntastic_python_checkers = ['flake8', 'pylint', 'pep8']
 let g:syntastic_python_pep8_args = ['--max-line-length=119']
-let g:syntastic_python_flake8_args = ['--max-line-length=119', '--ignore=E402']
+let g:syntastic_python_flake8_args = ['--max-line-length=119', '--ignore=E402,E111,E114']
 let g:syntastic_python_pylint_post_args='--disable=C0103,C0111,C0301,R0902,R0903'
 
 " =============================================================================
@@ -324,9 +324,6 @@ aug QFClose
   au!
   au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix"|q|endif
 aug END
-
-" toggle line number view
-nnoremap <C-n> :call NumberToggle()<cr>
 
 " go file in vertical split
 map gf :vertical wincmd f<CR>
