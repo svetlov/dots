@@ -119,16 +119,21 @@ class VimInstaller(Installer):
             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
         )
 
+        env = {
+            "CC": os.environ["CLANG39_CC"],
+            "CXX": os.environ["CLANG39_CXX"]
+        }
+
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
-            sb.call(["git", "submodule", "update", "--init", "--recursive"])
-            sb.call(["./install.py", "--clang-completer"])
+            sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
+            sb.call(["./install.py", "--clang-completer"], env=env)
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
             sb.call(["mkdir", "-p", "build"])
             with PathGuard("build"):
-                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."])
-                sb.call(["make", "-j"])
-                sb.call(["make", "install"])
+                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."], env=env)
+                sb.call(["make", "-j"], env=env)
+                sb.call(["make", "install"], env=env)
                 sb.call(["make", "clean"])
 
             open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')

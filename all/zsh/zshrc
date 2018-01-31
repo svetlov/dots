@@ -80,27 +80,27 @@ _to_clean_env() {
 }
 
 _update_env() {
+    if [[ -d "/usr/local/cuda" ]]; then
+        export CUDA_HOME="/usr/local/cuda";
+    fi
+
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
-    PATH=$(_smart_append ${PATH} "/usr/local/cuda/bin");
+    PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
     PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
     PATH=$(_smart_append ${PATH} "${HOME}/.local/vim/bin");
 
-    CPATH=$(_smart_append ${CPATH} "/usr/local/cuda/include");
+    CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
 
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
 
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/extras/CUPTI/lib64");  # libcupti
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
-
-    if [[ -d /usr/local/cuda ]]; then
-        export CUDA_HOME="/usr/local/cuda";
-    fi
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
 
     if [[ -d /opt/openmpi-1.10.2 ]]; then
         export MPI_PATH=/opt/openmpi-1.10.2;
