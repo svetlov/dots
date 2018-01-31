@@ -4,6 +4,8 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required by Vundle
 
+silent! so .vimlocal          " add vimlocal for different projects
+
 " install Vindle if there is none
 if !filereadable(expand('$HOME/.vim/bundle/Vundle.vim/README.md'))
     echo "Installing Vundle.."
