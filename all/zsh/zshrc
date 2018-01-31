@@ -105,11 +105,13 @@ _update_env() {
 
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/cuda/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
 
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/extras/CUPTI/lib64");  # libcupti
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64/stubs");  # libcuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/cuda/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
 
     if [[ -d /usr/local/cuda ]]; then
         export CUDA_HOME="/usr/local/cuda";
