@@ -42,6 +42,18 @@ reset-ssh() {
     sudo netstat -apn | grep -w 2224 | awk '{ print $7 }' | sed 's/\(.*\)\/.*/\1/' | sort -u | xargs -I{} kill -9 {};
 }
 
+lnpwd() {
+    if [[ "$#" -ne 2 ]]; then
+        echo "${COLOR_RED}Usage: lnpwd from to${COLOR_OFF}" 1>&2;
+        return 1;
+    fi
+
+    from=$(realpath $1);
+    to=$(realpath $2);
+    echo "Linking ${from} to ${to}";
+    ln -s ${from} ${to};
+}
+
 _pathstr_contains() {
 	# check $2 is a subpart of pathes of $1
     splitted=$( echo $1 | tr ":" "\n" );
@@ -102,25 +114,27 @@ _update_env() {
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
 
-    if [[ -d /opt/openmpi-1.10.2 ]]; then
-        export MPI_PATH=/opt/openmpi-1.10.2;
+    if [[ -d "/opt/openmpi-3.0.0" ]]; then
+        export MPI_PATH="/opt/openmpi-3.0.0";
         export CPLUS_INCLUDE_PATH=${MPI_PATH}/include;
-        export LIBRARY_PATH=${MPI_PATH}/lib:${LIBRARY_PATH};
-        export LD_LIBRARY_PATH=${MPI_PATH}/lib:${LD_LIBRARY_PATH};
+        PATH=$(_smart_append ${PATH} "${MPI_PATH}/bin");
+        CPATH=$(_smart_append ${CPATH} "${MPI_PATH}/include");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${MPI_PATH}/lib");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${MPI_PATH}/lib");
     fi
 
     TENSORFLOW_PATH="${HOME}/projects/tensorflow";
     if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
         export TENSORFLOW_PATH;
         tf () { cd "${TENSORFLOW_PATH}"; };
-        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
-        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
-        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
-        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/protobuf/src");
-        CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/eigen_archive");
+        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
+        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
+        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
+        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/protobuf/src");
+        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/eigen_archive");
 
-        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
-        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+        # LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
+        # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
 
     fi
 
