@@ -4,6 +4,9 @@ svn-commit*
 .color_coded
 bin/**
 
+**/dist
+**/build
+
 *.pyc
 *egg-info/
 

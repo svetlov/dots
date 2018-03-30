@@ -199,6 +199,9 @@ _update_arcadia_env () {
         export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
         export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
         danet () { cd ${DANET}; };
+        export YTF="${ARCADIA_ROOT}/cv/ytensorflow";
+        export YTF_BIN="${ARCADIA_ROOT_BIN}/cv/ytensorflow";
+        ytf () { cd ${YTF}; };
         export JUNK="${ARCADIA_ROOT}/junk/splinter";
         export JUNK_BIN="${ARCADIA_ROOT_BIN}/junk/splinter";
         junk () { cd ${JUNK}; };
