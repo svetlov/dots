@@ -163,9 +163,9 @@ bindkey '^R' history-incremental-search-backward
 # =====================================================================================================================
 
 yaclone() {
-    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/devtools/ya ${HOME}/.yatool;
+    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/ya ${HOME}/.yatool;
     [[ ! -z ${1} ]] && local root=${1} || local root="${HOME}/projects/arcadia.git";
-    ${HOME}/.yatool/ya clone ${root};
+    ${HOME}/.yatool clone ${root};
     rm -rf ~/.yatool;
     _update_arcadia_env;
     (
@@ -180,7 +180,7 @@ yaclone() {
 }
 
 _update_arcadia_env () {
-    if [ -e "${HOME}/projects/arcadia.git/devtools/ya/ya" ]; then
+    if [ -e "${HOME}/projects/arcadia.git/ya" ]; then
         export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
         export ARCADIA_ROOT_BIN="${ARCADIA_ROOT}/bin";
         arc () { cd ${ARCADIA_ROOT}; };
