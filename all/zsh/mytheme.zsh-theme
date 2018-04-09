@@ -12,7 +12,7 @@ else
 fi
 
 local time='[%D{%H:%M:%S}]'
-PROMPT="%{$fg[yellow]%}╰─${time}%{$reset_color%} %B${user_symbol}%b "
+PROMPT="%{$fg[yellow]%}╰─${time} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
 
 function hg_prompt_info() {
     branch=$(hg branch 2> /dev/null) || return
