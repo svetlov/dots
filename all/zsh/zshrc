@@ -42,18 +42,6 @@ reset-ssh() {
     sudo netstat -apn | grep -w 2224 | awk '{ print $7 }' | sed 's/\(.*\)\/.*/\1/' | sort -u | xargs -I{} kill -9 {};
 }
 
-lnpwd() {
-    if [[ "$#" -ne 2 ]]; then
-        echo "${COLOR_RED}Usage: lnpwd from to${COLOR_OFF}" 1>&2;
-        return 1;
-    fi
-
-    from=$(realpath $1);
-    to=$(realpath $2);
-    echo "Linking ${from} to ${to}";
-    ln -s ${from} ${to};
-}
-
 _pathstr_contains() {
 	# check $2 is a subpart of pathes of $1
     splitted=$( echo $1 | tr ":" "\n" );

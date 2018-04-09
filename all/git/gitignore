@@ -6,6 +6,8 @@ bin/**
 
 **/dist
 **/build
+**/.tox
+**/.pytest_cache
 
 *.pyc
 *egg-info/
