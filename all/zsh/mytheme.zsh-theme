@@ -23,26 +23,30 @@ function pwd_prompt() {
     print "$fg_bold[cyan]$(pwd)$reset_color"
 }
 
+function git_dirty {
+      [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "$fg_bold[yellow] ✗"
+}
+
 function git_status_prompt() {
     branches=$(git branch 2> /dev/null) || return
     branch=$(echo $branches | grep \* | cut -d ' ' -f2)
-    print "$fg_bold[blue]($fg_bold[magenta]$branch$fg_bold[blue])$reset_color "
+    print "  $fg_bold[blue]($fg_bold[magenta]$branch$fg_bold[blue])$(git_dirty)$reset_color"
 }
 
 function return_code_prompt() {
     rc="$1";
     datetime="[$(date +%H:%M:%S)]";
     if [ $rc -ne 0 ]; then
-        print "$fg_bold[red]$datetime ↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
+        print "  $fg_bold[red]$datetime ↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
     else
-        print "$fg_bold[green]$datetime ↵ $reset_color";
+        print "  $fg_bold[green]$datetime ↵ $reset_color";
     fi
 }
 
 precmd() {
   local rc="$?";
 
-  LEFT="$(hostname_prompt):$(pwd_prompt)  $(git_status_prompt)$(return_code_prompt ${rc})  ";
+  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_status_prompt)$(return_code_prompt ${rc})  ";
   LEFTACSII=$(echo $LEFT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
   LEFTWIDTH="${#LEFTACSII}";
   RIGHT="";
