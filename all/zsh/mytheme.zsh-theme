@@ -1,6 +1,6 @@
 # ZSH Theme - Preview: http://gyazo.com/8becc8a7ed5ab54a0262a470555c3eed.png
 PAD="................................................................................................................"
-MAXPADLEN="${#PAD}"
+MAXPROMPTLEN=120;
 
 if [[ $UID -eq 0 ]]; then
     local user_symbol='#'
@@ -33,24 +33,33 @@ function return_code_prompt() {
     rc="$1";
     datetime="[$(date +%H:%M:%S)]";
     if [ $rc -ne 0 ]; then
-        print "$fg_bold[red] $datetime↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
+        print "$fg_bold[red]$datetime ↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
     else
-        print "$fg_bold[green]$datetime↵$reset_color";
+        print "$fg_bold[green]$datetime ↵ $reset_color";
     fi
 }
 
 precmd() {
   local rc="$?";
 
-  RIGHT=" ";
-  LEFT="$(hostname_prompt) $(pwd_prompt) $(git_status_prompt)$(return_code_prompt ${rc})  ";
-
+  LEFT="$(hostname_prompt):$(pwd_prompt)  $(git_status_prompt)$(return_code_prompt ${rc})  ";
   LEFTACSII=$(echo $LEFT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
-  RIGHTASCII=$(echo $RIGHT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
+  LEFTWIDTH="${#LEFTACSII}";
+  RIGHT="";
 
-  PADWIDTH=$(($COLUMNS-${#LEFTACSII}-${#RIGHTASCII}))
-  PADWIDTH=$(( $PADWIDTH > $MAXPADLEN ? $MAXPADLEN : $PADWIDTH ))
-  # echo "$COLUMNS ${#LEFT} ${#LEFTACSII} ${PADWIDTH} ${#RIGHT} ${#RIGHTASCII}" >&2;
+
+  if [[ "${#TMUX}" -ne 0 ]]; then
+      PANEWIDTH="$(tmux display -p '#{pane_width}')";
+  else
+      PANEWIDTH="$COLUMNS";
+  fi
+
+  PROMPTLEN=$(( $PANEWIDTH > $MAXPROMPTLEN ? $MAXPROMPTLEN : $PANEWIDTH ))
+
+  PADWIDTH=$(($PROMPTLEN - $LEFTWIDTH))
+  PADWIDTH=$(( $PADWIDTH < 0 ? 0 : $PADWIDTH ))
+
+  # echo "$PANEWIDTH ${#LEFT} ${#LEFTACSII} ${PADWIDTH} ${#RIGHT} ${#RIGHTASCII}" >&2;
   print "${LEFT}${PAD:0:${PADWIDTH}}${RIGHT}"
 }
 

@@ -265,7 +265,7 @@ if [[ $is_darwin == true ]]; then
 
 elif [[ $is_linux == true ]]; then
     if [[ -L "${HOME}/.zshrc" ]]; then
-        if [[ -z "$TMUX" ]]; then
+        if [[ "${#TMUX}" -eq 0 ]]; then
             if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
                 ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
             fi
