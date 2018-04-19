@@ -215,23 +215,26 @@ _update_arcadia_env () {
             export CC=${_CC}; export CXX=${_CXX};#  export CPATH=${_CPATH};
         };
 
-        _git-svn-update-arcadia-master () {
+        git-svn-update-arcadia-master () {
             if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
                 echo "${COLOR_RED}Error${COLOR_OFF}: Please cd to ${ARCADIA_ROOT} directory." 1>&2;
                 return 1;
             fi
-            if [[ $(git status --porcelain | grep -v "??" | wc -l) -ne 0 ]]; then
-                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes." 1>&2;
+
+            if [[ $(git status --porcelain | wc -l) -ne 0 ]]; then
+                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes before update." 1>&2;
                 return 1;
             fi
-            git staash;
+
             local branch=`git branch | grep -e "^*" | cut -f2 -d\ `;
-            git co master;
+            if [[ ${branch} != "master" ]]; then
+                echo "${COLOR_RED}Error${COLOR_OFF}: Please switch to master branch manually before update." 1>&2;
+                return 1;
+            fi
+
             (cd ${ARCADIA_ROOT}; svn update;)
             git add --all :/;
             git commit -m "update from svn update call";
-            git co $branch;
-            git stash pop;
         }
 
         ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
