@@ -119,10 +119,9 @@ class VimInstaller(Installer):
             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
         )
 
-        env = {
-            "CC": os.environ["CLANG39_CC"],
-            "CXX": os.environ["CLANG39_CXX"]
-        }
+        env = os.environ.copy()
+        env["CC"] = os.environ["CLANG39_CC"]
+        env["CXX"] = os.environ["CLANG39_CXX"]
 
         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)

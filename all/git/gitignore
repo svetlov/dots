@@ -1,7 +1,6 @@
 .svn
 .svnignore
 svn-commit*
-.color_coded
 bin/**
 
 **/dist
@@ -14,3 +13,5 @@ bin/**
 *egg-info/
 
 *.json
+
+.color_coded

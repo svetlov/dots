@@ -117,15 +117,6 @@ _update_env() {
     if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
         export TENSORFLOW_PATH;
         tf () { cd "${TENSORFLOW_PATH}"; };
-        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow");
-        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-genfiles");
-        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external");
-        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/protobuf/src");
-        # CPATH=$(_smart_append ${CPATH} "${HOME}/projects/tensorflow/bazel-tensorflow/external/eigen_archive");
-
-        # LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
-        # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/projects/tensorflow/bazel-bin/tensorflow");
-
     fi
 
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
@@ -163,19 +154,23 @@ bindkey '^R' history-incremental-search-backward
 # =====================================================================================================================
 
 yaclone() {
-    svn co svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/ya ${HOME}/.yatool;
+    svn cat svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/ya > ${HOME}/.yatool;
     [[ ! -z ${1} ]] && local root=${1} || local root="${HOME}/projects/arcadia.git";
-    ${HOME}/.yatool clone ${root};
+    python ${HOME}/.yatool clone ${root};
     rm -rf ~/.yatool;
     _update_arcadia_env;
+
     (
         cd ${root};
-        yamake --checkout cv/imgclassifiers -j0;
+        yamake --checkout cv/imgclassifiers/danet -j0;
+        yamake --checkout ml/tensorflow/ytensorflow -j0;
 
         git init;
         git add --all :/;
         git commit -m "initial commit";
-        python junk/splinter/ycm/ycm_to_color_coded.py > ${root}/.color_coded;
+
+        yaycm cv/imgclassifiers/danet ml/tensorflow/ytensorflow/cpp;
+        python junk/splinter/vim/ycm_to_color_coded.py > .color_coded;
     )
 }
 
@@ -207,13 +202,6 @@ _update_arcadia_env () {
             ${array[@]} ${@:3};
         }
 
-        arcadiavim () {
-            # cant run vim in subshell cause of tmux-navigator needs vim cmd, not vim in subshell
-            local _CC=${CC}; local _CXX=${CXX};#  local _CPATH=${CPATH};
-            unset CC; unset CXX;#  unset CPATH;
-            vim "$@";
-            export CC=${_CC}; export CXX=${_CXX};#  export CPATH=${_CPATH};
-        };
 
         git-svn-update-arcadia-master () {
             if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
@@ -238,18 +226,17 @@ _update_arcadia_env () {
         }
 
         ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
-        yadev () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/devtools/ya-dev/ya "$@";) }
         yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
-        yadevmake () { yadev make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
         alias hg='arcadia_root_call hg "ya tool hg"';
-        alias vim='arcadia_root_call vim arcadiavim';
 
-        alias yaycm='ya make -r --add-result='.h' --add-result='.hh' \
-            --add-result='.hpp' --add-result='.c' --add-result='.cc' \
-            --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
-            --no-src-links --keep-going --checkout'
+        yaycm () {
+            ya make -rj32 --add-result='.h' --add-result='.hh' \
+                --add-result='.hpp' --add-result='.c' --add-result='.cc' \
+                --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+                --no-src-links --keep-going --checkout $@;
+        }
     fi
 
     if [ -e "${HOME}/.yt/token" ]; then
@@ -350,15 +337,14 @@ _install_last_vim() {
             libncurses5-dev \
             libxpm-dev \
             libxt-dev \
-            python-dev \
-            ruby-dev
+            python-dev
         git clone https://github.com/vim/vim.git
         cd vim
         ./configure \
            --prefix=${LOCAL}/vim \
-           --with-features=huge \
+           --disable-gui \
+           --with-features=normal \
            --enable-multibyte \
-           --enable-rubyinterp=yes \
            --enable-pythoninterp=yes \
            --with-python-config-dir=/usr/lib/python2.7/config \
            --enable-luainterp=yes \

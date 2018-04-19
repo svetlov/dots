@@ -22,6 +22,8 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 " ============================ UI section =====================================
+" show ident blocks
+Plugin 'Yggdroot/indentLine'
 " impowed status line
 Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
@@ -59,6 +61,7 @@ Plugin 'scrooloose/syntastic'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
 
+" show colored c++ files
 Plugin 'jeaye/color_coded'
 
 " snippets plugin
@@ -68,16 +71,6 @@ Plugin 'honza/vim-snippets'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
-
-" Do things a bit different if we are at Yandex
-let arcadia_root = $ARCADIA_ROOT . '/'
-if arcadia_root != '/'
-    let &path.=',' . arcadia_root
-    let yandex_config_path = string(arcadia_root) . '.vimrc'
-    if filereadable(yandex_config_path)
-        exec 'source ' . yandex_config_path
-    endif
-endif
 
 " =============================================================================
 " ============================== Custom Functions =============================
@@ -132,17 +125,6 @@ function! Ltoggle()
         lopen
     endif
 endfunction
-
-
-function! NumberToggle()
-  if(&relativenumber == 1)
-    set number
-    set relativenumber=0
-  else
-    let relativenumber=1
-  endif
-endfunc
-
 
 " =============================================================================
 " ============================= Airline Settings ==============================
@@ -227,11 +209,11 @@ let g:color_coded_filetypes = ['c', 'cpp', 'cpp.cuda', 'objc']
 " ============================= UltiSnips Settings ============================
 " =============================================================================
 
-set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
+" set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
 let g:UltiSnipsExpandTrigger = "<C-j>"
 let g:UltiSnipsEditSplit = 'vertical'
-let g:UltiSnipsSnippetsDir = $HOME."/projects/dots/all/vim/mysnippets"
-let g:UltiSnipsSnippetDirectories=["mysnippets", "UltiSnips"]
+" let g:UltiSnipsSnippetsDir = $HOME."/projects/dots/all/vim/mysnippets"
+let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "UltiSnips"]
 
 " =============================================================================
 " ============================== NerdTree Settings ============================
@@ -334,13 +316,13 @@ syntax on                               " set syntax support if there's syntax f
 set t_Co=256                            " add native colors for terminals except tty
 colorscheme molokai                     " set my colorscheme
 
-set ruler			                    " show the cursor position all the time
-set number			                    " Show line numbers
-set laststatus=2	                    " Always show the statusline
+set ruler                               " show the cursor position all the time
+set number                              " Show line numbers
+set laststatus=2                        " Always show the statusline
 set cursorline                          " Highlight current line
 set colorcolumn=120                     " color 120 characters in line
-" set showcmd		                        " Show (partial) command in status line.
-set showmatch	                        " Show matching brackets.
+" set showcmd                           " Show (partial) command in status line.
+set showmatch                           " Show matching brackets.
 
 set shiftwidth=4
 set tabstop=4
