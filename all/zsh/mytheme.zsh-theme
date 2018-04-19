@@ -8,8 +8,10 @@ else
     local user_symbol='$'
 fi
 
-local time='[%D{%H:%M:%S}]'
-PROMPT="%{$fg[yellow]%}╰─${time} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
+local time='[%D{%H:%M}]'
+local fulltime='[%D{%H:%M:%S}]'
+BEFORE_PROMPT="%{$fg[yellow]%}╰─${time} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
+AFTER_PROMPT="%{$fg[yellow]%}╰─${fulltime} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
 
 function hg_prompt_info() {
     branch=$(hg branch 2> /dev/null) || return
@@ -35,11 +37,11 @@ function git_status_prompt() {
 
 function return_code_prompt() {
     rc="$1";
-    datetime="[$(date +%H:%M:%S)]";
+    local_fulltime="[$(date +%H:%M:%S)]";
     if [ $rc -ne 0 ]; then
-        print "  $fg_bold[red]$datetime ↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
+        print "  $fg_bold[red]$local_fulltime ↵ $fg_bold[blue]($fg_bold[red]${rc}$fg_bold[blue])$reset_color";
     else
-        print "  $fg_bold[green]$datetime ↵ $reset_color";
+        print "  $fg_bold[green]$local_fulltime ↵ $reset_color";
     fi
 }
 
@@ -65,10 +67,21 @@ precmd() {
 
   # echo "$PANEWIDTH ${#LEFT} ${#LEFTACSII} ${PADWIDTH} ${#RIGHT} ${#RIGHTASCII}" >&2;
   print "${LEFT}${PAD:0:${PADWIDTH}}${RIGHT}"
+
+  PROMPT=$BEFORE_PROMPT
 }
 
-TMOUT=1
+reset-prompt-and-accept-line() {
+    PROMPT=$AFTER_PROMPT
+    zle reset-prompt
+    zle accept-line
+}
 
+zle -N reset-prompt-and-accept-line
+bindkey '^m' reset-prompt-and-accept-line
+
+
+TMOUT=60
 TRAPALRM() {
     zle reset-prompt
 }
