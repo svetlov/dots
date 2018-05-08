@@ -22,7 +22,7 @@ function pwd_prompt() {
 }
 
 function git_dirty {
-    [[ $(git diff --porcelain 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
+    [[ $(git status --porcelain 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
 }
 
 function git_branch_prompt() {
@@ -56,7 +56,7 @@ AFTER_PROMPT="%{$fg[yellow]%}╰─${fulltime} %{$fg_bold[cyan]%}%c%{$reset_colo
 precmd() {
   local rc="$?";
 
-  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_status_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
+  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_branch_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
   LEFTACSII=$(echo $LEFT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
   LEFTWIDTH="${#LEFTACSII}";
   RIGHT="";
