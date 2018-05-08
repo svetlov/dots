@@ -83,19 +83,20 @@ class GitConfigInstaller(Installer):
 
 class OhMyZshInstaller(Installer):
     name = 'zsh'
-    bashrc = os.path.join(HOME, ".bashrc")
-    zshrc = os.path.join(HOME, ".zshrc")
-    bashline = '[ -z "$PS1" ] && return\n\nexec zsh'
+
+    src_bashrc = os.path.join(PWD, 'all', 'zsh', 'bashrc')
+    dst_bashrc = os.path.join(HOME, ".bashrc")
+
+    src_zshrc = os.path.join(PWD, 'all', 'zsh', 'zshrc')
+    dst_zshrc = os.path.join(HOME, ".zshrc")
+
     themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
     mytheme = os.path.join(themes, "mytheme.zsh-theme")
 
     @classmethod
     def install(cls):
-        if os.path.exists(cls.bashrc) and open(cls.bashrc).read().strip() != cls.bashline:
-            os.rename(cls.bashrc, get_free_name(cls.bashrc + ".old"))
-            with open(cls.bashrc, 'w') as bashrc:
-                bashrc.write(cls.bashline)
-        symlink(os.path.join(PWD, "all", "zsh", "zshrc"), cls.zshrc)
+        symlink(cls.src_bashrc, cls.dst_bashrc)
+        symlink(cls.src_zshrc, cls.dst_zshrc)
 
         os.makedirs(cls.themes, exist_ok=True)
         symlink(os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"), cls.mytheme)
