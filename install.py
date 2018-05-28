@@ -116,6 +116,11 @@ class VimInstaller(Installer):
         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
 
         symlink(
+            os.path.join(PWD, "all", "vim", "NERDTreeBookmarks"),
+            os.path.join(HOME, ".NERDTreeBookmarks")
+        )
+
+        symlink(
             os.path.join(PWD, "all", "vim", "danet-config.vim"),
             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
         )
@@ -136,7 +141,7 @@ class VimInstaller(Installer):
                 sb.call(["make", "install"], env=env)
                 sb.call(["make", "clean"])
 
-            open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
+       #      open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
 
 
 class TmuxInstaller(Installer):

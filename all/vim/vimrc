@@ -57,7 +57,7 @@ Plugin 'vim-scripts/DoxyGen-Syntax'
 
 " ========================== dev section ======================================
 " error checking
-Plugin 'scrooloose/syntastic'
+" Plugin 'scrooloose/syntastic'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
 
@@ -221,7 +221,10 @@ let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "U
 
 " auto close vim if NERDTree is only one opened window
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
-map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
+map <leader>t :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
+let g:NERDTreeWinSize = 80
+let g:NERDTreeShowBookmarks = 1
+map <leader>f :NERDTreeToggle<CR>
 
 " =============================================================================
 " ============================ Buffergator Settings ===========================
@@ -229,7 +232,6 @@ map <leader>nt :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
 
 let g:buffergator_hsplit_size = 20
 let g:buffergator_viewport_split_policy="T"  " open at top
-
 
 let g:buffergator_suppress_keymaps = 1
 map <leader>b :BuffergatorToggle<CR>
@@ -252,16 +254,16 @@ nnoremap <leader>l :SidewaysRight<cr>
 " =============================================================================
 
 " <Leader>f{char} to move to {char}
-map  <Leader>f <Plug>(easymotion-bd-f)
-nmap <Leader>f <Plug>(easymotion-overwin-f)
+" map  <Leader>f <Plug>(easymotion-bd-f)
+" nmap <Leader>f <Plug>(easymotion-overwin-f)
 
 " Move to line
-map <Leader>l <Plug>(easymotion-bd-jk)
-nmap <Leader>l <Plug>(easymotion-overwin-line)
+" map <Leader>l <Plug>(easymotion-bd-jk)
+" nmap <Leader>l <Plug>(easymotion-overwin-line)
 
 " Move to word
-map  <Leader>w <Plug>(easymotion-bd-w)
-nmap <Leader>w <Plug>(easymotion-overwin-w)
+" map  <Leader>w <Plug>(easymotion-bd-w)
+" nmap <Leader>w <Plug>(easymotion-overwin-w)
 
 " =============================================================================
 " ================================= KeyMap Settings ===========================
