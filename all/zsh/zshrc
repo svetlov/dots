@@ -80,49 +80,55 @@ _to_clean_env() {
 }
 
 _update_env() {
-    if [[ -d "/usr/local/cuda" ]]; then
-        export CUDA_HOME="/usr/local/cuda";
-    fi
-
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
-    PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
+
     PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
     PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/vim/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/nvim/bin");
 
-    CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
 
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
 
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
+
+    if [[ -d "/usr/local/cuda" ]]; then
+        export CUDA_HOME="/usr/local/cuda";
+        PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
+        CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
+        # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
+    fi
 
     if [[ -d "/opt/openmpi-3.0.0" ]]; then
         export MPI_PATH="/opt/openmpi-3.0.0";
-        export CPLUS_INCLUDE_PATH=${MPI_PATH}/include;
+        export CPLUS_INCLUDE_PATH="${MPI_PATH}/include";
         PATH=$(_smart_append ${PATH} "${MPI_PATH}/bin");
         CPATH=$(_smart_append ${CPATH} "${MPI_PATH}/include");
         LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${MPI_PATH}/lib");
         LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${MPI_PATH}/lib");
     fi
 
-    TENSORFLOW_PATH="${HOME}/projects/tensorflow";
-    if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
-        export TENSORFLOW_PATH;
-        tf () { cd "${TENSORFLOW_PATH}"; };
-    fi
-
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 }
 
 _update_env;
+
+TF="${HOME}/projects/tensorflow";
+if [[ $is_linux == true && ! -z "${TF+x}" ]]; then
+    export TF;
+    tf () { cd "${TF}"; };
+fi
+
+which nvim > /dev/null;
+if [[ $? -eq 0 ]]; then
+    alias vim="nvim";
+fi
 
 # =====================================================================================================================
 # ================================================= OhMyZsh Settings ==================================================
@@ -327,6 +333,24 @@ _install_lua() {
     _update_env;
 }
 
+_install_nvim() {
+    mkdir -p ${HOME}/.tmp.build.packages;
+    (
+        cd $HOME/.tmp.build.packages;
+        git clone https://github.com/neovim/neovim.git;
+        cd neovim;
+        git checkout nightly;
+        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local/nvim";
+        make install;
+    );
+    rm -rf ${HOME}/.tmp.build.packages
+
+    pip2 install --user --upgrade neovim
+    pip3 install --user --upgrade neovim
+
+    _update_env;
+}
+
 _install_last_vim() {
     rm -rf ${LOCAL}/vim
     mkdir -p ${HOME}/.tmp.build.packages;
@@ -382,8 +406,7 @@ deploy_env() {
     _install_clang39;
     export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
     _install_tmux;
-    _install_lua;
-    _install_last_vim;
+    _install_nvim;
 
     pip2 install -U --user pip setuptools;
     pip2 install -U --user virtualenvwrapper;
