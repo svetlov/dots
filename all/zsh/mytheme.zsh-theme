@@ -8,15 +8,11 @@ else
     local user_symbol='$'
 fi
 
-local time='[%D{%H:%M}]'
-local fulltime='[%D{%H:%M:%S}]'
-BEFORE_PROMPT="%{$fg[yellow]%}╰─${time} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
-AFTER_PROMPT="%{$fg[yellow]%}╰─${fulltime} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
-
 function hg_prompt_info() {
     branch=$(hg branch 2> /dev/null) || return
     echo "$ZSH_THEME_HG_PROMPT_PREFIX$(hg_get_branch_name)$ZSH_THEME_HG_PROMPT_CLEAN"
 }
+
 function hostname_prompt() {
     print "$fg[yellow]$(hostname -s)$reset_color"
 }
@@ -26,10 +22,10 @@ function pwd_prompt() {
 }
 
 function git_dirty {
-      [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "$fg_bold[yellow]:✗"
+    [[ $(git status --porcelain 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
 }
 
-function git_status_prompt() {
+function git_branch_prompt() {
     branches=$(git branch 2> /dev/null) || return
     branch=$(echo $branches | grep \* | cut -d ' ' -f2)
     print " $fg_bold[blue]($fg_bold[magenta]$branch$(git_dirty)$fg_bold[blue])$reset_color"
@@ -50,10 +46,17 @@ function return_code_prompt() {
     fi
 }
 
+
+local time='[%D{%H:%M}]'
+local fulltime='[%D{%H:%M:%S}]'
+BEFORE_PROMPT="%{$fg[yellow]%}╰─${time} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
+AFTER_PROMPT="%{$fg[yellow]%}╰─${fulltime} %{$fg_bold[cyan]%}%c%{$reset_color%} %B${user_symbol}%b "
+
+
 precmd() {
   local rc="$?";
 
-  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_status_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
+  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_branch_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
   LEFTACSII=$(echo $LEFT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
   LEFTWIDTH="${#LEFTACSII}";
   RIGHT="";
