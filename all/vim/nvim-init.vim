@@ -7,65 +7,44 @@ filetype off                  " required by Vundle
 silent! so .vimlocal          " add vimlocal for different projects
 
 " install Vindle if there is none
-if !filereadable(expand('$HOME/.vim/bundle/Vundle.vim/README.md'))
+if !filereadable(expand('$HOME/.config/nvim/bundle/Vundle.vim/README.md'))
     echo "Installing Vundle.."
     echo ""
     silent !mkdir -p ~/.vim/bundle
-    silent !git clone --quiet https://github.com/gmarik/Vundle.vim ~/.vim/bundle/Vundle.vim
+    silent !git clone --quiet https://github.com/gmarik/Vundle.vim ~/.config/nvim/bundle/Vundle.vim
 endif
 
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim/
-call vundle#begin()
+set rtp+=~/.config/nvim/bundle/Vundle.vim
+call vundle#begin("~/.config/nvim/bundle")
 
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
 " ============================ UI section =====================================
-" show ident blocks
-Plugin 'Yggdroot/indentLine'
 " impowed status line
 Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-" fast fs tree navigation
-Plugin 'scrooloose/nerdtree'
-" buffer navigator like nerdtree
-Plugin 'jeetsukumaran/vim-buffergator'
-" nice tags about file
-" Plugin 'majutsushi/tagbar'
-" fast mru files navigation
-Plugin 'ctrlpvim/ctrlp.vim'
-" fast switch of header and source c/cpp files
-Plugin 'derekwyatt/vim-fswitch'
-
-" tmux and vim integration
-Plugin 'christoomey/vim-tmux-navigator'
 " color theme molokai
 Plugin 'svetlov/molokai'
+" tmux and vim integration
+Plugin 'christoomey/vim-tmux-navigator'
+" buffer navigator like nerdtree
+Plugin 'jeetsukumaran/vim-buffergator'
 
 " ===================== code-style section ====================================
 " easy comment for common languages
 Plugin 'tpope/vim-commentary'
-" easy move of method argumets
-" Plugin 'AndrewRadev/sideways.vim'
-" easy motion
-" Plugin 'easymotion/vim-easymotion'
 " python pep8 auto indent
 Plugin 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
 Plugin 'vim-scripts/DoxyGen-Syntax'
 
 " ========================== dev section ======================================
-" error checking
-" Plugin 'scrooloose/syntastic'
+" fast switch of header and source c/cpp files
+Plugin 'derekwyatt/vim-fswitch'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
-" code autocomplete for python
-Plugin 'davidhalter/jedi-vim'
-
-" show colored c++ files
-" Plugin 'jeaye/color_coded'
-
 " snippets plugin
 Plugin 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
@@ -83,6 +62,111 @@ if arcadia_root != '/'
         exec 'source ' . yandex_config_path
     endif
 endif
+
+let g:python_host_prog='/usr/bin/python'
+let g:python3_host_prog='/usr/bin/python3'
+
+" =============================================================================
+" ============================= Airline Settings ==============================
+" =============================================================================
+
+set laststatus=2
+let g:airline_theme='solarized'
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+let g:airline_theme = 'molokai'
+
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.branch = '⎇'
+
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+
+" enable buffer indicies
+let g:airline#extensions#tabline#buffer_nr_show = 1
+" collapse buffer line if exactly one buffer
+let g:airline_inactive_collapse=1
+
+" =============================================================================
+" ============================= UltiSnips Settings ============================
+" =============================================================================
+
+" set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
+let g:UltiSnipsExpandTrigger = "<C-j>"
+let g:UltiSnipsEditSplit = 'vertical'
+let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "UltiSnips"]
+
+" =============================================================================
+" ============================ Buffergator Settings ===========================
+" =============================================================================
+
+let g:buffergator_hsplit_size = 20
+let g:buffergator_viewport_split_policy="B"  " open at top
+
+let g:buffergator_suppress_keymaps = 1
+map <leader>b :BuffergatorToggle<CR>
+
+" =============================================================================
+" ================================ YCM Settings ===============================
+" =============================================================================
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_global_ycm_extra_conf = $HOME . '/projects/dots/all/vim/ycm.py'
+let g:ycm_goto_buffer_command = 'vertical-split'
+let g:ycm_autoclose_preview_window_after_completion = 1
+let g:ycm_autoclose_preview_window_after_insertion = 1
+
+let g:ycm_python_binary_path = 'python'
+
+let g:ycm_error_symbol = '☓'
+let g:ycm_warning_symbol = '☝'
+let g:ycm_filetype_specific_completion_to_disable = {
+    \ 'csv' : 1,
+    \ 'gitcommit' : 1,
+    \ 'diff' : 1,
+    \ 'help' : 1,
+    \ 'infolog' : 1,
+    \ 'mail' : 1,
+    \ 'markdown' : 1,
+    \ 'notes' : 1,
+    \ 'pandoc' : 1,
+    \ 'qf' : 1,
+    \ 'svn' : 1,
+    \ 'tagbar' : 1,
+    \ 'text' : 1,
+    \ 'unite' : 1,
+    \ 'vimwiki' : 1
+    \}
+
+let g:ycm_key_list_select_completion = ['<Down>']
+let g:ycm_key_list_previous_completion = ['<Up>']
+
+map gdf :YcmComplete GoToDefinition<CR>
+map gdc :YcmComplete GoToDeclaration<CR>
+autocmd FileType c,ccp nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
+" " for auto ident one symbol at left in case of errors
+" autocmd BufEnter * sign define dummy
+" autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+
+" =============================================================================
+" ================================ file switch ================================
+" =============================================================================
+
+let b:fsnonewfiles = "on"
+au BufEnter *.h let b:fswitchdst  = 'cpp,cc'
+au BufEnter *.h let b:fswitchlocs = 'rel:./'
+au BufEnter *.cc let b:fswitchdst  = 'h,hpp'
+au BufEnter *.cc let b:fswitchlocs = 'rel:./'
+nmap <silent> <leader>s :FSHere<CR>
+
+" =============================================================================
+" =============================== vim-commentry ===============================
+" =============================================================================
+autocmd FileType c,cpp setlocal commentstring=//\ %s
 
 " =============================================================================
 " ============================== Custom Functions =============================
@@ -117,161 +201,6 @@ function! PopulatePasteBufferFromOSX()
 endfunction
 
 " =============================================================================
-" ============================= Airline Settings ==============================
-" =============================================================================
-
-set laststatus=2
-let g:airline_theme='solarized'
-if !exists('g:airline_symbols')
-    let g:airline_symbols = {}
-endif
-
-let g:airline_theme = 'molokai'
-
-let g:airline_left_sep = '▶'
-let g:airline_right_sep = '◀'
-let g:airline_symbols.branch = '⎇'
-
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
-
-" enable buffer indicies
-let g:airline#extensions#tabline#buffer_nr_show = 1
-" collapse buffer line if exactly one buffer
-let g:airline_inactive_collapse=1
-
-" =============================================================================
-" =============================== Syntastic Settings ==========================
-" =============================================================================
-let g:syntastic_python_checkers = ['flake8', 'pylint', 'pep8']
-let g:syntastic_python_pep8_args = ['--max-line-length=119']
-let g:syntastic_python_flake8_args = ['--max-line-length=119', '--ignore=E402,E111,E114']
-let g:syntastic_python_pylint_post_args='--disable=C0103,C0111,C0301,R0902,R0903'
-
-" =============================================================================
-" ================================ YCM Settings ===============================
-" =============================================================================
-let g:ycm_filetype_specific_completion_to_disable = { 'python': 1 }
-
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_add_preview_to_completeopt = 1
-let g:ycm_global_ycm_extra_conf = $HOME . '/projects/dots/all/vim/ycm.py'
-let g:ycm_goto_buffer_command = 'vertical-split'
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
-
-let g:ycm_error_symbol = '☓'
-let g:ycm_warning_symbol = '☝'
-let g:ycm_filetype_specific_completion_to_disable = {
-    \ 'csv' : 1,
-    \ 'gitcommit' : 1,
-    \ 'diff' : 1,
-    \ 'help' : 1,
-    \ 'infolog' : 1,
-    \ 'mail' : 1,
-    \ 'markdown' : 1,
-    \ 'notes' : 1,
-    \ 'pandoc' : 1,
-    \ 'qf' : 1,
-    \ 'svn' : 1,
-    \ 'tagbar' : 1,
-    \ 'text' : 1,
-    \ 'unite' : 1,
-    \ 'vimwiki' : 1
-    \}
-
-let g:ycm_key_list_select_completion = ['<Down>']
-let g:ycm_key_list_previous_completion = ['<Up>']
-
-map gdf :YcmComplete GoToDefinition<CR>
-map gdc :YcmComplete GoToDeclaration<CR>
-autocmd FileType c,ccp,python nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
-" for auto ident one symbol at left in case of errors
-autocmd BufEnter * sign define dummy
-autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
-
-let g:jedi#popup_on_dot = 0
-let g:jedi#popup_select_first = 1
-
-" =============================================================================
-" ============================ ColorCoded Settings ============================
-" =============================================================================
-
-let g:color_coded_filetypes = ['c', 'cpp', 'cpp.cuda', 'objc']
-
-" =============================================================================
-" ============================= UltiSnips Settings ============================
-" =============================================================================
-
-" set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
-let g:UltiSnipsExpandTrigger = "<C-j>"
-let g:UltiSnipsEditSplit = 'vertical'
-" let g:UltiSnipsSnippetsDir = $HOME."/projects/dots/all/vim/mysnippets"
-let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "UltiSnips"]
-
-" =============================================================================
-" ============================== NerdTree Settings ============================
-" =============================================================================
-
-" auto close vim if NERDTree is only one opened window
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
-map <leader>t :call CallWithNormalizeSplints("NERDTreeToggle")<CR>
-let g:NERDTreeWinSize = 80
-let g:NERDTreeShowBookmarks = 1
-map <leader>f :NERDTreeToggle<CR>
-
-" =============================================================================
-" ================================ CtrlP Settings =============================
-" =============================================================================
-
-let g:ctrlp_lazy_update = 500
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 0
-let g:ctrlp_max_depth = 20
-let g:ctrlp_max_files = 0
-
-
-" =============================================================================
-" ============================ Buffergator Settings ===========================
-" =============================================================================
-
-let g:buffergator_hsplit_size = 20
-let g:buffergator_viewport_split_policy="B"  " open at top
-
-let g:buffergator_suppress_keymaps = 1
-map <leader>b :BuffergatorToggle<CR>
-
-" =============================================================================
-" ============================== TagBar Settings ==============================
-" =============================================================================
-
-map <leader>tb :TagbarToggle<cr>
-
-" =============================================================================
-" ============================= SideWays Settings =============================
-" =============================================================================
-
-nnoremap <leader>h :SidewaysLeft<cr>
-nnoremap <leader>l :SidewaysRight<cr>
-
-" =============================================================================
-" =========================== EasyMotion Settings =============================
-" =============================================================================
-
-" <Leader>f{char} to move to {char}
-" map  <Leader>f <Plug>(easymotion-bd-f)
-" nmap <Leader>f <Plug>(easymotion-overwin-f)
-
-" Move to line
-" map <Leader>l <Plug>(easymotion-bd-jk)
-" nmap <Leader>l <Plug>(easymotion-overwin-line)
-
-" Move to word
-" map  <Leader>w <Plug>(easymotion-bd-w)
-" nmap <Leader>w <Plug>(easymotion-overwin-w)
-
-" =============================================================================
 " ================================= KeyMap Settings ===========================
 " =============================================================================
 
@@ -303,17 +232,11 @@ nnoremap <silent> <C-E>ari :call Preserve("normal gg=G")<CR>
 nnoremap <C-E>p :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
-let b:fsnonewfiles = "on"
-au BufEnter *.h let b:fswitchdst  = 'cpp,cc'
-au BufEnter *.h let b:fswitchlocs = 'rel:./'
-au BufEnter *.cc let b:fswitchdst  = 'h,hpp'
-au BufEnter *.cc let b:fswitchlocs = 'rel:./'
-nmap <silent> <leader>s :FSHere<CR>
-
 nnoremap S :%s/
 vnoremap s :s/
 
 nnoremap <C-M> :MaximizerToggle<CR>
+
 " =============================================================================
 " ================================= Global Settings ===========================
 " =============================================================================
@@ -374,10 +297,8 @@ set nowrapscan	                        " Don't wrap around EOF or BOF while sear
 " When you type the first tab, it will complete as much as possible, the second
 " tab hit will provide a list, the third and subsequent tabs will cycle through
 " completion options so you can complete the file without further keys
-set wildignore=*/.git/*,*/.svn/*,*/.hg/*
+set wildignore=*/.git/*,*/.svn/*
 set wildignore+=*.o,*.so,*.pyc
-set wildignore+=*.net,*.cfg
-set wildignore+=*.graph,*.pb,*.pbtxt
 set wildmode=longest,full
 set wildmenu
 

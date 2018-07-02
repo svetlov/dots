@@ -80,49 +80,56 @@ _to_clean_env() {
 }
 
 _update_env() {
-    if [[ -d "/usr/local/cuda" ]]; then
-        export CUDA_HOME="/usr/local/cuda";
-    fi
-
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
-    PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/vim/bin");
 
-    CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/cmake/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
+    PATH=$(_smart_append ${PATH} "${HOME}/.local/nvim/bin");
+
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
 
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
 
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
     LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
+
+    if [[ -d "/usr/local/cuda" ]]; then
+        export CUDA_HOME="/usr/local/cuda";
+        PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
+        CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
+        # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
+    fi
 
     if [[ -d "/opt/openmpi-3.0.0" ]]; then
         export MPI_PATH="/opt/openmpi-3.0.0";
-        export CPLUS_INCLUDE_PATH=${MPI_PATH}/include;
+        export CPLUS_INCLUDE_PATH="${MPI_PATH}/include";
         PATH=$(_smart_append ${PATH} "${MPI_PATH}/bin");
         CPATH=$(_smart_append ${CPATH} "${MPI_PATH}/include");
         LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${MPI_PATH}/lib");
         LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${MPI_PATH}/lib");
     fi
 
-    TENSORFLOW_PATH="${HOME}/projects/tensorflow";
-    if [[ $is_linux == true && ! -z "${TENSORFLOW_PATH+x}" ]]; then
-        export TENSORFLOW_PATH;
-        tf () { cd "${TENSORFLOW_PATH}"; };
-    fi
-
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 }
 
 _update_env;
+
+TF="${HOME}/projects/tensorflow";
+if [[ $is_linux == true && ! -z "${TF+x}" ]]; then
+    export TF;
+    tf () { cd "${TF}"; };
+fi
+
+which nvim > /dev/null;
+if [[ $? -eq 0 ]]; then
+    alias vim="nvim";
+fi
 
 # =====================================================================================================================
 # ================================================= OhMyZsh Settings ==================================================
@@ -202,7 +209,6 @@ _update_arcadia_env () {
             ${array[@]} ${@:3};
         }
 
-
         git-svn-update-arcadia-master () {
             if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
                 echo "${COLOR_RED}Error${COLOR_OFF}: Please cd to ${ARCADIA_ROOT} directory." 1>&2;
@@ -275,9 +281,25 @@ _install_gcc49() {
     sudo apt-get update
     sudo apt-get install -y gcc-4.9 g++-4.9
 }
+
 _install_clang39() {
     wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-get install -y clang-3.9 libclang-3.9-dev lldb-3.9 clang-format-3.9 python-clang-3.9
+}
+
+_install_cmake() {
+    mkdir -p ${HOME}/.tmp.build.packages;
+    (
+        cd ${HOME}/.tmp.build.packages;
+        wget http://www.cmake.org/files/v3.10/cmake-3.10.1.tar.gz
+        tar -xvzf cmake-3.10.1.tar.gz
+        cd cmake-3.10.1/
+        ./bootstrap --prefix=${LOCAL}/cmake
+        make -j
+        make install
+    )
+    rm -rf ${HOME}/.tmp.builld.packages;
+    _update_env;
 }
 
 _install_tmux() {
@@ -312,52 +334,20 @@ _install_tmux() {
     _update_env;
 }
 
-_install_lua() {
-    if [[ -e "${LOCAL}/lua/version" ]]; then
-        local lua_version=$(cat "${LOCAL}/lua/version");
-        if [[ ${lua_version} -eq ${LUA_VERSION} ]]; then
-            return;
-        fi
-        rm -rf ${LOCAL}/lua;
-    fi
-
-    sudo apt-get install -y lua${LUA_VERSION} liblua${LUA_VERSION}-dev
-    mkdir -p ${LOCAL}/lua/include
-    ln -s /usr/include/lua${LUA_VERSION}/*.h ${LOCAL}/lua/include/
-    mkdir -p ${LOCAL}/lua/lib
-    ln -s /usr/lib/x86_64-linux-gnu/liblua${LUA_VERSION}.so ${LOCAL}/lua/lib/liblua.so
-    echo "${LUA_VERSION}" > ${LOCAL}/lua/version;
-
-    _update_env;
-}
-
-_install_last_vim() {
-    rm -rf ${LOCAL}/vim
+_install_nvim() {
     mkdir -p ${HOME}/.tmp.build.packages;
     (
-        cd ${HOME}/.tmp.build.packages;
-
-        sudo apt-get install -y \
-            libncurses5-dev \
-            libxpm-dev \
-            libxt-dev \
-            python-dev
-        git clone https://github.com/vim/vim.git
-        cd vim
-        ./configure \
-           --prefix=${LOCAL}/vim \
-           --disable-gui \
-           --with-features=normal \
-           --enable-multibyte \
-           --enable-pythoninterp=yes \
-           --with-python-config-dir=/usr/lib/python2.7/config \
-           --enable-luainterp=yes \
-           --with-lua-prefix=${LOCAL}/lua \
-           --enable-cscope
-        make VIMRUNTIMEDIR=${LOCAL}/vim/share/vim/vim80 -j
-        make install
-    )
+        cd $HOME/.tmp.build.packages;
+        git clone https://github.com/neovim/neovim.git;
+        cd neovim;
+        git checkout nightly;
+        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local/nvim";
+        make install;
+    );
     rm -rf ${HOME}/.tmp.build.packages
+
+    pip2 install --user --upgrade neovim
+    pip3 install --user --upgrade neovim
 
     _update_env;
 }
@@ -385,16 +375,16 @@ deploy_env() {
     _install_gcc49;
     _install_clang39;
     export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
+    _install_cmake;
     _install_tmux;
-    _install_lua;
-    _install_last_vim;
+    _install_nvim;
 
     pip2 install -U --user pip setuptools;
-    pip2 install -U --user virtualenvwrapper;
     pip2 install -U --user matplotlib;
     pip2 install -U --user pillow;
     pip2 install -U --user 'ipython[all]';
     pip2 install -U --user 'jupyter[all]';
+    pip2 install -U --user virtualenvwrapper;
 
     _reinstall_dots;
     unset CC; unset CXX;
