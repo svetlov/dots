@@ -5,7 +5,10 @@ import os
 import sys
 import argparse
 import subprocess as sb
-from contextlib import contextmanager
+import contextlib
+
+import distutils.sysconfig as sysconfig
+
 
 ISLINUX = (sys.platform != 'darwin')
 
@@ -20,7 +23,7 @@ os.makedirs(LOCAL_BIN, exist_ok=True)
 INSTALLERS = {}
 
 
-@contextmanager
+@contextlib.contextmanager
 def PathGuard(path):
     prev = os.getcwd()
     os.chdir(path)
@@ -123,8 +126,9 @@ class NVimInstaller(Installer):
         env = os.environ.copy()
         env["CC"] = os.environ["CLANG39_CC"]
         env["CXX"] = os.environ["CLANG39_CXX"]
+        env['PYTHON_INCLUDE_DIRS'] = sysconfig.get_python_inc()
 
-        with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
+        with PathGuard(os.path.join(HOME, ".config", "nvim", "bundle", "YouCompleteMe")):
             sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
             sb.call(["./install.py", "--clang-completer"], env=env)
 
@@ -238,7 +242,7 @@ class ConfigsInstall(Installer):
         GitConfigInstaller.install()
         MercurialInstaller.install()
         TmuxInstaller.install()
-        VimInstaller.install()
+        NVimInstaller.install()
 
 
 def parse_args():
