@@ -288,13 +288,15 @@ _install_clang39() {
 }
 
 _install_cmake() {
+    sudo apt-get install libcurl4-openssl-dev;
+
     mkdir -p ${HOME}/.tmp.build.packages;
     (
         cd ${HOME}/.tmp.build.packages;
         wget http://www.cmake.org/files/v3.10/cmake-3.10.1.tar.gz
         tar -xvzf cmake-3.10.1.tar.gz
         cd cmake-3.10.1/
-        ./bootstrap --prefix=${LOCAL}/cmake
+        ./bootstrap --prefix=${LOCAL}/cmake --system-curl
         make -j
         make install
     )
@@ -312,15 +314,15 @@ _install_tmux() {
         rm -rf ${LOCAL}/tmux;
     fi
 
+    sudo apt install -y automake
+    sudo apt install -y build-essential
+    sudo apt install -y pkg-config
+    sudo apt install -y libevent-dev
+    sudo apt install -y libncurses5-dev
+
     mkdir -p ${HOME}/.tmp.build.packages;
     (
         cd ${HOME}/.tmp.build.packages;
-
-        sudo apt install -y automake
-        sudo apt install -y build-essential
-        sudo apt install -y pkg-config
-        sudo apt install -y libevent-dev
-        sudo apt install -y libncurses5-dev
         git clone https://github.com/tmux/tmux
         cd tmux
         git checkout ${TMUX_VERSION}
@@ -374,10 +376,12 @@ deploy_env() {
     sudo apt-get install -y software-properties-common python-software-properties;
     _install_gcc49;
     _install_clang39;
+
     export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
     _install_cmake;
     _install_tmux;
     _install_nvim;
+    unset CC; unset CXX;
 
     pip2 install -U --user pip setuptools;
     pip2 install -U --user matplotlib;
@@ -387,5 +391,4 @@ deploy_env() {
     pip2 install -U --user virtualenvwrapper;
 
     _reinstall_dots;
-    unset CC; unset CXX;
 }

@@ -27,10 +27,14 @@ Plugin 'bling/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 " color theme molokai
 Plugin 'svetlov/molokai'
+" show ident blocks
+Plugin 'Yggdroot/indentLine'
 " tmux and vim integration
 Plugin 'christoomey/vim-tmux-navigator'
 " buffer navigator like nerdtree
 Plugin 'jeetsukumaran/vim-buffergator'
+" fast mru files navigation
+Plugin 'ctrlpvim/ctrlp.vim'
 
 " ===================== code-style section ====================================
 " easy comment for common languages
