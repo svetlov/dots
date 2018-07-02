@@ -32,7 +32,7 @@ Plugin 'scrooloose/nerdtree'
 " buffer navigator like nerdtree
 Plugin 'jeetsukumaran/vim-buffergator'
 " nice tags about file
-Plugin 'majutsushi/tagbar'
+" Plugin 'majutsushi/tagbar'
 " fast mru files navigation
 Plugin 'ctrlpvim/ctrlp.vim'
 " fast switch of header and source c/cpp files
@@ -47,9 +47,9 @@ Plugin 'svetlov/molokai'
 " easy comment for common languages
 Plugin 'tpope/vim-commentary'
 " easy move of method argumets
-Plugin 'AndrewRadev/sideways.vim'
+" Plugin 'AndrewRadev/sideways.vim'
 " easy motion
-Plugin 'easymotion/vim-easymotion'
+" Plugin 'easymotion/vim-easymotion'
 " python pep8 auto indent
 Plugin 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
@@ -60,9 +60,11 @@ Plugin 'vim-scripts/DoxyGen-Syntax'
 " Plugin 'scrooloose/syntastic'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
+" code autocomplete for python
+Plugin 'davidhalter/jedi-vim'
 
 " show colored c++ files
-Plugin 'jeaye/color_coded'
+" Plugin 'jeaye/color_coded'
 
 " snippets plugin
 Plugin 'SirVer/ultisnips'
@@ -71,6 +73,16 @@ Plugin 'honza/vim-snippets'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
+
+" Do things a bit different if we are at Yandex
+let arcadia_root = $ARCADIA_ROOT . '/'
+if arcadia_root != '/'
+    let &path.=',' . arcadia_root
+    let yandex_config_path = string(arcadia_root) . '.vimrc'
+    if filereadable(yandex_config_path)
+        exec 'source ' . yandex_config_path
+    endif
+endif
 
 " =============================================================================
 " ============================== Custom Functions =============================
@@ -162,6 +174,8 @@ let g:syntastic_python_pylint_post_args='--disable=C0103,C0111,C0301,R0902,R0903
 " =============================================================================
 " ================================ YCM Settings ===============================
 " =============================================================================
+let g:ycm_filetype_specific_completion_to_disable = { 'python': 1 }
+
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_add_preview_to_completeopt = 1
 let g:ycm_global_ycm_extra_conf = $HOME . '/projects/dots/all/vim/ycm.py'
@@ -199,6 +213,9 @@ autocmd FileType c,ccp,python nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
 autocmd BufEnter * sign define dummy
 autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
 
+let g:jedi#popup_on_dot = 0
+let g:jedi#popup_select_first = 1
+
 " =============================================================================
 " ============================ ColorCoded Settings ============================
 " =============================================================================
@@ -227,11 +244,22 @@ let g:NERDTreeShowBookmarks = 1
 map <leader>f :NERDTreeToggle<CR>
 
 " =============================================================================
+" ================================ CtrlP Settings =============================
+" =============================================================================
+
+let g:ctrlp_lazy_update = 500
+let g:ctrlp_use_caching = 1
+let g:ctrlp_clear_cache_on_exit = 0
+let g:ctrlp_max_depth = 20
+let g:ctrlp_max_files = 0
+
+
+" =============================================================================
 " ============================ Buffergator Settings ===========================
 " =============================================================================
 
 let g:buffergator_hsplit_size = 20
-let g:buffergator_viewport_split_policy="T"  " open at top
+let g:buffergator_viewport_split_policy="B"  " open at top
 
 let g:buffergator_suppress_keymaps = 1
 map <leader>b :BuffergatorToggle<CR>
@@ -368,8 +396,10 @@ set nowrapscan	                        " Don't wrap around EOF or BOF while sear
 " When you type the first tab, it will complete as much as possible, the second
 " tab hit will provide a list, the third and subsequent tabs will cycle through
 " completion options so you can complete the file without further keys
-set wildignore=*/.git/*,*/.svn/*
+set wildignore=*/.git/*,*/.svn/*,*/.hg/*
 set wildignore+=*.o,*.so,*.pyc
+set wildignore+=*.net,*.cfg
+set wildignore+=*.graph,*.pb,*.pbtxt
 set wildmode=longest,full
 set wildmenu
 
