@@ -61,7 +61,7 @@ filetype plugin indent on     " required by Vundle
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
     let &path.=',' . arcadia_root
-    let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vimrc'
+    let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vim' . 'vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
     endif
