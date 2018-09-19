@@ -1,0 +1,8 @@
+arcadia.git ~/projects/arcadia.git
+danet ~/projects/arcadia.git/cv/imgclassifiers/danet
+experiments ~/experiments
+imgbody-equivalence ~/experiments/fp16/equivalence
+junk ~/projects/arcadia.git/junk/splinter
+splinter ~/
+ytensorflow ~/projects/arcadia.git/ml/tensorflow/ytensorflow
+

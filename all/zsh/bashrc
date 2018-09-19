@@ -1,0 +1,4 @@
+[ -z "$PS1" ] && return
+
+command_exists () { type "$1" &> /dev/null; }
+if command_exists zsh ; then exec zsh; fi

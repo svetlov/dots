@@ -5,7 +5,10 @@ import os
 import sys
 import argparse
 import subprocess as sb
-from contextlib import contextmanager
+import contextlib
+
+import distutils.sysconfig as sysconfig
+
 
 ISLINUX = (sys.platform != 'darwin')
 
@@ -20,7 +23,7 @@ os.makedirs(LOCAL_BIN, exist_ok=True)
 INSTALLERS = {}
 
 
-@contextmanager
+@contextlib.contextmanager
 def PathGuard(path):
     prev = os.getcwd()
     os.chdir(path)
@@ -83,55 +86,92 @@ class GitConfigInstaller(Installer):
 
 class OhMyZshInstaller(Installer):
     name = 'zsh'
-    bashrc = os.path.join(HOME, ".bashrc")
-    zshrc = os.path.join(HOME, ".zshrc")
-    bashline = '[ -z "$PS1" ] && return\n\nexec zsh'
+
+    src_bashrc = os.path.join(PWD, 'all', 'zsh', 'bashrc')
+    dst_bashrc = os.path.join(HOME, ".bashrc")
+
+    src_zshrc = os.path.join(PWD, 'all', 'zsh', 'zshrc')
+    dst_zshrc = os.path.join(HOME, ".zshrc")
+
     themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
     mytheme = os.path.join(themes, "mytheme.zsh-theme")
 
     @classmethod
     def install(cls):
-        if os.path.exists(cls.bashrc) and open(cls.bashrc).read().strip() != cls.bashline:
-            os.rename(cls.bashrc, get_free_name(cls.bashrc + ".old"))
-            with open(cls.bashrc, 'w') as bashrc:
-                bashrc.write(cls.bashline)
-        symlink(os.path.join(PWD, "all", "zsh", "zshrc"), cls.zshrc)
+        symlink(cls.src_bashrc, cls.dst_bashrc)
+        symlink(cls.src_zshrc, cls.dst_zshrc)
 
         os.makedirs(cls.themes, exist_ok=True)
         symlink(os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"), cls.mytheme)
 
-
-class VimInstaller(Installer):
-    name = 'vim'
-    vimrc = os.path.join(HOME, ".vimrc")
+class NVimInstaller(Installer):
+    name = 'nvim'
 
     @classmethod
     def install(cls):
-        symlink(os.path.join(PWD, "all", "vim", "vimrc"), cls.vimrc)
-        sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-
-        os.makedirs(os.path.join(HOME, ".vim", "syntax"), exist_ok=True)
-        os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
-        os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".config", "nvim"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".config", "nvim", "syntax"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".config", "nvim", "undo"), exist_ok=True)
+        os.makedirs(os.path.join(HOME, ".config", "nvim", "swap"), exist_ok=True)
 
         symlink(
+            os.path.join(PWD, "all", "vim", "nvim-init.vim"),
+            os.path.join(HOME, ".config", "nvim", "init.vim"))
+        symlink(
             os.path.join(PWD, "all", "vim", "danet-config.vim"),
-            os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
-        )
+            os.path.join(HOME, ".config", "nvim", "syntax", "danet-config.vim"))
 
-        with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
-            sb.call(["git", "submodule", "update", "--init", "--recursive"])
-            sb.call(["./install.py", "--clang-completer"])
+        sb.call(["nvim", "-e", "+PluginInstall", "+qall"])
 
-        with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
-            sb.call(["mkdir", "-p", "build"])
-            with PathGuard("build"):
-                sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."])
-                sb.call(["make", "-j"])
-                sb.call(["make", "install"])
-                sb.call(["make", "clean"])
+        env = os.environ.copy()
+        env["CC"] = os.environ["CLANG39_CC"]
+        env["CXX"] = os.environ["CLANG39_CXX"]
+        env['PYTHON_INCLUDE_DIRS'] = sysconfig.get_python_inc()
 
-            open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
+        with PathGuard(os.path.join(HOME, ".config", "nvim", "bundle", "YouCompleteMe")):
+            sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
+            sb.call(["./install.py", "--clang-completer"], env=env)
+
+# class VimInstaller(Installer):
+#     name = 'vim'
+#     vimrc = os.path.join(HOME, ".vimrc")
+
+#     @classmethod
+#     def install(cls):
+#         symlink(os.path.join(PWD, "all", "vim", "vimrc"), cls.vimrc)
+#         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
+
+#         os.makedirs(os.path.join(HOME, ".vim", "syntax"), exist_ok=True)
+#         os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
+#         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
+
+#         symlink(
+#             os.path.join(PWD, "all", "vim", "NERDTreeBookmarks"),
+#             os.path.join(HOME, ".NERDTreeBookmarks")
+#         )
+
+#         symlink(
+#             os.path.join(PWD, "all", "vim", "danet-config.vim"),
+#             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
+#         )
+
+#         env = os.environ.copy()
+#         env["CC"] = os.environ["CLANG39_CC"]
+#         env["CXX"] = os.environ["CLANG39_CXX"]
+
+#         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
+#             sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
+#             sb.call(["./install.py", "--clang-completer"], env=env)
+
+#         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
+#             sb.call(["mkdir", "-p", "build"])
+#             with PathGuard("build"):
+#                 sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."], env=env)
+#                 sb.call(["make", "-j"], env=env)
+#                 sb.call(["make", "install"], env=env)
+#                 sb.call(["make", "clean"])
+
+       #      open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
 
 
 class TmuxInstaller(Installer):
@@ -202,7 +242,7 @@ class ConfigsInstall(Installer):
         GitConfigInstaller.install()
         MercurialInstaller.install()
         TmuxInstaller.install()
-        VimInstaller.install()
+        NVimInstaller.install()
 
 
 def parse_args():

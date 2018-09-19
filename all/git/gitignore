@@ -1,10 +1,20 @@
 .svn
 .svnignore
 svn-commit*
-.color_coded
 bin/**
+
+**/dist
+**/build
+**/.tox
+**/.cache
+**/.pytest_cache
 
 *.pyc
 *egg-info/
 
 *.json
+
+.color_coded
+
+ml/tensorflow/ytensorflow/cpp/ytensorflow/_build.cpp
+ml/tensorflow/ytensorflow/cpp/ytensorflow/ops/image/_build.cpp
