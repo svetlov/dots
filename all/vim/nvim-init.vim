@@ -65,7 +65,7 @@ filetype plugin indent on     " required by Vundle
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
     let &path.=',' . arcadia_root
-    let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vimrc'
+    let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vim' . 'vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
     endif
@@ -183,6 +183,16 @@ nmap <silent> <leader>s :FSHere<CR>
 " =============================== vim-commentry ===============================
 " =============================================================================
 autocmd FileType c,cpp setlocal commentstring=//\ %s
+
+" =============================================================================
+" ================================ CtrlP Settings =============================
+" =============================================================================
+
+let g:ctrlp_lazy_update = 500
+let g:ctrlp_use_caching = 1
+let g:ctrlp_clear_cache_on_exit = 0
+let g:ctrlp_max_depth = 20
+let g:ctrlp_max_files = 0
 
 " =============================================================================
 " ============================== Custom Functions =============================

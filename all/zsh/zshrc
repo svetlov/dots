@@ -28,6 +28,12 @@ export COLOR_PURPLE=$'\e[0;35m'       # Purple
 export COLOR_CYAN=$'\e[0;36m'         # Cyan
 export COLOR_WHITE=$'\e[0;37m'        # White
 
+
+which nvim > /dev/null;
+if [[ $? -eq 0 ]]; then
+    alias vim="nvim";
+fi
+
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
 alias vimlarge="vim -u NONE -U NONE -N"
@@ -37,6 +43,9 @@ alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
+
+alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
+
 
 reset-ssh() {
     sudo netstat -apn | grep -w 2224 | awk '{ print $7 }' | sed 's/\(.*\)\/.*/\1/' | sort -u | xargs -I{} kill -9 {};
@@ -124,11 +133,6 @@ TF="${HOME}/projects/tensorflow";
 if [[ $is_linux == true && ! -z "${TF+x}" ]]; then
     export TF;
     tf () { cd "${TF}"; };
-fi
-
-which nvim > /dev/null;
-if [[ $? -eq 0 ]]; then
-    alias vim="nvim";
 fi
 
 # =====================================================================================================================
@@ -294,7 +298,7 @@ _install_clang39() {
 }
 
 _install_cmake() {
-    sudo apt-get install libcurl4-openssl-dev;
+    sudo apt-get install -y libcurl4-openssl-dev;
 
     mkdir -p ${HOME}/.tmp.build.packages;
     (
@@ -344,14 +348,16 @@ _install_tmux() {
 
 _install_nvim() {
     mkdir -p ${HOME}/.tmp.build.packages;
+    export TMPDIR="${HOME}/.tmp.build.packages";
     (
         cd $HOME/.tmp.build.packages;
         git clone https://github.com/neovim/neovim.git;
         cd neovim;
-        git checkout nightly;
-        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local/nvim";
+        git checkout v0.3.1;
+        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local/nvim" -j;
         make install;
     );
+    unset TMPDIR;
     rm -rf ${HOME}/.tmp.build.packages
 
     pip2 install --user --upgrade neovim

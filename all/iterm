@@ -1,1 +1,17 @@
 http://tangledhelix.com/blog/2012/04/28/iterm2-keymaps-for-tmux/
+
+alt+= 0x02 0x3D
+alt+\ 0x02 0x5C
+alt+c 0x02 0x63
+alt+t 0x02 0x25
+alt+w 0x02 0x77
+
+alt+h 0x02 0x68
+alt+l 0x02 0x6C
+
+
+cmd+\ Selelt Menu Item 'Maximize Active Pane'
+cmd+t Split Vertically with "Default" Profile
+
+cmd+h Select Split Pane On Left
+cmd+l Select Split Pane On Right
