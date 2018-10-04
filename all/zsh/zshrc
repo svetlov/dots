@@ -147,9 +147,9 @@ if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
     git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
     ${ZSH}/custom/plugins/fzf/install --bin;
     git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
+
+    compaudit | xargs chmod g-w,o-w
 fi
-
-
 
 if [[ -f "${HOME}/.oh-my-zsh/custom/themes/mytheme.zsh-theme" ]]; then
     ZSH_THEME="mytheme";
