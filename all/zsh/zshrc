@@ -31,7 +31,7 @@ export COLOR_WHITE=$'\e[0;37m'        # White
 alias zshconfig="vim ~/.zshrc"
 alias editor="vim"
 alias vimlarge="vim -u NONE -U NONE -N"
-alias vimconfig="vim ~/.vimrc"
+alias vimconfig="vim ~/.config/nvim/init.vim"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias cx="chmod +x "
 alias rm="rm -i"
@@ -139,7 +139,13 @@ export ZSH=$HOME/.oh-my-zsh
 
 if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
     git clone git://github.com/robbyrussell/oh-my-zsh.git ${ZSH};
+
+    git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
+    ${ZSH}/custom/plugins/fzf/install --bin;
+    git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
 fi
+
+
 
 if [[ -f "${HOME}/.oh-my-zsh/custom/themes/mytheme.zsh-theme" ]]; then
     ZSH_THEME="mytheme";
@@ -147,14 +153,14 @@ else
     ZSH_THEME="maran";
 fi
 
+
 ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git mercurial tmux python osx brew history-substring-search virtualenvwrapper vi-mode)
+plugins=(git mercurial tmux python osx brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
 
 source $ZSH/oh-my-zsh.sh
-bindkey '^R' history-incremental-search-backward
 
 # =====================================================================================================================
 # ================================================= Arcadia Settings ==================================================

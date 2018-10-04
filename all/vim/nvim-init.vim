@@ -6,6 +6,7 @@ filetype off                  " required by Vundle
 
 silent! so .vimlocal          " add vimlocal for different projects
 
+
 " install Vindle if there is none
 if !filereadable(expand('$HOME/.config/nvim/bundle/Vundle.vim/README.md'))
     echo "Installing Vundle.."
@@ -33,8 +34,10 @@ Plugin 'Yggdroot/indentLine'
 Plugin 'christoomey/vim-tmux-navigator'
 " buffer navigator like nerdtree
 Plugin 'jeetsukumaran/vim-buffergator'
+
 " fast mru files navigation
-Plugin 'ctrlpvim/ctrlp.vim'
+source $ZSH/custom/plugins/fzf/plugin/fzf.vim
+Plugin 'junegunn/fzf.vim'
 
 " ===================== code-style section ====================================
 " easy comment for common languages
@@ -56,6 +59,7 @@ Plugin 'honza/vim-snippets'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
+
 
 " Do things a bit different if we are at Yandex
 let arcadia_root = $ARCADIA_ROOT . '/'
@@ -103,6 +107,14 @@ let g:airline_inactive_collapse=1
 let g:UltiSnipsExpandTrigger = "<C-j>"
 let g:UltiSnipsEditSplit = 'vertical'
 let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "UltiSnips"]
+
+" =============================================================================
+" =============================== FZF Settings ================================
+" =============================================================================
+let g:fzf_layout = { 'down': '~25%' }
+let g:fzf_buffers_jump = 1
+
+map <C-P> :FZF $ARCADIA_ROOT<CR>
 
 " =============================================================================
 " ============================ Buffergator Settings ===========================
@@ -153,8 +165,8 @@ map gdf :YcmComplete GoToDefinition<CR>
 map gdc :YcmComplete GoToDeclaration<CR>
 autocmd FileType c,ccp nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
 " " for auto ident one symbol at left in case of errors
-" autocmd BufEnter * sign define dummy
-" autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+autocmd BufEnter * sign define dummy
+autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
 
 " =============================================================================
 " ================================ file switch ================================
@@ -239,7 +251,10 @@ nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 nnoremap S :%s/
 vnoremap s :s/
 
-nnoremap <C-M> :MaximizerToggle<CR>
+" Mapping selecting mappings
+nmap <leader><tab> <plug>(fzf-maps-n)
+xmap <leader><tab> <plug>(fzf-maps-x)
+omap <leader><tab> <plug>(fzf-maps-o)
 
 " =============================================================================
 " ================================= Global Settings ===========================
@@ -259,6 +274,7 @@ set colorcolumn=120                     " color 120 characters in line
 " set showcmd                           " Show (partial) command in status line.
 set showmatch                           " Show matching brackets.
 
+set ff=unix                             " to convert every LF CR to LF eol
 set shiftwidth=4
 set tabstop=4
 set softtabstop=4

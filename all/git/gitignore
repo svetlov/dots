@@ -17,3 +17,4 @@ bin/**
 .color_coded
 
 ml/tensorflow/ytensorflow/cpp/ytensorflow/_build.cpp
+ml/tensorflow/ytensorflow/cpp/ytensorflow/ops/image/_build.cpp

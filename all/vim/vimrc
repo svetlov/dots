@@ -31,10 +31,8 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdtree'
 " buffer navigator like nerdtree
 Plugin 'jeetsukumaran/vim-buffergator'
-" nice tags about file
-" Plugin 'majutsushi/tagbar'
 " fast mru files navigation
-Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'junegunn/fzf.vim'
 " fast switch of header and source c/cpp files
 Plugin 'derekwyatt/vim-fswitch'
 
