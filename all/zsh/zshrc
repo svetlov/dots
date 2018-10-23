@@ -385,6 +385,7 @@ _reinstall_dots() {
 
 deploy_env() {
     sudo apt-get install -y make git cmake;
+    sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
     sudo apt-get install -y software-properties-common python-software-properties;
     _install_gcc49;
     _install_clang39;
