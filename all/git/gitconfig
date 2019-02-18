@@ -5,15 +5,15 @@
     co = checkout
     ci = commit
     b = branch
-	s = status --short --branch
+    s = status --short --branch
     h = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
     unstage = reset HEAD --
     last = log -1 HEAD
-	commend = commit --amend --no-edit
-	stsh = stash --keep-index
-	staash = stash --include-untracked
-	staaash = stash --all
-	merc = merge --no-ff
+    commend = commit --amend --no-edit
+    stsh = stash --keep-index
+    staash = stash --include-untracked
+    staaash = stash --all
+    merc = merge --no-ff
 [user]
 	name = Vsevolod Svetlov
 [color]

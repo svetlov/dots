@@ -43,6 +43,7 @@ alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
+alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
 
@@ -52,7 +53,7 @@ reset-ssh() {
 }
 
 _pathstr_contains() {
-	# check $2 is a subpart of pathes of $1
+    # check $2 is a subpart of pathes of $1
     splitted=$( echo $1 | tr ":" "\n" );
     echo ${splitted[@]} | grep -q -w -E "^$2$" > /dev/null;
     [[ $? -eq 0 ]] && return 1 || return 0;
@@ -150,6 +151,9 @@ if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
 
     compaudit | xargs chmod g-w,o-w
 fi
+export FZF_DEFAULT_COMMAND="fd . "
+
+
 
 if [[ -f "${HOME}/.oh-my-zsh/custom/themes/mytheme.zsh-theme" ]]; then
     ZSH_THEME="mytheme";
@@ -170,44 +174,47 @@ source $ZSH/oh-my-zsh.sh
 # ================================================= Arcadia Settings ==================================================
 # =====================================================================================================================
 
-yaclone() {
+ya-deploy() {
     svn cat svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/ya > ${HOME}/.yatool;
-    [[ ! -z ${1} ]] && local root=${1} || local root="${HOME}/projects/arcadia.git";
-    python ${HOME}/.yatool clone ${root};
-    rm -rf ~/.yatool;
-    _update_arcadia_env;
 
+    local root="${HOME}/projects/arcadia";
+    ulimit -n 10000;
+    mkdir -p ${root};
+    mkdir -p ${root}/arcadia ${root}/store;
+    nice ya tool arc mount -s stallman.search.yandex.net -m arcadia/ -S store/ -r arcadia;
+
+    rm -rf ${HOME}/.yatool;
+
+    _update_arcadia_env;
     (
         cd ${root};
-        yamake --checkout cv/imgclassifiers/danet -j0;
-        yamake --checkout ml/tensorflow/ytensorflow -j0;
-
-        git init;
-        git add --all :/;
-        git commit -m "initial commit";
-
-        yaycm cv/imgclassifiers/danet ml/tensorflow/ytensorflow/cpp;
-        python junk/splinter/vim/ycm_to_color_coded.py > .color_coded;
+        ycm cv/imgclassifiers/tf_applicator ml/tensorflow/ytensorflow/cpp;
     )
 }
 
-_update_arcadia_env () {
-    if [ -e "${HOME}/projects/arcadia.git/ya" ]; then
-        export ARCADIA_ROOT="${HOME}/projects/arcadia.git";
-        export ARCADIA_ROOT_BIN="${ARCADIA_ROOT}/bin";
-        arc () { cd ${ARCADIA_ROOT}; };
-        export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
-        export DANET_BIN="${ARCADIA_ROOT_BIN}/cv/imgclassifiers/danet";
-        danet () { cd ${DANET}; };
-        export YTF="${ARCADIA_ROOT}/ml/tensorflow/ytensorflow";
-        export YTF_BIN="${ARCADIA_ROOT_BIN}/ml/tensorflow/ytensorflow";
-        ytf () { cd ${YTF}; };
-        export JUNK="${ARCADIA_ROOT}/junk/splinter";
-        export JUNK_BIN="${ARCADIA_ROOT_BIN}/junk/splinter";
-        junk () { cd ${JUNK}; };
-    fi
 
+_update_arcadia_env () {
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
+        export FZF_DEFAULT_COMMAND="${HOME}/projects/dots/all/vim/cat-arcadia-files.sh"
+
+        export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia";
+        arcadia () { cd ${ARCADIA_ROOT}; };
+
+        export ARCADIA_CONTRIB="${ARCADIA_ROOT}/contrib";
+        contrib () { cd ${ARCADIA_CONTRIB}; };
+
+        export TF_APPLICATOR="${ARCADIA_ROOT}/cv/imgclassifiers/tf_applicator";
+        tfapp () { cd ${tfapp}; };
+
+        export YTF="${ARCADIA_ROOT}/ml/tensorflow/ytensorflow";
+        ytf () { cd ${YTF}; };
+
+        export JUNK="${ARCADIA_ROOT}/junk/splinter";
+        junk () { cd ${JUNK}; };
+
+        export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
+        danet () { cd ${DANET}; };
+
         arcadia_root_call() {
             # $1 -- original cmd
             # $2 -- arcadia cmd
@@ -219,39 +226,32 @@ _update_arcadia_env () {
             ${array[@]} ${@:3};
         }
 
-        git-svn-update-arcadia-master () {
-            if [[ $(pwd -P) != ${ARCADIA_ROOT}* ]]; then
-                echo "${COLOR_RED}Error${COLOR_OFF}: Please cd to ${ARCADIA_ROOT} directory." 1>&2;
-                return 1;
-            fi
-
-            if [[ $(git status --porcelain | wc -l) -ne 0 ]]; then
-                echo "${COLOR_RED}Error${COLOR_OFF}: Please commit all local changes before update." 1>&2;
-                return 1;
-            fi
-
-            local branch=`git branch | grep -e "^*" | cut -f2 -d\ `;
-            if [[ ${branch} != "master" ]]; then
-                echo "${COLOR_RED}Error${COLOR_OFF}: Please switch to master branch manually before update." 1>&2;
-                return 1;
-            fi
-
-            (cd ${ARCADIA_ROOT}; svn update;)
-            git add --all :/;
-            git commit -m "update from svn update call";
-        }
-
         ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
-        yamake () { ya make -o $ARCADIA_ROOT/bin --no-src-links "$@"; }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
         alias hg='arcadia_root_call hg "ya tool hg"';
 
-        yaycm () {
+        arc() {
+            if [[ "${1}" = "b" ]]; then
+                ya tool arc branch;
+            elif [[ "${1}" = "cb" ]]; then
+                echo $(ya tool arc branch | grep '\*' | cut -f2 -d\ );
+            elif [[ "${1}" = "s" ]]; then
+                ya tool arc status;
+            elif [[ "${1}" = "undo" ]]; then
+                ya tool arc checkout $(arc cb) ${@:2};
+            elif [[ "${1}" = "unstage" ]]; then
+                ya tool arc reset $(arc cb) ${@:2};
+            else
+                ya tool arc ${@}
+            fi
+        }
+
+        ycm () {
             ya make -rj32 --add-result='.h' --add-result='.hh' \
                 --add-result='.hpp' --add-result='.c' --add-result='.cc' \
                 --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
-                --no-src-links --keep-going --checkout $@;
+                --no-src-links --keep-going $@;
         }
     fi
 

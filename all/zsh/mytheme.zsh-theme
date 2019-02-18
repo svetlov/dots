@@ -31,6 +31,16 @@ function git_branch_prompt() {
     print " $fg_bold[blue]($fg_bold[magenta]$branch$(git_dirty)$fg_bold[blue])$reset_color"
 }
 
+function arc_dirty {
+    [[ $(arc status --short 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
+}
+
+function arc_branch_prompt() {
+    branches=$(arc branch 2> /dev/null) || return
+    branch=$(echo $branches | grep \* | cut -d ' ' -f2)
+    print " $fg_bold[blue]($fg_bold[magenta]$branch$(arc_dirty)$fg_bold[blue])$reset_color"
+}
+
 function venv_prompt() {
     venv_name=$(basename $VIRTUAL_ENV 2> /dev/null) || return;
     print " ($venv_name)";
@@ -56,7 +66,7 @@ AFTER_PROMPT="%{$fg[yellow]%}╰─${fulltime} %{$fg_bold[cyan]%}%c%{$reset_colo
 precmd() {
   local rc="$?";
 
-  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_branch_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
+  LEFT="$(hostname_prompt):$(pwd_prompt)$(git_branch_prompt)$(arc_branch_prompt)$(venv_prompt)$(return_code_prompt ${rc}) ";
   LEFTACSII=$(echo $LEFT | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g");
   LEFTWIDTH="${#LEFTACSII}";
   RIGHT="";
