@@ -11,9 +11,21 @@ silent! so .vimlocal          " add vimlocal for different projects
 if !filereadable(expand('$HOME/.config/nvim/bundle/Vundle.vim/README.md'))
     echo "Installing Vundle.."
     echo ""
-    silent !mkdir -p ~/.vim/bundle
+    silent !mkdir -p ~/.config/nvim/bundle
     silent !git clone --quiet https://github.com/gmarik/Vundle.vim ~/.config/nvim/bundle/Vundle.vim
 endif
+
+
+" Do things a bit different if we are at Yandex
+let arcadia_root = $ARCADIA_ROOT . '/'
+if arcadia_root != '/'
+    let &path.=',' . arcadia_root
+    let yandex_config_path = arcadia_root . 'junk/' . 'splinter/' . 'vim/' . 'vimrc'
+    if filereadable(yandex_config_path)
+        exec 'source ' . yandex_config_path
+    endif
+endif
+
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.config/nvim/bundle/Vundle.vim
@@ -34,6 +46,8 @@ Plugin 'Yggdroot/indentLine'
 Plugin 'christoomey/vim-tmux-navigator'
 " buffer navigator like nerdtree
 Plugin 'jeetsukumaran/vim-buffergator'
+" qbuffer fast edit
+Plugin 'romainl/vim-qf'
 
 " fast mru files navigation
 source $ZSH/custom/plugins/fzf/plugin/fzf.vim
@@ -60,16 +74,6 @@ Plugin 'honza/vim-snippets'
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle
 
-
-" Do things a bit different if we are at Yandex
-let arcadia_root = $ARCADIA_ROOT . '/'
-if arcadia_root != '/'
-    let &path.=',' . arcadia_root
-    let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vim' . 'vimrc'
-    if filereadable(yandex_config_path)
-        exec 'source ' . yandex_config_path
-    endif
-endif
 
 let g:python_host_prog='/usr/bin/python'
 let g:python3_host_prog='/usr/bin/python3'
