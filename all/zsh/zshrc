@@ -10,6 +10,8 @@ export PROJECT_HOME=${HOME}/projects;
 export IPYTHON_PORT=6500;
 export CLANG39_CC="/usr/bin/clang-3.9";
 export CLANG39_CXX="/usr/bin/clang++-3.9";
+export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia"
+export ARCADIA_ROOT_GENERATED="${HOME}/projects/arcadia/generated"
 
 export LUA_VERSION="5.3";
 export TMUX_VERSION="2.5";
@@ -175,19 +177,14 @@ source $ZSH/oh-my-zsh.sh
 # =====================================================================================================================
 
 ya-deploy() {
-    svn cat svn+ssh://arcadia.yandex.ru/arc/trunk/arcadia/ya > ${HOME}/.yatool;
+    sudo apt-get install yandex-arc-launcher -y --force-yes
 
-    local root="${HOME}/projects/arcadia";
-    ulimit -n 10000;
-    mkdir -p ${root};
-    mkdir -p ${root}/arcadia ${root}/store;
-    nice ya tool arc mount -s stallman.search.yandex.net -m arcadia/ -S store/ -r arcadia;
-
-    rm -rf ${HOME}/.yatool;
+    mkdir -p ${ARCADIA_ROOT}/arcadia ${ARCADIA_ROOT}/store ${ARCADIA_ROOT_GENERATED};
+    nice arc mount -m ${ARCADIA_ROOT}/arcadia/ -S ${ARCADIA_ROOT}/store/;
 
     _update_arcadia_env;
     (
-        cd ${root};
+        cd ${ARCADIA_ROOT};
         ycm cv/imgclassifiers/tf_applicator ml/tensorflow/ytensorflow/cpp;
     )
 }
