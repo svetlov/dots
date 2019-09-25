@@ -153,7 +153,7 @@ if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
 
     compaudit | xargs chmod g-w,o-w
 fi
-export FZF_DEFAULT_COMMAND="fd . "
+export FZF_DEFAULT_COMMAND="fd --type f . "
 
 
 
@@ -245,9 +245,11 @@ _update_arcadia_env () {
         }
 
         ycm () {
-            ya make -rj32 --add-result='.h' --add-result='.hh' \
-                --add-result='.hpp' --add-result='.c' --add-result='.cc' \
-                --add-result='.cpp' --output ${ARCADIA_ROOT}/.ycm \
+            ya make -rj32 \
+                --add-protobuf-result \
+                --add-result='.h' --add-result='.hh' --add-result='.hpp' \
+                --add-result='.c' --add-result='.cc' --add-result='.cpp' \
+                --output ${ARCADIA_ROOT}/../generated \
                 --no-src-links --keep-going $@;
         }
     fi
