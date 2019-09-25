@@ -66,6 +66,8 @@ Plugin 'vim-scripts/DoxyGen-Syntax'
 Plugin 'derekwyatt/vim-fswitch'
 " code autocomplete for c/c++/python
 Plugin 'Valloric/YouCompleteMe'
+" code checker
+Plugin 'vim-syntastic/syntastic'
 " snippets plugin
 Plugin 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
@@ -171,6 +173,17 @@ autocmd FileType c,ccp nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
 " " for auto ident one symbol at left in case of errors
 autocmd BufEnter * sign define dummy
 autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+
+" =============================================================================
+" ============================= Syntastic Settings ============================
+" =============================================================================
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+
+let g:syntastic_python_checkers = ['pyflakes']
 
 " =============================================================================
 " ================================ file switch ================================
