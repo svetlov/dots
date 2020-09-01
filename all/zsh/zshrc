@@ -3,10 +3,14 @@ export LC_CTYPE=en_US.UTF-8;
 export LC_ALL=en_US.UTF-8;
 export LANG=en_US.UTF-8;
 export EDITOR='vim';
+
+export USER="splinter";
 export HOME=$(cd ${HOME}; pwd -P);
 export LOCAL=${HOME}/.local;
+
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${HOME}/projects;
+
 export IPYTHON_PORT=6500;
 export CLANG39_CC="/usr/bin/clang-3.9";
 export CLANG39_CXX="/usr/bin/clang++-3.9";
@@ -34,6 +38,7 @@ export COLOR_WHITE=$'\e[0;37m'        # White
 which nvim > /dev/null;
 if [[ $? -eq 0 ]]; then
     alias vim="nvim";
+    export EDITOR='nvim';
 fi
 
 alias zshconfig="vim ~/.zshrc"
@@ -153,7 +158,7 @@ if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
 
     compaudit | xargs chmod g-w,o-w
 fi
-export FZF_DEFAULT_COMMAND="fd --type f . "
+export FZF_DEFAULT_COMMAND="fd --type file"
 
 
 
@@ -200,11 +205,20 @@ _update_arcadia_env () {
         export ARCADIA_CONTRIB="${ARCADIA_ROOT}/contrib";
         contrib () { cd ${ARCADIA_CONTRIB}; };
 
-        export TF_APPLICATOR="${ARCADIA_ROOT}/cv/imgclassifiers/tf_applicator";
-        tfapp () { cd ${tfapp}; };
+        export TFAPP="${ARCADIA_ROOT}/cv/imgclassifiers/tf_applicator";
+        tfapp () { cd ${TFAPP}; };
+
+        export NDL="${ARCADIA_ROOT}/cv/imgclassifiers/framework/nirvana/nirvana_dl";
+        ndl() { cd ${NDL}; };
+
+        export PYDL="${ARCADIA_ROOT}/ml/nirvana/python_deep_learning";
+        pydl() { cd ${PYDL}; };
 
         export YTF="${ARCADIA_ROOT}/ml/tensorflow/ytensorflow";
         ytf () { cd ${YTF}; };
+
+        export VPQ="${ARCADIA_ROOT}/ml/tensorflow/models/vpq";
+        vpq () { cd ${VPQ}; };
 
         export JUNK="${ARCADIA_ROOT}/junk/splinter";
         junk () { cd ${JUNK}; };
@@ -226,15 +240,25 @@ _update_arcadia_env () {
         ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
         alias gdb='arcadia_root_call gdb "ya tool gdb"';
         alias svn='arcadia_root_call svn "ya tool svn"';
-        alias hg='arcadia_root_call hg "ya tool hg"';
+
+        export ARC_EDITOR=${EDITOR};
 
         arc() {
-            if [[ "${1}" = "b" ]]; then
-                ya tool arc branch;
+            if [[ "${1}" = "rbc" ]]; then
+                ya tool arc rebase --continue;
+            elif [[ "${1}" = "rbs" ]]; then
+                ya tool arc rebase --skip;
+            elif [[ "${1}" = "mt" ]]; then
+                ya tool arc mergetool -y --tool=vimdiff;
             elif [[ "${1}" = "cb" ]]; then
                 echo $(ya tool arc branch | grep '\*' | cut -f2 -d\ );
             elif [[ "${1}" = "s" ]]; then
-                ya tool arc status;
+                ya tool arc status --short ${@:2} \
+                    | sed "s/^## \(.*\)\.\.\.\(.*\)/* \1 -> $COLOR_GREEN\2$COLOR_OFF */g" \
+                    | sed "s/^\(??.*\)/$COLOR_PURPLE\1$COLOR_OFF/g" \
+                    | sed "s/^\( M.*\)/$COLOR_RED\1$COLOR_OFF/g" \
+                    | sed "s/^\(A .*\)/$COLOR_GREEN\1$COLOR_OFF/g" \
+                    | tac
             elif [[ "${1}" = "undo" ]]; then
                 ya tool arc checkout $(arc cb) ${@:2};
             elif [[ "${1}" = "unstage" ]]; then
@@ -255,7 +279,7 @@ _update_arcadia_env () {
     fi
 
     if [ -e "${HOME}/.yt/token" ]; then
-        export YT_PROXY=hahn.yt.yandex.net
+        export YT_PROXY=arnold.yt.yandex.net
         export YT_TOKEN=`cat ~/.yt/token`
         export YT_HOME=//home/cvtest/splinter
     fi

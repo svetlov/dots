@@ -20,6 +20,7 @@ endif
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
     let &path.=',' . arcadia_root
+    let &path.=',' . arcadia_root . 'contrib/' . 'libs/' . 'tf/'
     let yandex_config_path = arcadia_root . 'junk/' . 'splinter/' . 'vim/' . 'vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
@@ -72,6 +73,8 @@ Plugin 'vim-syntastic/syntastic'
 Plugin 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
 Plugin 'honza/vim-snippets'
+" Motion
+Plugin 'easymotion/vim-easymotion'
 
 call vundle#end()             " reguired by Vundle
 filetype plugin indent on     " required by Vundle

@@ -75,7 +75,9 @@ filetype plugin indent on     " required by Vundle
 " Do things a bit different if we are at Yandex
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
-    let &path.=',' . arcadia_root
+    let arcadia_tensorflow_root = $ARCADIA_ROOT . '/contrib/libs/tf'
+    let &path.=',' . arcadia_root .
+    let &path.=',' . arcadia_tensorflow_root
     let yandex_config_path = string(arcadia_root) . 'junk' . 'splinter' . 'vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
