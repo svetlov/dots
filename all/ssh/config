@@ -151,3 +151,9 @@ Host hermes
 Host data-lab
     HostName 213.131.9.38
     Port 26262
+
+Host cv-v100
+    HostName cv-v100-common.vla.yp-c.yandex.net
+
+Host a100
+    HostName a100.sas.yp-c.yandex.net
