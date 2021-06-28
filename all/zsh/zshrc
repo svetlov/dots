@@ -10,6 +10,7 @@ export LOCAL=${HOME}/.local;
 
 export WORKON_HOME=${HOME}/.virtualenvs;
 export PROJECT_HOME=${HOME}/projects;
+export DOTS_HOME=${PROJECT_HOME}/dots;
 
 export IPYTHON_PORT=6500;
 export CLANG39_CC="/usr/bin/clang-3.9";
@@ -65,6 +66,37 @@ _pathstr_contains() {
     splitted=$( echo $1 | tr ":" "\n" );
     echo ${splitted[@]} | grep -q -w -E "^$2$" > /dev/null;
     [[ $? -eq 0 ]] && return 1 || return 0;
+}
+
+_safe_symlink() {
+    if [[ -f "$2" ]]; then  # destination exists
+        if [[ -L "$2" ]]; then   # destination is symlink
+            local realDstPath=$(readlink -f "$2");
+            if [[ "${realDstPath}" == "$1" ]]; then  # destination is linked to source
+                echo "Destination file '$2' already exists and points to source '$1'" 1>&2;
+                return;
+            elif [[ ! -f "${realDstPath}" ]]; then  # destination is broken symlink
+                rm "$2";
+            else  # desitnation is link
+                if [[ -f "${2}.back" ]]; then  # back file exits, failing
+                    echo "Destination file '$2' already exists, and .back file also already exists" 1>&2;
+                    return;
+                fi
+                echo "Making backup for existing destination file '$2'" 1>&2;
+                ln -s ${realDstPath} "$2.back"
+            fi
+        elif [[ "${realDstPath}" == "$2" ]]; then  # destination exists and it's regular file
+            if [[ -f "${2}.back" ]]; then  # back file exits, failing
+                echo "Destination file '$2' already exists, and .back file also already exists" 1>&2;
+                return;
+            fi
+            echo "Making backup for existing destination file '$2'">&2;
+            cp $2 "$2.back"
+        fi
+    fi
+
+    echo "Linking source $1 to destination $2" 1>&2;
+    ln -s $1 $2;
 }
 
 _smart_append() {
@@ -139,12 +171,6 @@ _update_env() {
 
 _update_env;
 
-TF="${HOME}/projects/tensorflow";
-if [[ $is_linux == true && ! -z "${TF+x}" ]]; then
-    export TF;
-    tf () { cd "${TF}"; };
-fi
-
 # =====================================================================================================================
 # ================================================= OhMyZsh Settings ==================================================
 # =====================================================================================================================
@@ -157,12 +183,14 @@ if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
     git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
     ${ZSH}/custom/plugins/fzf/install --bin;
     git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
-
+    _update_env;
     compaudit | xargs chmod g-w,o-w
+
+    _safe_symlink "${DOTS_HOME}/all/zsh/bashrc" "${HOME}/.bashrc"
+    _safe_symlink "${DOTS_HOME}/all/zsh/zshrc" "${HOME}/.zshrc"
+    _safe_symlink "${DOTS_HOME}/all/zsh/mytheme.zsh-theme" "${HOME}/.oh-my-zsh/custom/themes/mytheme.zsh-theme"
 fi
 export FZF_DEFAULT_COMMAND="fd --type file"
-
-
 
 if [[ -f "${HOME}/.oh-my-zsh/custom/themes/mytheme.zsh-theme" ]]; then
     ZSH_THEME="mytheme";
@@ -175,9 +203,9 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git mercurial tmux python osx brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
+plugins=(git tmux python osx brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
 
-source $ZSH/oh-my-zsh.sh
+source ${ZSH}/oh-my-zsh.sh
 
 # =====================================================================================================================
 # ================================================= Arcadia Settings ==================================================
@@ -195,7 +223,7 @@ ya-deploy() {
 
 _update_arcadia_env () {
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
-        export FZF_DEFAULT_COMMAND="${HOME}/projects/dots/all/vim/cat-arcadia-files.sh"
+        export FZF_DEFAULT_COMMAND="${DOTS_HOME}/all/vim/cat-arcadia-files.sh"
 
         export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia";
         arcadia () { cd ${ARCADIA_ROOT}; };
@@ -337,6 +365,9 @@ _install_cmake() {
 }
 
 _install_tmux() {
+    _safe_symlink "${DOTS_HOME}/all/tmux/tmux.conf" "${HOME}/.tmux.conf"
+    _safe_symlink "${DOTS_HOME}/all/tmux/tmux-vim-select-pane" "${LOCAL}/bin/tmux-vim-select-pane"
+
     which tmux > /dev/null;
     if [[ $? -eq 0 ]]; then
         local tmux_version=$(tmux -V | sed 's/tmux //g');
@@ -368,31 +399,67 @@ _install_tmux() {
     _update_env;
 }
 
-_reinstall_dots() {
-    mkdir -p ${HOME}/projects;
-    (
-        cd ${HOME}/projects
-        if [[ ! -d "${HOME}/projects/dots" ]]; then
-            git clone git@github.com:svetlov/dots.git;
-            cd dots
-        else
-            cd dots;
-            git stash;
-            git checkout master;
-            git pull origin master;
-        fi
-        ./install.py install configs;
-        _update_env;
-    );
+_install_nvim() {
+    if [[ $is_darwin == true ]]; then
+        brew install neovim;
+    elif [[ $is_linux == true ]]; then
+        (
+            mkdir -p ${LOCAL}/nvim/bin;
+            cd ${LOCAL}/nvim/bin;
+            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+            chmod u+x nvim.appimage
+            ln -s ${LOCAL}/nvim/bin/nvim.appimage ${LOCAL}/nvim/bin/nvim;
+            ln -s ${LOCAL}/nvim/bin/nvim ${LOCAL}/nvim/bin/vim;
+        );
+    fi
+    _update_env;
+
+    mkdir -p "${HOME}/.config/nvim";
+    mkdir -p "${HOME}/.config/nvim/syntax";
+    mkdir -p "${HOME}/.config/nvim/undo";
+    mkdir -p "${HOME}/.config/nvim/swap";
+    _safe_symlink "${DOTS_HOME}/all/vim/nvim-init.vim" "${HOME}/.config/nvim/init.vim"
+    _safe_symlink "${DOTS_HOME}/all/vim/danet-config.vim" "${HOME}/.config/nvim/syntax/danet-config.vim";
+    nvim -e +PluginInstall +qall;
 }
 
-deploy_env() {
-    sudo apt-get install -y make git cmake libtool-bin;
-    sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
-    sudo apt-get install -y software-properties-common python-software-properties;
+_install_ssh() {
+    if [[ $is_darwin == true ]]; then
+        LAUNCH_AGENTS_DIR="${HOME}/Library/LaunchAgents";
 
-    _install_cmake;
-    _install_tmux;
+        _launch() {
+            launchctl unload "${LAUNCH_AGENTS_DIR}/$1";
+            _safe_symlink "${DOTS_HOME}/all/ssh/$1" "${LAUNCH_AGENTS_DIR}/$1";
+            launchctl load "${LAUNCH_AGENTS_DIR}/$1";
+        }
+
+        _launch pbcopy.plist;
+        _launch pbpaste.plist;
+        _launch pbopen.plist;
+        _launch notebook.plist;
+    elif [[ $is_linux == true ]]; then
+        _safe_symlink "${DOTS_HOME}/all/ssh/pbcopy-remote.sh" "${LOCAL}/bin/pbcopy";
+        _safe_symlink "${DOTS_HOME}/all/ssh/pbpaste-remote.sh" "${LOCAL}/bin/pbpaste";
+        _safe_symlink "${DOTS_HOME}/all/ssh/pbopen.sh" "${LOCAL}/bin/pbopen";
+    fi
+    _safe_symlink "${DOTS_HOME}/all/ssh/notebook.sh" "${LOCAL}/bin/notebook.sh";
+    _safe_symlink "${DOTS_HOME}/all/ssh/config" "${HOME}/.ssh/config";
+    chmod 400 "${HOME}/.ssh/config";
+}
+
+
+deploy_env() {
+    if [[ $is_darwin == true ]]; then
+    elif [[ $is_linux == true ]]; then
+        sudo apt-get install -y make git cmake libtool-bin;
+        sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
+        sudo apt-get install -y software-properties-common python-software-properties;
+
+        _install_cmake;
+        _install_tmux;
+    fi
+    _install_ssh;
+    _install_nvim;
 
     echo "#\!/bin/bash\npython \"\$@\"" > ${LOCAL}/bin/venvpython;
     chmod +x ${LOCAL}/bin/venvpython
@@ -403,6 +470,4 @@ deploy_env() {
     pip3 install -U --user 'ipython[all]';
     pip3 install -U --user 'jupyter[all]';
     pip3 install -U --user virtualenvwrapper;
-
-    _reinstall_dots;
 }
