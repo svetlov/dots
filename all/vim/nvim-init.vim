@@ -6,13 +6,13 @@ filetype off                  " required by Vundle
 
 silent! so .vimlocal          " add vimlocal for different projects
 
-
-" install Vindle if there is none
-if !filereadable(expand('$HOME/.config/nvim/bundle/Vundle.vim/README.md'))
-    echo "Installing Vundle.."
-    echo ""
-    silent !mkdir -p ~/.config/nvim/bundle
-    silent !git clone --quiet https://github.com/gmarik/Vundle.vim ~/.config/nvim/bundle/Vundle.vim
+" install vim-plug if there is none
+let b:vimplug_local_path = expand($LOCAL . '/nvim/share/nvim/runtime/autoload/plug.vim')
+let b:vimplug_remote_path = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+if !filereadable(b:vimplug_local_path)
+    echo "Installing vim-plug..\n"
+    silent !mkdir -p ~/.config/nvim/plugged
+    execute '!curl -fLo ' . b:vimplug_local_path . ' --create-dirs ' . b:vimplug_remote_path
 endif
 
 
@@ -20,7 +20,8 @@ endif
 let arcadia_root = $ARCADIA_ROOT . '/'
 if arcadia_root != '/'
     let &path.=',' . arcadia_root
-    let &path.=',' . arcadia_root . 'contrib/' . 'libs/' . 'tf/'
+    let &path.=',' . arcadia_root . 'contrib/' . 'libs/' . 'tf-2.4/'
+    let &path.=',' . arcadia_root . 'ml/' . 'tensorflow/' . 'ytensorflow/' . 'cpp/'
     let yandex_config_path = arcadia_root . 'junk/' . 'splinter/' . 'vim/' . 'vimrc'
     if filereadable(yandex_config_path)
         exec 'source ' . yandex_config_path
@@ -28,56 +29,50 @@ if arcadia_root != '/'
 endif
 
 
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.config/nvim/bundle/Vundle.vim
-call vundle#begin("~/.config/nvim/bundle")
-
-" let Vundle manage Vundle, required
-Plugin 'gmarik/Vundle.vim'
-
+call plug#begin(expand('~/.config/nvim/plugged'))
 " ============================ UI section =====================================
 " impowed status line
-Plugin 'bling/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+Plug 'bling/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 " color theme molokai
-Plugin 'svetlov/molokai'
+Plug 'svetlov/molokai'
 " show ident blocks
-Plugin 'Yggdroot/indentLine'
+Plug 'Yggdroot/indentLine'
 " tmux and vim integration
-Plugin 'christoomey/vim-tmux-navigator'
-" buffer navigator like nerdtree
-Plugin 'jeetsukumaran/vim-buffergator'
+Plug 'christoomey/vim-tmux-navigator'
+" Project view
+Plug 'preservim/nerdtree'
+" NERDTree plugin that highlights opened buffers
+Plug 'PhilRunninger/nerdtree-buffer-ops'
 " qbuffer fast edit
-Plugin 'romainl/vim-qf'
+" Plugin 'romainl/vim-qf'
 
 " fast mru files navigation
 source $ZSH/custom/plugins/fzf/plugin/fzf.vim
-Plugin 'junegunn/fzf.vim'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 
 " ===================== code-style section ====================================
 " easy comment for common languages
-Plugin 'tpope/vim-commentary'
+Plug 'tpope/vim-commentary'
 " python pep8 auto indent
-Plugin 'hynek/vim-python-pep8-indent'
+Plug 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
-Plugin 'vim-scripts/DoxyGen-Syntax'
+Plug 'vim-scripts/DoxyGen-Syntax'
 
 " ========================== dev section ======================================
 " fast switch of header and source c/cpp files
-Plugin 'derekwyatt/vim-fswitch'
+Plug 'derekwyatt/vim-fswitch'
 " code autocomplete for c/c++/python
-Plugin 'Valloric/YouCompleteMe'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " code checker
-Plugin 'vim-syntastic/syntastic'
+Plug 'dense-analysis/ale'
 " snippets plugin
-Plugin 'SirVer/ultisnips'
+Plug 'SirVer/ultisnips'
 " Snippets are separated from the plugin.
-Plugin 'honza/vim-snippets'
-" Motion
-Plugin 'easymotion/vim-easymotion'
+Plug 'honza/vim-snippets'
 
-call vundle#end()             " reguired by Vundle
-filetype plugin indent on     " required by Vundle
+call plug#end()
 
 
 let g:python_host_prog='/usr/bin/python'
@@ -123,70 +118,155 @@ let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "U
 let g:fzf_layout = { 'down': '~25%' }
 let g:fzf_buffers_jump = 1
 
-map <C-P> :FZF $ARCADIA_ROOT<CR>
+" map <leader>p :FZF . <CR>
+" map <leader>P :FZF $ARCADIA_ROOT<CR>
+
+" Prevent FZF commands from opening in none modifiable buffers
+function! FZFOpen(cmd)
+    " If more than 1 window, and buffer is not modifiable or file type is NERD tree or Quickfix type
+    if winnr('$') > 1 && (!&modifiable || &ft == 'nerdtree' || &ft == 'qf')
+        " Move one window to the right, then up
+        wincmd l
+        wincmd k
+    endif
+    exe a:cmd
+endfunction
+
+" FZF in Open buffers
+nnoremap <silent> <leader>b :call FZFOpen(":Buffers")<CR>
+
+" FZF Search for Files
+nnoremap <silent> <leader>f :call FZFOpen(":Files")<CR>
 
 " =============================================================================
-" ============================ Buffergator Settings ===========================
+" ============================ NerdTree Settings ===========================
+" =============================================================================
+let g:NERDTreeWinSize = 80
+let g:NERDTreeBookmarksFile = $HOME.'/projects/dots/all/vim/NERDTreeBookmarks'
+let g:NERDTreeShowBookmarks = 1  "auto show bookmarks on enter
+let g:NERDTreeChDirMode = 2  " auto cd to bookmark directory
+let g:NERDTreeQuitOnOpen = 3  " Closes after opening a file and closes the bookmark table after opening a bookmark
+let g:NERDTreeRespectWildIgnore = 1
+
+" NERDTree setting defaults to work around http://github.com/scrooloose/nerdtree/issues/489
+let g:NERDTreeDirArrows = 1
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+let g:NERDTreeGlyphReadOnly = "RO"
+
+
+function! NERDTreeCustomOpenTmuxPaneForDirNode(dirnode)
+    silent exec '!tmux splitw -h -c ' . a:dirnode.path.str()
+endfunction
+
+function! NERDTreeFindOrToggle()
+    let l:nerdTreeWindow = winnr('$') > 1 && (!&modifiable || &ft == 'nerdtree' || &ft == 'qf')
+    let l:emptyBuffer = line('$') == 1 && getline(1) == ''
+    if l:nerdTreeWindow || l:emptyBuffer
+        NERDTreeToggle
+    else
+        NERDTreeFind
+    endif
+endfunction
+
+function! NERDTreeSwitchToNearestBookmark()
+    let l:searchForPath = argc() == 0 ? getcwd() : expand("%:p")
+
+    let l:bestMatchBookmark = {}
+    let l:bestMatchLen = 0
+    for bookmark in g:NERDTreeBookmark.Bookmarks()
+        let l:matchLen = strlen(matchstr(l:searchForPath, bookmark.path.str()))
+
+        if l:bestMatchLen < l:matchLen
+            let l:bestMatchBookmark = bookmark
+            let l:bestMatchLen = l:matchLen
+        endif
+    endfor
+
+    if l:bestMatchLen > 0 && l:bestMatchBookmark.path.str() != $HOME
+        let l:bestMatchPathStr = g:NERDTreePath.Resolve(l:bestMatchBookmark.path.str())
+        let l:bestMatchPathObj = g:NERDTreePath.New(l:bestMatchPathStr)
+        let l:bestMatchDirNode = g:NERDTreeDirNode.New(l:bestMatchPathObj, g:NERDTree)
+        call l:bestMatchDirNode.path.changeToDir()
+        " let $PYTHONPATH = l:bestMatchDirNode.path.getParent().str() . ":" . $PYTHONPATH
+        " let $PYTHONPATH = l:bestMatchDirNode.path.str() . ":" . $PYTHONPATH
+        " let g:WorkspaceFolders = [l:bestMatchDirNode.path.str()]
+    endif
+
+    if argc() == 0
+        NERDTree
+    endif
+endfunction
+
+autocmd VimEnter * call NERDTreeAddKeyMap({
+    \ 'key': '<CR>',
+    \ 'scope': 'DirNode',
+    \ 'callback': 'NERDTreeCustomOpenTmuxPaneForDirNode',
+    \ 'quickhelpText': 'open or close a dirctory',
+    \ 'override': 1 })
+
+" Start NERDTree when Vim is started without file arguments.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if (argc() == 0 || argc() == 1) && !exists('s:std_in') | call NERDTreeSwitchToNearestBookmark() | endif
+
+nmap <silent> <leader>a :call NERDTreeFindOrToggle()<CR>
+nmap <silent> <leader>A :NERDTreeClose<CR>
+
+
+" =============================================================================
+" ============================== CoC.VIM Settings =============================
 " =============================================================================
 
-let g:buffergator_hsplit_size = 20
-let g:buffergator_viewport_split_policy="B"  " open at top
+inoremap <silent><expr> <TAB> pumvisible() ? "\<C-n>" : <SID>check_back_space() ? "\<TAB>" : coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <silent><expr> <c-space> coc#refresh()
+"" Make <CR> auto-select the first completion item and notify coc.nvim to format on enter
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+"
+"" Use `[g` and `]g` to navigate diagnostics
+"" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+""nmap <silent> [g <Plug>(coc-diagnostic-prev)
+""nmap <silent> ]g <Plug>(coc-diagnostic-next)
+"
+" GoTo code navigation.
+nmap <silent> gd :call  CocAction('jumpDefinition', 'vsplit')<CR>
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 
-let g:buffergator_suppress_keymaps = 1
-map <leader>b :BuffergatorToggle<CR>
+" Use K to show documentation in preview window.
+nmap <leader>R <Plug>(coc-rename)
+noremap <silent> K :call <SID>show_documentation()<CR>
 
-" =============================================================================
-" ================================ YCM Settings ===============================
-" =============================================================================
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_add_preview_to_completeopt = 1
-let g:ycm_global_ycm_extra_conf = $HOME . '/projects/dots/all/vim/ycm.py'
-let g:ycm_goto_buffer_command = 'vertical-split'
-let g:ycm_autoclose_preview_window_after_completion = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
-let g:ycm_python_binary_path = 'python'
-
-let g:ycm_error_symbol = '☓'
-let g:ycm_warning_symbol = '☝'
-let g:ycm_filetype_specific_completion_to_disable = {
-    \ 'csv' : 1,
-    \ 'gitcommit' : 1,
-    \ 'diff' : 1,
-    \ 'help' : 1,
-    \ 'infolog' : 1,
-    \ 'mail' : 1,
-    \ 'markdown' : 1,
-    \ 'notes' : 1,
-    \ 'pandoc' : 1,
-    \ 'qf' : 1,
-    \ 'svn' : 1,
-    \ 'tagbar' : 1,
-    \ 'text' : 1,
-    \ 'unite' : 1,
-    \ 'vimwiki' : 1
-    \}
-
-let g:ycm_key_list_select_completion = ['<Down>']
-let g:ycm_key_list_previous_completion = ['<Up>']
-
-map gdf :YcmComplete GoToDefinition<CR>
-map gdc :YcmComplete GoToDeclaration<CR>
-autocmd FileType c,ccp nnoremap <buffer> gdh :YcmCompleter GetDoc<CR>
-" " for auto ident one symbol at left in case of errors
-autocmd BufEnter * sign define dummy
-autocmd BufEnter * execute 'sign place 9999 line=1 name=dummy buffer=' . bufnr('')
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
 
 " =============================================================================
-" ============================= Syntastic Settings ============================
+" ================================ ALE Settings ===============================
 " =============================================================================
 
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 0
+let g:ale_completion_enabled = 0
+"let g:ale_linters = {'python': ['pyls', 'flake8']}
+let g:ale_python_flake8_executable = 'python'
+let g:ale_python_flake8_args = '-m flake8 --max-line-length=120'
+let g:ale_python_flake8_options = '-m flake8 --max-line-length=120'
+let g:ale_python_pylint_executable = 'python'
+let g:ale_python_pylint_args = '-m pylint -d=C0301'
+let g:ale_python_pylint_options = '-m pylint -d=C0301'
 
-let g:syntastic_python_checkers = ['pyflakes']
+
 
 " =============================================================================
 " ================================ file switch ================================
@@ -205,16 +285,6 @@ nmap <silent> <leader>s :FSHere<CR>
 autocmd FileType c,cpp setlocal commentstring=//\ %s
 
 " =============================================================================
-" ================================ CtrlP Settings =============================
-" =============================================================================
-
-let g:ctrlp_lazy_update = 500
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 0
-let g:ctrlp_max_depth = 20
-let g:ctrlp_max_files = 0
-
-" =============================================================================
 " ============================== Custom Functions =============================
 " =============================================================================
 
@@ -230,7 +300,7 @@ function! Preserve(command)
     call cursor(l, c)
 endfunction
 
-function! CallWithNormalizeSplints(command)
+function! CallWithNormalizeSplits(command)
     execute a:command
     execute "wincmd ="
 endfunction
@@ -280,12 +350,6 @@ nnoremap <C-E>y :call PropagatePasteBufferToOSX()<cr>
 
 nnoremap S :%s/
 vnoremap s :s/
-
-" Mapping selecting mappings
-nmap <leader><tab> <plug>(fzf-maps-n)
-xmap <leader><tab> <plug>(fzf-maps-x)
-omap <leader><tab> <plug>(fzf-maps-o)
-
 " =============================================================================
 " ================================= Global Settings ===========================
 " =============================================================================
@@ -337,10 +401,14 @@ set suffixesadd=.pl,.pm,.yml,.yaml,.tyaml
 set hidden                              " more native buffer behavior
 set undolevels=1000                     " use many levels of undo
 
+
+set updatetime=300                      " longer updatetime (default is 4000 ms) leads to noticeable delays
+
 set ignorecase                          " Do case insensitive matching
 set incsearch                           " Incremental search
-set hlsearch	                        " Highlight search
-set nowrapscan	                        " Don't wrap around EOF or BOF while searching
+set hlsearch                            " Highlight search
+set nowrapscan                          " Don't wrap around EOF or BOF while searching
+
 
 " set autowrite                         " Automatically save before commands like :next and :make
 
@@ -349,6 +417,7 @@ set nowrapscan	                        " Don't wrap around EOF or BOF while sear
 " completion options so you can complete the file without further keys
 set wildignore=*/.git/*,*/.svn/*
 set wildignore+=*.o,*.so,*.pyc
+set wildignore+=*.whl
 set wildmode=longest,full
 set wildmenu
 
@@ -356,6 +425,8 @@ set wildmenu
 " the possible matches; see :h completeopt
 set completeopt=menu,menuone,longest
 set switchbuf=useopen,usetab
+
+set shortmess+=c                        " Don't pass messages to |ins-completion-menu|.
 
 " this makes sure that shell scripts are highlighted
 " as bash scripts and not sh scripts

@@ -50,6 +50,7 @@ alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
+alias curln="curl -H \"Authorization: OAuth $(cat ${HOME}/.nirvana/token)\"";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
@@ -101,17 +102,18 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
 
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/bin");  # for virtualenvwrapper and pbcopy/pbpaste
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/cmake/bin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/tmux/bin");
-    PATH=$(_smart_append ${PATH} "${HOME}/.local/nvim/bin");
+    PATH=$(_smart_append ${PATH} "${LOCAL}/bin");  # for virtualenvwrapper and pbcopy/pbpaste
+    PATH=$(_smart_append ${PATH} "${LOCAL}/cmake/bin");
+    PATH=$(_smart_append ${PATH} "${LOCAL}/tmux/bin");
+    PATH=$(_smart_append ${PATH} "${LOCAL}/nvim/bin");
 
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
 
     LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
-    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${HOME}/.local/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${LOCAL}/lib");
 
-    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${HOME}/.local/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${LOCAL}/lib");
 
     if [[ -d "/usr/local/cuda" ]]; then
         export CUDA_HOME="/usr/local/cuda";
@@ -123,8 +125,8 @@ _update_env() {
         LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
     fi
 
-    if [[ -d "/opt/openmpi-3.0.0" ]]; then
-        export MPI_PATH="/opt/openmpi-3.0.0";
+    if [[ -d "/opt/openmpi" ]]; then
+        export MPI_PATH="/opt/openmpi";
         export CPLUS_INCLUDE_PATH="${MPI_PATH}/include";
         PATH=$(_smart_append ${PATH} "${MPI_PATH}/bin");
         CPATH=$(_smart_append ${CPATH} "${MPI_PATH}/include");
@@ -185,13 +187,9 @@ ya-deploy() {
     sudo apt-get install yandex-arc-launcher -y --force-yes
 
     mkdir -p ${ARCADIA_ROOT}/arcadia ${ARCADIA_ROOT}/store ${ARCADIA_ROOT_GENERATED};
-    nice arc mount -m ${ARCADIA_ROOT}/arcadia/ -S ${ARCADIA_ROOT}/store/;
+    nice arc mount -m ${ARCADIA_ROOT}/ -S ${ARCADIA_ROOT}/../store/;
 
     _update_arcadia_env;
-    (
-        cd ${ARCADIA_ROOT};
-        ycm cv/imgclassifiers/tf_applicator ml/tensorflow/ytensorflow/cpp;
-    )
 }
 
 
@@ -201,6 +199,15 @@ _update_arcadia_env () {
 
         export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia";
         arcadia () { cd ${ARCADIA_ROOT}; };
+
+        cd () {
+            if [[ ! -z "${1}" && ! -d "${1}" && -d "${ARCADIA_ROOT}/${1}" ]]; then
+                echo "cd $ARCADIA_ROOT/${1}";
+                builtin cd $ARCADIA_ROOT/${1};
+            else
+                builtin cd ${1};
+            fi
+        }
 
         export ARCADIA_CONTRIB="${ARCADIA_ROOT}/contrib";
         contrib () { cd ${ARCADIA_CONTRIB}; };
@@ -216,6 +223,9 @@ _update_arcadia_env () {
 
         export YTF="${ARCADIA_ROOT}/ml/tensorflow/ytensorflow";
         ytf () { cd ${YTF}; };
+
+        export UB="${ARCADIA_ROOT}/ml/tensorflow/models/userbert";
+        ub () { cd ${UB}; };
 
         export VPQ="${ARCADIA_ROOT}/ml/tensorflow/models/vpq";
         vpq () { cd ${VPQ}; };
@@ -245,26 +255,26 @@ _update_arcadia_env () {
 
         arc() {
             if [[ "${1}" = "rbc" ]]; then
-                ya tool arc rebase --continue;
+                /usr/bin/arc rebase --continue;
             elif [[ "${1}" = "rbs" ]]; then
-                ya tool arc rebase --skip;
+                /usr/bin/arc rebase --skip;
             elif [[ "${1}" = "mt" ]]; then
-                ya tool arc mergetool -y --tool=vimdiff;
+                /usr/bin/arc mergetool -y --tool=vimdiff;
             elif [[ "${1}" = "cb" ]]; then
-                echo $(ya tool arc branch | grep '\*' | cut -f2 -d\ );
+                echo $(/usr/bin/arc branch | grep '\*' | cut -f2 -d\ );
             elif [[ "${1}" = "s" ]]; then
-                ya tool arc status --short ${@:2} \
+                /usr/bin/arc status --short ${@:2} \
                     | sed "s/^## \(.*\)\.\.\.\(.*\)/* \1 -> $COLOR_GREEN\2$COLOR_OFF */g" \
                     | sed "s/^\(??.*\)/$COLOR_PURPLE\1$COLOR_OFF/g" \
                     | sed "s/^\( M.*\)/$COLOR_RED\1$COLOR_OFF/g" \
                     | sed "s/^\(A .*\)/$COLOR_GREEN\1$COLOR_OFF/g" \
                     | tac
             elif [[ "${1}" = "undo" ]]; then
-                ya tool arc checkout $(arc cb) ${@:2};
+                /usr/bin/arc checkout $(arc cb) ${@:2};
             elif [[ "${1}" = "unstage" ]]; then
-                ya tool arc reset $(arc cb) ${@:2};
+                /usr/bin/arc reset $(arc cb) ${@:2};
             else
-                ya tool arc ${@}
+                /usr/bin/arc ${@}
             fi
         }
 
@@ -308,17 +318,6 @@ fi
 # =====================================================================================================================
 # ================================================= Deploy Function ===================================================
 # =====================================================================================================================
-
-_install_gcc49() {
-    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    sudo apt-get update
-    sudo apt-get install -y gcc-4.9 g++-4.9
-}
-
-_install_clang39() {
-    wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    sudo apt-get install -y clang-3.9 libclang-3.9-dev lldb-3.9 clang-format-3.9 python-clang-3.9
-}
 
 _install_cmake() {
     sudo apt-get install -y libcurl4-openssl-dev;
@@ -369,26 +368,6 @@ _install_tmux() {
     _update_env;
 }
 
-_install_nvim() {
-    mkdir -p ${HOME}/.tmp.build.packages;
-    export TMPDIR="${HOME}/.tmp.build.packages";
-    (
-        cd $HOME/.tmp.build.packages;
-        git clone https://github.com/neovim/neovim.git;
-        cd neovim;
-        git checkout v0.3.1;
-        make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local/nvim" -j;
-        make install;
-    );
-    unset TMPDIR;
-    rm -rf ${HOME}/.tmp.build.packages
-
-    pip2 install --user --upgrade neovim
-    pip3 install --user --upgrade neovim
-
-    _update_env;
-}
-
 _reinstall_dots() {
     mkdir -p ${HOME}/projects;
     (
@@ -402,7 +381,8 @@ _reinstall_dots() {
             git checkout master;
             git pull origin master;
         fi
-        ./install.py install configs; _update_env;
+        ./install.py install configs;
+        _update_env;
     );
 }
 
@@ -410,21 +390,19 @@ deploy_env() {
     sudo apt-get install -y make git cmake libtool-bin;
     sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
     sudo apt-get install -y software-properties-common python-software-properties;
-    _install_gcc49;
-    _install_clang39;
 
-    export CC=${CLANG39_CC}; export CXX=${CLANG39_CXX};
     _install_cmake;
     _install_tmux;
-    _install_nvim;
-    unset CC; unset CXX;
 
-    pip2 install -U --user pip setuptools;
-    pip2 install -U --user matplotlib;
-    pip2 install -U --user pillow;
-    pip2 install -U --user 'ipython[all]';
-    pip2 install -U --user 'jupyter[all]';
-    pip2 install -U --user virtualenvwrapper;
+    echo "#\!/bin/bash\npython \"\$@\"" > ${LOCAL}/bin/venvpython;
+    chmod +x ${LOCAL}/bin/venvpython
+
+    pip3 install -U --user pip setuptools;
+    pip3 install -U --user matplotlib;
+    pip3 install -U --user pillow;
+    pip3 install -U --user 'ipython[all]';
+    pip3 install -U --user 'jupyter[all]';
+    pip3 install -U --user virtualenvwrapper;
 
     _reinstall_dots;
 }

@@ -38,7 +38,7 @@ function arc_dirty {
 function arc_branch_prompt() {
     branches=$(arc branch 2> /dev/null) || return
     branch=$(echo $branches | grep \* | cut -d ' ' -f2)
-    print " $fg_bold[blue]($fg_bold[magenta]$branch$(arc_dirty)$fg_bold[blue])$reset_color"
+    print " $fg_bold[blue]($fg_bold[magenta]$branch$fg_bold[blue])$reset_color"
 }
 
 function venv_prompt() {
