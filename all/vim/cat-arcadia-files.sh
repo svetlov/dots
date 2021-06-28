@@ -1,6 +1,6 @@
 #!/bin/zsh -e
 
-if [[ "${@: -1}" = "${ARCADIA_ROOT}" ]]; then
+if [[ "${@: -1}" == "${ARCADIA_ROOT}" ]]; then
 
     ARCADIA_ROOT_FILES_LIST_CACHED_FILE=${HOME}/.cache/arcadia_files_list.txt
 

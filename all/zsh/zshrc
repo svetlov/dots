@@ -420,7 +420,7 @@ _install_nvim() {
     mkdir -p "${HOME}/.config/nvim/swap";
     _safe_symlink "${DOTS_HOME}/all/vim/nvim-init.vim" "${HOME}/.config/nvim/init.vim"
     _safe_symlink "${DOTS_HOME}/all/vim/danet-config.vim" "${HOME}/.config/nvim/syntax/danet-config.vim";
-    nvim -e +PluginInstall +qall;
+    nvim -e +PlugInstall +qall;
 }
 
 _install_ssh() {
@@ -450,10 +450,16 @@ _install_ssh() {
 
 deploy_env() {
     if [[ $is_darwin == true ]]; then
+        brew install fd;
     elif [[ $is_linux == true ]]; then
+        sudo apt-get update;
         sudo apt-get install -y make git cmake libtool-bin;
         sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
         sudo apt-get install -y software-properties-common python-software-properties;
+        sudo apt-get install -y curl libcurl4-openssl-dev;
+
+        wget https://github.com/sharkdp/fd/releases/download/v8.2.1/fd_8.2.1_amd64.deb;
+        sudo dpkg -i ./fd_8.2.1_amd64.deb; rm -rf ./fd_8.2.1_amd64.deb;
 
         _install_cmake;
         _install_tmux;

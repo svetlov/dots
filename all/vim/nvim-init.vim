@@ -7,7 +7,7 @@ filetype off                  " required by Vundle
 silent! so .vimlocal          " add vimlocal for different projects
 
 " install vim-plug if there is none
-let b:vimplug_local_path = expand($LOCAL . '/nvim/share/nvim/runtime/autoload/plug.vim')
+let b:vimplug_local_path = expand($HOME. '/.config/nvim/autoload/plug.vim')
 let b:vimplug_remote_path = 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 if !filereadable(b:vimplug_local_path)
     echo "Installing vim-plug..\n"
