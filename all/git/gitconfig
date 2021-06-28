@@ -16,6 +16,7 @@
     merc = merge --no-ff
 [user]
 	name = Vsevolod Svetlov
+	email = splinter@yandex-team.ru
 [color]
   diff = auto
   status = auto
