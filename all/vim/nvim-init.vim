@@ -44,8 +44,8 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'preservim/nerdtree'
 " NERDTree plugin that highlights opened buffers
 Plug 'PhilRunninger/nerdtree-buffer-ops'
-" qbuffer fast edit
-" Plugin 'romainl/vim-qf'
+" fast switch of header and source c/cpp files
+Plug 'derekwyatt/vim-fswitch'
 
 " fast mru files navigation
 source $ZSH/custom/plugins/fzf/plugin/fzf.vim
@@ -59,18 +59,6 @@ Plug 'tpope/vim-commentary'
 Plug 'hynek/vim-python-pep8-indent'
 " doxygen syntax highlight
 Plug 'vim-scripts/DoxyGen-Syntax'
-
-" ========================== dev section ======================================
-" fast switch of header and source c/cpp files
-Plug 'derekwyatt/vim-fswitch'
-" code autocomplete for c/c++/python
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" code checker
-Plug 'dense-analysis/ale'
-" snippets plugin
-Plug 'SirVer/ultisnips'
-" Snippets are separated from the plugin.
-Plug 'honza/vim-snippets'
 
 call plug#end()
 
@@ -102,15 +90,6 @@ let g:airline#extensions#tabline#left_alt_sep = '|'
 let g:airline#extensions#tabline#buffer_nr_show = 1
 " collapse buffer line if exactly one buffer
 let g:airline_inactive_collapse=1
-
-" =============================================================================
-" ============================= UltiSnips Settings ============================
-" =============================================================================
-
-" set rtp+=~/projects/dots/all/vim/  " for mysnippets directory
-let g:UltiSnipsExpandTrigger = "<C-j>"
-let g:UltiSnipsEditSplit = 'vertical'
-let g:UltiSnipsSnippetDirectories=[$HOME.'/projects/dots/all/vim/mysnippets', "UltiSnips"]
 
 " =============================================================================
 " =============================== FZF Settings ================================
@@ -211,62 +190,6 @@ autocmd VimEnter * if (argc() == 0 || argc() == 1) && !exists('s:std_in') | call
 
 nmap <silent> <leader>a :call NERDTreeFindOrToggle()<CR>
 nmap <silent> <leader>A :NERDTreeClose<CR>
-
-
-" =============================================================================
-" ============================== CoC.VIM Settings =============================
-" =============================================================================
-
-inoremap <silent><expr> <TAB> pumvisible() ? "\<C-n>" : <SID>check_back_space() ? "\<TAB>" : coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-inoremap <silent><expr> <c-space> coc#refresh()
-"" Make <CR> auto-select the first completion item and notify coc.nvim to format on enter
-inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-"
-"" Use `[g` and `]g` to navigate diagnostics
-"" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
-""nmap <silent> [g <Plug>(coc-diagnostic-prev)
-""nmap <silent> ]g <Plug>(coc-diagnostic-next)
-"
-" GoTo code navigation.
-nmap <silent> gd :call  CocAction('jumpDefinition', 'vsplit')<CR>
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use K to show documentation in preview window.
-nmap <leader>R <Plug>(coc-rename)
-noremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
-    call CocActionAsync('doHover')
-  else
-    execute '!' . &keywordprg . " " . expand('<cword>')
-  endif
-endfunction
-
-" =============================================================================
-" ================================ ALE Settings ===============================
-" =============================================================================
-
-let g:ale_completion_enabled = 0
-"let g:ale_linters = {'python': ['pyls', 'flake8']}
-let g:ale_python_flake8_executable = 'python'
-let g:ale_python_flake8_args = '-m flake8 --max-line-length=120'
-let g:ale_python_flake8_options = '-m flake8 --max-line-length=120'
-let g:ale_python_pylint_executable = 'python'
-let g:ale_python_pylint_args = '-m pylint -d=C0301'
-let g:ale_python_pylint_options = '-m pylint -d=C0301'
-
-
 
 " =============================================================================
 " ================================ file switch ================================
