@@ -22,7 +22,10 @@ function pwd_prompt() {
 }
 
 function git_dirty {
-    [[ $(git status --porcelain 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
+    # [[ $(git status --porcelain 2> /dev/null | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
+    # [[ $(git diff-index --quiet HEAD) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
+    # echo "$fg_bold[yellow]:✗"
+    # [[ $(git diff --ignore-submodules HEAD | wc -l) -ne 0 ]] && echo "$fg_bold[yellow]:✗"
 }
 
 function git_branch_prompt() {
@@ -36,6 +39,7 @@ function arc_dirty {
 }
 
 function arc_branch_prompt() {
+    return  # I am not in Yandex anymore
     branches=$(arc branch 2> /dev/null) || return
     branch=$(echo $branches | grep \* | cut -d ' ' -f2)
     print " $fg_bold[blue]($fg_bold[magenta]$branch$fg_bold[blue])$reset_color"
