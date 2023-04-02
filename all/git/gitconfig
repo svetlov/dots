@@ -1,6 +1,6 @@
 [core]
     excludesfile = ~/.gitignore
-    editor = vim
+    editor = code
 [alias]
     co = checkout
     ci = commit
@@ -15,12 +15,16 @@
     staaash = stash --all
     merc = merge --no-ff
 [user]
-	name = Vsevolod Svetlov
-	email = splinter@yandex-team.ru
+  name = Vsevolod Svetlov
+  email = vsvetlov@twitter.com
 [color]
   diff = auto
   status = auto
   branch = auto
   interactive = auto
-  ui = true
+	ui = true
   pager = true
+[diff]
+  renames = true
+[http]
+  postBuffer = 524288000

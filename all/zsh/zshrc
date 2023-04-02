@@ -4,7 +4,6 @@ export LC_ALL=en_US.UTF-8;
 export LANG=en_US.UTF-8;
 export EDITOR='vim';
 
-export USER="splinter";
 export HOME=$(cd ${HOME}; pwd -P);
 export LOCAL=${HOME}/.local;
 
@@ -13,10 +12,11 @@ export PROJECT_HOME=${HOME}/projects;
 export DOTS_HOME=${PROJECT_HOME}/dots;
 
 export IPYTHON_PORT=6500;
-export CLANG39_CC="/usr/bin/clang-3.9";
-export CLANG39_CXX="/usr/bin/clang++-3.9";
-export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia"
-export ARCADIA_ROOT_GENERATED="${HOME}/projects/arcadia/generated"
+export VIRTUALENVWRAPPER_PYTHON=python3;
+# export CLANG39_CC="/usr/bin/clang-3.9";
+# export CLANG39_CXX="/usr/bin/clang++-3.9";
+# export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia"
+# export ARCADIA_ROOT_GENERATED="${HOME}/projects/arcadia/generated"
 
 export LUA_VERSION="5.3";
 export TMUX_VERSION="2.5";
@@ -51,7 +51,6 @@ alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
-alias curln="curl -H \"Authorization: OAuth $(cat ${HOME}/.nirvana/token)\"";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
@@ -178,13 +177,12 @@ _update_env;
 export ZSH=$HOME/.oh-my-zsh
 
 if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
-    git clone git://github.com/robbyrussell/oh-my-zsh.git ${ZSH};
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
     git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
     ${ZSH}/custom/plugins/fzf/install --bin;
     git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
     _update_env;
-    compaudit | xargs chmod g-w,o-w
 
     _safe_symlink "${DOTS_HOME}/all/zsh/bashrc" "${HOME}/.bashrc"
     _safe_symlink "${DOTS_HOME}/all/zsh/zshrc" "${HOME}/.zshrc"
@@ -203,12 +201,44 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git tmux python osx brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
+plugins=(git tmux python brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
 
 source ${ZSH}/oh-my-zsh.sh
 
+
 # =====================================================================================================================
-# ================================================= Arcadia Settings ==================================================
+# ================================================ Twitter Settings ===================================================
+# =====================================================================================================================
+
+_update_twitter_settings() {
+    export VISUAL='code --wait';
+    export EDITOR="$VISUAL";
+
+    # Automatically placed at end of file by MDE. To disable this behavior: touch ~/.no-mde-dotfile. 
+    # Ideally you do not need to do this. Please contact us on Slack at #mde-contributors to discuss long-term alternatives.
+    source /opt/twitter_mde/etc/zshrc
+
+    alias mykubectl="kubectl --context=kf-cxp-stg -n vsvetlov ";
+
+    export SOURCE="${HOME}/workspace/source"
+    twsrc() { cd ${SOURCE}; };
+
+    cd () {
+        if [[ ! -z "${1}" && ! -d "${1}" && -d "${SOURCE}/${1}" ]]; then
+            echo "cd ${SOURCE}/${1}";
+            builtin cd ${SOURCE}/${1};
+        else
+            builtin cd ${1};
+        fi
+    }
+}
+
+_update_twitter_settings
+
+ 
+
+# =====================================================================================================================
+# ================================================ Yandex Settings ====================================================
 # =====================================================================================================================
 
 ya-deploy() {
@@ -222,6 +252,8 @@ ya-deploy() {
 
 
 _update_arcadia_env () {
+    alias curln="curl -H \"Authorization: OAuth $(cat ${HOME}/.nirvana/token)\"";
+
     if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
         export FZF_DEFAULT_COMMAND="${DOTS_HOME}/all/vim/cat-arcadia-files.sh"
 
@@ -323,13 +355,15 @@ _update_arcadia_env () {
     fi
 }
 
-_update_arcadia_env;
+# _update_arcadia_env;
 
 # =====================================================================================================================
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
 if [[ $is_darwin == true ]]; then
-
+    if [[ "${#TMUX}" -eq 0 ]]; then
+        tmux attach || tmux new -A
+    fi
 elif [[ $is_linux == true ]]; then
     if [[ -L "${HOME}/.zshrc" ]]; then
         if [[ "${#TMUX}" -eq 0 ]]; then
@@ -477,3 +511,4 @@ deploy_env() {
     pip3 install -U --user 'jupyter[all]';
     pip3 install -U --user virtualenvwrapper;
 }
+
