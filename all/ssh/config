@@ -1,148 +1,31 @@
 Host *
     ForwardAgent yes
-    RemoteForward 2224 127.0.0.1:2224
-    RemoteForward 2225 127.0.0.1:2225
-    RemoteForward 2226 127.0.0.1:2226
-    RemoteForward 2227 127.0.0.1:2227
+    # RemoteForward 2224 127.0.0.1:2224
+    # RemoteForward 2225 127.0.0.1:2225
+    # RemoteForward 2226 127.0.0.1:2226
+    # RemoteForward 2227 127.0.0.1:2227
+
+    LocalForward 2224 127.0.0.1:2224
+    LocalForward 2225 127.0.0.1:2225
+    LocalForward 2226 127.0.0.1:2226
+    LocalForward 2227 127.0.0.1:2227
 
 Host router
     User root
     Port 23451
     HostName 77.37.212.26
 
-Host viola
-    HostName viola.search.yandex.net
+Host vpn
+    # see https://my.llhost-inc.eu/clientarea.php?action=services for details
+    # see http://5.181.202.33:51821/ as webface
+    User splinter
+    HostName 5.181.202.33
 
-Host jones
-    HostName jones.search.yandex.net
-
-Host hinton
-    HostName hinton.search.yandex.net
-
-Host dnncv1
-    HostName 2a02:6b8:c01:104:0:696:0:40
-
-Host dnncv2
-    HostName 2a02:6b8:c01:102:0:696:0:31
-
-Host dnncv4
-    HostName 2a02:6b8:c01:102:0:696:0:32
-
-Host dnncv5
-    HostName 2a02:6b8:c01:101:0:696:0:3e
-
-Host n0
-    HostName nikola0.search.yandex.net
-
-Host n1
-    HostName nikola1.search.yandex.net
-
-Host n2
-    HostName nikola2.search.yandex.net
-
-Host n3
-    HostName nikola3.search.yandex.net
-
-Host n4
-    HostName nikola4.search.yandex.net
-
-Host n5
-    HostName nikola5.search.yandex.net
-
-Host n6
-    HostName nikola6.search.yandex.net
-
-Host n7
-    HostName nikola7.search.yandex.net
-
-Host n8
-    HostName nikola8.search.yandex.net
-
-Host n9
-    HostName nikola9.search.yandex.net
-
-Host n10
-    HostName nikola10.search.yandex.net
-
-Host n11
-    HostName nikola11.search.yandex.net
-
-Host n12
-    HostName nikola12.search.yandex.net
-
-Host n13
-    HostName nikola13.search.yandex.net
-
-Host n14
-    HostName nikola14.search.yandex.net
-
-Host n15
-    HostName nikola15.search.yandex.net
-
-Host n16
-    HostName nikola16.search.yandex.net
-
-Host n17
-    HostName nikola17.search.yandex.net
-
-Host cv6
-    HostName cv-sas-006.search.yandex.net
-
-Host cv7
-    HostName cv-sas-007.search.yandex.net
-
-Host cv8
-    HostName cv-sas-008.search.yandex.net
-
-Host cv9
-    HostName cv-sas-009.search.yandex.net
-
-Host cv10
-    HostName cv-sas-010.search.yandex.net
-
-Host cv11
-    HostName cv-sas-011.search.yandex.net
-
-Host cv12
-    HostName cv-sas-012.search.yandex.net
-
-Host cv13
-    HostName cv-sas-013.search.yandex.net
-
-Host cv14
-    HostName cv-sas-014.search.yandex.net
-
-Host cv15
-    HostName cv-sas-015.search.yandex.net
-
-Host cv16
-    HostName cv-sas-016.search.yandex.net
-
-Host cv17
-    HostName cv-sas-017.search.yandex.net
-
-
-# old statistics servers
-
-Host cloud
-    User cloud-user
-    HostName 37.9.123.183
-
-Host test
-    HostName 37.9.123.55
-
-Host e
-    # User splinter
-    HostName stbx-dev01e.yandex.ru
-
-Host e2
-    # User splinter
-    HostName dev02e.stat.yandex.net
-
-Host h
-    # User splinter
-    HostName stbx-dev01h.stat.yandex.net
-
+Host vpn-komiak
+    # starndard passwd, wireguard passwd физфакМГУ2009
+    # see http://45.155.120.210:51821/ as webface
+    User svetlov
+    HostName 45.155.120.210
 
 # dolenko lab server
 Host hermes
@@ -154,6 +37,15 @@ Host data-lab
 
 Host cv-v100
     HostName cv-v100-common.vla.yp-c.yandex.net
+    ForwardAgent %d/.skotty/sock/default.sock
 
 Host a100
     HostName a100.sas.yp-c.yandex.net
+    ForwardAgent %d/.skotty/sock/default.sock
+
+Host *.yandex.net
+  # Forward only "sudo" socket to the untrusted environment
+  ForwardAgent %d/.skotty/sock/sudo.sock
+  # But authenticate through default socket
+  IdentityAgent %d/.skotty/sock/default.sock
+
