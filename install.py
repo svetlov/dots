@@ -7,9 +7,6 @@ import argparse
 import subprocess as sb
 import contextlib
 
-import distutils.sysconfig as sysconfig
-
-
 ISLINUX = (sys.platform != 'darwin')
 
 PWD = os.path.abspath(os.path.dirname(__file__))
@@ -109,6 +106,8 @@ class NVimInstaller(Installer):
 
     @classmethod
     def install(cls):
+        import distutils.sysconfig as sysconfig
+
         os.makedirs(os.path.join(HOME, ".config", "nvim"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".config", "nvim", "syntax"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".config", "nvim", "undo"), exist_ok=True)
