@@ -1,0 +1,160 @@
+{
+  "window.zoomLevel": 1,
+  "editor.rulers": [
+    120
+  ], // highlight text width with vertical line
+  "editor.indentSize": 2,
+  "editor.formatOnSave": true,
+  "editor.minimap.enabled": false,
+  "editor.minimap.size": "fill",
+  "editor.find.addExtraSpaceOnTop": false,
+  "editor.semanticHighlighting.enabled": true,
+  "markdown.preview.lineHeight": 1,
+  "files.trimTrailingWhitespace": true, // rm trailing spaces on save
+  "files.insertFinalNewline": true, // get rid of "No newline at end of file" in git diff or arc diff
+  "files.autoSave": "onWindowChange",
+  "files.watcherExclude": {
+    "": true,
+    "**/.bloop": true,
+    "**/.metals": true,
+    "**/.ammonite": true,
+    "**/.git": true,
+    "**/pycache/": true,
+    "**/mypy_cache/": true,
+    "**/bazel-": true,
+    "vendor/": true,
+    "**/bin/": true
+  },
+  "files.exclude": {
+    ".pytest**": true,
+    ".tox": true,
+    "dist/": true,
+    "build/": true,
+    "**.egg-info/": true,
+  },
+  "explorer.openEditors.visible": 1, // hide open editors in explorer
+  // "workbench.colorTheme": "Default Dark+",
+  "workbench.editor.showTabs": "single", // hide open editors in tabs
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook",
+  },
+  "settingsSync.ignoredSettings": [
+    "-python.defaultInterpreterPath"
+  ],
+  "notebook.lineNumbers": "on",
+  "notebook.output.scrolling": true,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "right"
+  },
+  "remote.downloadExtensionsLocally": true,
+  // https://github.com/VSCodeVim/Vim/issues/3957#issuecomment-1206642758
+  "extensions.experimental.affinity": {
+    "vscodevim.vim": 1,
+    "asvetliakov.vscode-neovim": 1,
+    "ms-python.python": 2,
+    "ms-python.pylance": 2,
+  },
+  // ================================================ terminal settings ================================================
+  // "redhat.telemetry.enabled": false,
+  // "terminal.integrated.defaultProfile.linux": "zsh",
+  // // "terminal.integrated.inheritEnv": true, // preserve server env (https://stackoverflow.com/a/59443505)
+  // // "terminal.integrated.macOptionClickForcesSelection": true, // for copy paste in tmux terminal
+  // "terminal.integrated.commandsToSkipShell": [
+  //   "workbench.action.terminal.sendSequence"
+  // ],
+  // "terminal.integrated.gpuAcceleration": "off",
+  // "terminal.integrated.allowChords": false,
+  // "terminal.integrated.drawBoldTextInBrightColors": false,
+  // "terminal.integrated.windowsEnableConpty": false,
+  // "terminal.integrated.customGlyphs": false,
+  // ============================================ remote ssh settings ==================================================
+  // "remote.SSH.useLocalServer": false,
+  "remote.SSH.useFlock": false, // for servers with hdfs systems, like slurm cluster
+  "remote.SSH.localServerDownload": "always", // for servers without internet connections
+  "remote.SSH.useExecServer": false,
+  "remote.SSH.remoteServerListenOnSocket": true,
+  "remote.SSH.remotePlatform": {
+    "devbox": "linux",
+    "atla-gxx-06-sr1.prod.twttr.net": "linux"
+  },
+  // "remote.SSH.logLevel": "trace",
+  // "remote.SSH.defaultForwardedPorts": [
+  //   { "name": "pbcopy", "localPort": 22240, "remotePort": 2224 },
+  //   { "name": "pbpaste", "localPort": 22250, "remotePort": 2225 },
+  //   { "name": "pbopen", "localPort": 22260, "remotePort": 2226 },
+  //   { "name": "notebook", "localPort": 22270, "remotePort": 2227 }
+  // ],
+  // ============================================== vim settings =======================================================
+  // "vim.enableNeovim": true,
+  // "vim.neovimUseConfigFile": true
+  "vim.vimrc.enable": false,
+  "vim.textwidth": 120, // set text width in vim to 120 symbols width
+  "vim.useSystemClipboard": true,
+  "vim.easymotion": false,
+  // "vim.vimrc.path": "~/projects/dots/all/vim/nvim-init.vim",
+  "vim.surround": false, // vscode-open-buffers extention
+  "vim.sneak": false,
+  // it is shown that vim.statusBarColors is inactive but it's not true.
+  "vim.statusBarColorControl": true,
+  "vim.statusBarColors": {
+    "normal": "#268bd2",
+    "insert": "#d33682",
+    "visual": "#268bd2",
+    "visualline": "#2aa198",
+    "visualblock": "#859900",
+    "replace": "#b58900",
+  },
+  "vim.foldfix": true,
+  "vim.overrideCopy": false,
+  // =============================================== Python settings ===================================================
+  // "python.analysis.logLevel": "Trace",
+  "python.languageServer": "Pylance",
+  "python.terminal.activateEnvironment": true,
+  "python.experiments.enabled": false,
+  "python.experiments.optOutFrom": [
+    "All"
+  ],
+  "python.logging.level": "info",
+  "[python]": {
+    "editor.formatOnType": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+  },
+  "python.venvFolders": [
+    "~/.virtualenvs",
+    "~/tml_venvs"
+  ],
+  "window.commandCenter": false,
+  "extensions.autoUpdate": false,
+  "update.mode": "manual",
+  "files.autoSaveDelay": 0,
+  "extensions.ignoreRecommendations": true,
+  "jupyter.logging.level": "error",
+  // "workbench.colorCustomizations": {
+  //   "statusBar.background": "#268bd2",
+  //   "statusBar.noFolderBackground": "#268bd2",
+  //   "statusBar.debuggingBackground": "#268bd2",
+  //   "statusBar.foreground": "#ffffff",
+  //   "statusBar.debuggingForeground": "#ffffff"
+  // },
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#268bd2",
+    "statusBar.noFolderBackground": "#268bd2",
+    "statusBar.debuggingBackground": "#268bd2",
+    "statusBar.foreground": "#ffffff",
+    "statusBar.debuggingForeground": "#ffffff"
+  },
+  "files.saveConflictResolution": "overwriteFileOnDisk",
+  "explorer.excludeGitIgnore": true,
+  "search.useParentIgnoreFiles": true,
+  "redhat.telemetry.enabled": false,
+  "window.customTitleBarVisibility": "never",
+  "workbench.activityBar.location": "hidden",
+  "gitlens.advanced.messages": {
+    "suppressLineUncommittedWarning": true
+  },
+  "git.suggestSmartCommit": false,
+  "git.openRepositoryInParentFolders": "never",
+}

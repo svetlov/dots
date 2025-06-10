@@ -1,0 +1,435 @@
+// Place your key bindings in this file to override the defaults
+[
+  {
+    "key": "\\ f",
+    "command": "workbench.action.quickOpen",
+    "when": "!terminalFocus && neovim.mode != insert && neovim.mode != cmdline" // to allow using of \ character in insert/find mode
+  },
+  {
+    "key": "\\ s",
+    "command": "clangd.switchheadersource",
+    "when": "!terminalFocus && neovim.mode != insert && neovim.mode != cmdline" // to allow using of \ character in insert/find mode
+  },
+  {
+    // hide sidebar on cmd+shift+e when explorer sidebar is visible
+    "key": "cmd+shift+e",
+    "command": "workbench.action.closeSidebar",
+    "when": "explorerViewletVisible"
+  },
+  {
+    // hide sidebar on cmd+shift+f when search sidebar is visible
+    "key": "cmd+shift+f",
+    "command": "workbench.action.closeSidebar",
+    "when": "searchViewletVisible"
+  },
+  {
+    // toggle terminal on cmd+shift+t
+    "key": "cmd+shift+t",
+    "command": "workbench.action.terminal.toggleTerminal",
+  },
+  {
+    // disable default reopen closed editor cmd+shift+t
+    "key": "cmd+shift+t",
+    "command": "-workbench.action.reopenClosedEditor"
+  },
+  {
+    // open source control
+    "key": "cmd+shift+g",
+    "when": "workbench.scm.active",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        "workbench.scm.focus",
+        "list.focusFirst",
+      ],
+    },
+  },
+  {
+    // close source control
+    "key": "cmd+shift+g",
+    "command": "workbench.action.closeSidebar",
+    "when": "sideBarFocus && activeViewlet == 'workbench.view.scm'"
+  },
+  {
+    // free cmd+shift+g
+    "key": "cmd+shift+g",
+    "command": "-editor.action.previousMatchFindAction",
+    "when": "editorFocus"
+  },
+  {
+    // free cmd+shift+g
+    "key": "cmd+shift+g",
+    "command": "-workbench.action.terminal.openDetectedLink",
+    "when": "accessibleViewIsShown && terminalHasBeenCreated && accessibleViewCurrentProviderId == 'terminal'"
+  },
+  {
+    // free cmd+shift+g
+    "key": "cmd+shift+g",
+    "command": "-workbench.action.terminal.findPrevious",
+    "when": "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocusInAny && terminalHasBeenCreated || terminalFocusInAny && terminalProcessSupported"
+  },
+  {
+    "key": "escape",
+    "command": "workbench.action.closeSidebar",
+    "when": "sideBarFocus",
+  },
+  {
+    "key": "v",
+    "command": "explorer.openToSide",
+    "when": "explorerViewletFocus && explorerViewletVisible && !inputFocus"
+  },
+  {
+    "key": "ctrl+enter",
+    "command": "-explorer.openToSide",
+    "when": "explorerViewletFocus && explorerViewletVisible && !inputFocus"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "-workbench.action.terminal.split",
+    "when": "terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "cmd+shift+v",
+    "command": "workbench.action.splitEditor",
+    "when": "!terminalFocus && !multipleEditorGroups"
+  },
+  {
+    "key": "cmd+shift+v",
+    "command": "workbench.action.closeEditorsInOtherGroups",
+    "when": "multipleEditorGroups"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "-workbench.action.splitEditor"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "-workbench.action.terminal.splitInstance",
+    "when": "terminalProcessSupported && terminalTabsFocus"
+  },
+  {
+    "key": "cmd+k cmd+\\",
+    "command": "workbench.action.splitEditorOrthogonal",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "cmd+k cmd+\\",
+    "command": "-workbench.action.splitEditorOrthogonal"
+  },
+  // =============================================== Meta Navigation commands ==============================================
+  {
+    "key": "cmd+h",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        "workbench.action.navigateLeft",
+        {
+          "when": "!editorTextFocus && sideBarFocus && activeViewlet == 'workbench.view.scm'",
+          "command": "list.focusFirst",
+        }
+      ]
+    }
+  },
+  {
+    "key": "cmd+l",
+    "command": "workbench.action.navigateRight"
+  },
+  {
+    "key": "cmd+k",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        {
+          "command": "workbench.action.focusActiveEditorGroup",
+          "when": "terminalFocus"
+        },
+        {
+          "command": "workbench.action.navigateUp",
+          "when": "!terminalFocus"
+        },
+      ],
+    }
+  },
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.terminal.focus"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "terminalIsOpen && terminalFocus && terminalProcessSupported",
+  },
+  {
+    // close editor and terminal viewers if in editor
+    "key": "cmd+\\",
+    "when": "editorTextFocus",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        "workbench.action.closeSidebar",
+        "workbench.action.closePanel",
+        "workbench.action.activityBarLocation.hide",
+        "workbench.action.toggleMaximizeEditorGroup",
+      ],
+    }
+  },
+  // =============================================== Menu Navigation commands ==============================================
+  {
+    "key": "ctrl+j",
+    "command": "list.focusDown",
+    "when": "listFocus"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "list.focusUp",
+    "when": "listFocus"
+  },
+  {
+    "key": "enter",
+    "command": "list.select",
+    "when": "explorerViewletVisible && filesExplorerFocus"
+  },
+  {
+    "key": "ctrl+o",
+    "command": "list.toggleExpand",
+    "when": "listFocus"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "selectNextSuggestion",
+    "when": "editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "selectPrevSuggestion",
+    "when": "editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible"
+  },
+  // {
+  //     "key": "ctrl+j",
+  //     "command": "workbench.action.quickOpenNavigateNext",
+  //     "when": "inQuickOpen"
+  // },
+  // {
+  //     "key": "ctrl+k",
+  //     "command": "workbench.action.quickOpenNavigatePrevious",
+  //     "when": "inQuickOpen"
+  // },
+  // =============================================== Editors Navigation commands ==============================================
+  {
+    "key": "alt+h",
+    "command": "workbench.action.previousEditorInGroup",
+    "when": "!terminalFocus",
+  },
+  {
+    "key": "alt+l",
+    "command": "workbench.action.nextEditorInGroup",
+    "when": "!terminalFocus"
+  },
+  // =============================================== Quick Select commands ==================================================
+  // This command described in settings.json :: "vim.normalModeKeyBindings": [...]
+  // {
+  //     "key": "<leader>+f",
+  //     "command": "workbench.action.quickOpen"
+  // },
+  {
+    "key": "ctrl+v",
+    "command": "workbench.action.alternativeAcceptSelectedQuickOpenItem",
+    "when": "inQuickOpen"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "selectNextSuggestion",
+    "when": "editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.quickOpenSelectNext",
+    "when": "inQuickOpen"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "selectPrevSuggestion",
+    "when": "editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.quickOpenSelectPrevious",
+    "when": "inQuickOpen"
+  },
+  // ================================================== Tmux Terminal commands ================================================
+  {
+    "key": "alt+w", // select tmux window
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u0077",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+c", // new tmux window
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u0063",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+=", // equalize tmux panes
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u003d",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+t", // horizontal split
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u0025",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+\\", // maximize pane
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u005c",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+h", // select left pane
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u006c",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  {
+    "key": "alt+l", // select right pane
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\u0002\u0068",
+    },
+    "when": "terminalFocus && terminalProcessSupported",
+  },
+  // ============================================ Commentary commands ================================================
+  {
+    "key": "alt+/",
+    "command": "extension.multiCommand.execute",
+    "when": "editorTextFocus && !editorReadonly",
+    "args": {
+      "sequence": [
+        "cursorLineEnd",
+        {
+          "command": "editor.action.insertSnippet",
+          "args": {
+            "snippet": "  $LINE_COMMENT $1"
+          }
+        },
+      ],
+    }
+  },
+  {
+    "key": "shift+cmd+r",
+    "command": "-rerunSearchEditorSearch",
+    "when": "inSearchEditor"
+  },
+  {
+    "key": "shift+cmd+w",
+    "command": "workbench.action.joinAllGroups"
+  },
+  {
+    "key": "alt+cmd+right",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalHasBeenCreated || terminalProcessSupported"
+  },
+  {
+    "key": "alt+cmd+right",
+    "command": "-workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "alt+cmd+down",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalHasBeenCreated || terminalProcessSupported"
+  },
+  {
+    "key": "alt+cmd+down",
+    "command": "-workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "cmd+]",
+    "command": "workbench.action.terminal.focusNext",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  {
+    "key": "cmd+[",
+    "command": "workbench.action.terminal.focusPrevious",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  // ============================================ vim commands ================================================
+  // ============================================ git commands ================================================
+  {
+    "key": "cmd+shift+a",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "interval": 100,
+      "sequence": [
+        "git.stage",
+        "workbench.scm.focus",
+        "list.focusFirst", // message box
+      ],
+    },
+    "when": "!sideBarFocus || activeViewlet != 'workbench.view.scm'"
+  },
+  {
+    "key": "cmd+shift+u",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "interval": 100,
+      "sequence": [
+        "git.unstage",
+        "workbench.scm.focus",
+        "list.focusFirst", // message box
+      ],
+    },
+    "when": "!sideBarFocus || activeViewlet != 'workbench.view.scm'"
+  },
+  {
+    "key": "cmd+r",
+    "command": "-workbench.action.reloadWindow",
+    "when": "isDevelopment"
+  },
+  {
+    "key": "cmd+r",
+    "command": "-workbench.action.terminal.runRecentCommand",
+    "when": "accessibilityModeEnabled && terminalFocus && terminalHasBeenCreated || accessibilityModeEnabled && terminalFocus && terminalProcessSupported || accessibilityModeEnabled && accessibleViewIsShown && terminalHasBeenCreated && accessibleViewCurrentProviderId == 'terminal' || accessibilityModeEnabled && accessibleViewIsShown && terminalProcessSupported && accessibleViewCurrentProviderId == 'terminal'"
+  },
+  {
+    "key": "cmd+r",
+    "command": "-python.refreshTensorBoard",
+    "when": "python.hasActiveTensorBoardSession"
+  },
+  {
+    "key": "cmd+r",
+    "command": "git.revertSelectedRanges",
+    "when": "isInDiffEditor && !operationInProgress"
+  },
+  {
+    "key": "cmd+k cmd+r",
+    "command": "-git.revertSelectedRanges",
+    "when": "isInDiffEditor && !operationInProgress"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "-workbench.action.terminal.split",
+    "when": "terminalFocus && terminalProcessSupported || terminalFocus && terminalWebExtensionContributedProfile"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "-workbench.action.terminal.splitActiveTab",
+    "when": "terminalProcessSupported && terminalTabsFocus"
+  },
+]

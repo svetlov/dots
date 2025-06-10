@@ -185,6 +185,19 @@ class TmuxInstaller(Installer):
             os.path.join(LOCAL_BIN, "tmux-vim-select-pane")
         )
 
+class VSCodeInstaller(Installer):
+  name = "vscode"
+  VSCODE_SETTINGS_DIR = os.path.join(HOME, "Library", "Application Support", "Code", "User")
+
+  @classmethod
+  def install(cls):
+    os.makedirs(self.VSCODE_SETTINGS_DIR, exists_ok=True)
+    for config in ("settings.json", "keybindings.json"):
+      symlink(
+        os.path.join(PWD, "all", "vscode", config),
+        os.path.join(self.VSCODE_SETTINGS_DIR, config),
+      )
+
 
 class SSHInstaller(Installer):
     name = "ssh"
@@ -241,6 +254,7 @@ class ConfigsInstall(Installer):
         GitConfigInstaller.install()
         MercurialInstaller.install()
         TmuxInstaller.install()
+        VSCodeInstaller.install()
         NVimInstaller.install()
 
 
