@@ -1,0 +1,12 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+zsh --version &> /dev/null && error_code=0 || error_code=$?
+if [ ${error_code} -eq 0 ]; then
+  exec zsh -l
+fi
+echo "There's no zsh available, osname=${OSNAME}"

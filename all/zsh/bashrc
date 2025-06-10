@@ -1,4 +1,44 @@
-[ -z "$PS1" ] && return
+# .bashrc
 
-command_exists () { type "$1" &> /dev/null; }
-if command_exists zsh ; then exec zsh; fi
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+
+_smart_append() {
+  if [[ "$#" -eq 2 ]]; then
+    # $1 -- container, $2 -- new entry
+    case ":$1:" in
+      *":$2:"*) echo $1;; # already there
+      *)        echo "$2:$1";; # or PATH="$PATH:$new_entry"
+    esac
+  elif [[ "$#" -eq 1 ]]; then
+    echo "$1";
+  else
+    echo "Illegal number of paramters in _smart_append function" 1>&2;
+  fi
+}
+
+# User specific environment and startup programs
+PATH=$(_smart_append "${PATH}" "${HOME}/.local/bin"); 
+
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  OSNAME=$(lsb_release -is);
+  if [ "${OSNAME}" == "CentOS" ]; then
+    PATH=$(_smart_append ${PATH} "${HOME}/.local.centos/bin"); 
+  elif [ "${OSNAME}" == "Ubuntu" ]; then
+    PATH=$(_smart_append ${PATH} "${HOME}/.local.ubuntu/bin"); 
+  fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  true  # doing nothing here atm
+else
+  echo "Unsupported OS: ${OSTYPE}"
+fi
+
+export PATH;
