@@ -1,41 +1,33 @@
 // Place your key bindings in this file to override the defaults
 [
+  // (neovim.mode != insert && neovim.mode != cmdline) allows to use \ character in insert/find mode
   {
     "key": "\\ f",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && !terminalFocus",
     "command": "workbench.action.quickOpen",
-    "when": "!terminalFocus && neovim.mode != insert && neovim.mode != cmdline" // to allow using of \ character in insert/find mode
-  },
-  {
-    "key": "\\ s",
-    "command": "clangd.switchheadersource",
-    "when": "!terminalFocus && neovim.mode != insert && neovim.mode != cmdline" // to allow using of \ character in insert/find mode
-  },
-  {
-    // hide sidebar on cmd+shift+e when explorer sidebar is visible
-    "key": "cmd+shift+e",
-    "command": "workbench.action.closeSidebar",
-    "when": "explorerViewletVisible"
-  },
-  {
-    // hide sidebar on cmd+shift+f when search sidebar is visible
-    "key": "cmd+shift+f",
-    "command": "workbench.action.closeSidebar",
-    "when": "searchViewletVisible"
   },
   {
     // toggle terminal on cmd+shift+t
-    "key": "cmd+shift+t",
-    "command": "workbench.action.terminal.toggleTerminal",
+    "key": "\\ t",
+    "when": "neovim.mode != insert && neovim.mode != cmdline",
+    "command": "workbench.action.terminal.toggleTerminal"
   },
   {
-    // disable default reopen closed editor cmd+shift+t
-    "key": "cmd+shift+t",
-    "command": "-workbench.action.reopenClosedEditor"
+    // open sidebar on win+shift+e when explorer sidebar is not visible
+    "key": "\\ e",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && !explorerViewletFocus",
+    "command": "workbench.files.action.focusFilesExplorer"
+  },
+  {
+    // hide sidebar on win+shift+f when search sidebar is visible
+    "key": "\\ s",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && !searchViewletFocus",
+    "command": "workbench.view.search.focus"
   },
   {
     // open source control
-    "key": "cmd+shift+g",
-    "when": "workbench.scm.active",
+    "key": "\\ g",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && workbench.scm.active",
     "command": "extension.multiCommand.execute",
     "args": {
       "sequence": [
@@ -45,33 +37,43 @@
     },
   },
   {
-    // close source control
-    "key": "cmd+shift+g",
+    "key": "\\ v",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && !terminalFocus && !multipleEditorGroups",
+    "command": "workbench.action.splitEditor"
+  },
+  {
+    "key": "\\ v",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && multipleEditorGroups",
+    "command": "workbench.action.closeEditorsInOtherGroups"
+  },
+  {
+    "key": "\\ c",
+    "when": "sideBarVisible",
     "command": "workbench.action.closeSidebar",
-    "when": "sideBarFocus && activeViewlet == 'workbench.view.scm'"
   },
   {
-    // free cmd+shift+g
-    "key": "cmd+shift+g",
-    "command": "-editor.action.previousMatchFindAction",
-    "when": "editorFocus"
+    "key": "\\ a",
+    "command": "workbench.action.toggleMaximizedPanel",
+    "when": "terminalFocus && terminalProcessSupported",
   },
   {
-    // free cmd+shift+g
-    "key": "cmd+shift+g",
-    "command": "-workbench.action.terminal.openDetectedLink",
-    "when": "accessibleViewIsShown && terminalHasBeenCreated && accessibleViewCurrentProviderId == 'terminal'"
-  },
-  {
-    // free cmd+shift+g
-    "key": "cmd+shift+g",
-    "command": "-workbench.action.terminal.findPrevious",
-    "when": "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocusInAny && terminalHasBeenCreated || terminalFocusInAny && terminalProcessSupported"
+    // close editor and terminal viewers if in editor
+    "key": "\\ a",
+    "when": "neovim.mode != insert && neovim.mode != cmdline && editorTextFocus",
+    "command": "extension.multiCommand.execute",
+    "args": {
+      "sequence": [
+        "workbench.action.closeSidebar",
+        "workbench.action.closePanel",
+        "workbench.action.activityBarLocation.hide",
+        "workbench.action.toggleMaximizeEditorGroup",
+      ],
+    }
   },
   {
     "key": "escape",
-    "command": "workbench.action.closeSidebar",
     "when": "sideBarFocus",
+    "command": "workbench.action.closeSidebar",
   },
   {
     "key": "v",
@@ -83,42 +85,23 @@
     "command": "-explorer.openToSide",
     "when": "explorerViewletFocus && explorerViewletVisible && !inputFocus"
   },
+  // ============================================= Navigation commands =================================================
   {
-    "key": "cmd+\\",
-    "command": "-workbench.action.terminal.split",
-    "when": "terminalFocus && terminalProcessSupported"
+    "key": "ctrl+l",
+    "command": "workbench.action.navigateRight",
   },
   {
-    "key": "cmd+shift+v",
-    "command": "workbench.action.splitEditor",
-    "when": "!terminalFocus && !multipleEditorGroups"
+    "key": "ctrl+j",
+    "command": "workbench.action.navigateDown",
+    "when": "!(editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible)"
   },
   {
-    "key": "cmd+shift+v",
-    "command": "workbench.action.closeEditorsInOtherGroups",
-    "when": "multipleEditorGroups"
+    "key": "ctrl+k",
+    "command": "workbench.action.navigateUp",
+    "when": "!(editorTextFocus && suggestWidgetMultipleSuggestions && suggestWidgetVisible)"
   },
   {
-    "key": "cmd+\\",
-    "command": "-workbench.action.splitEditor"
-  },
-  {
-    "key": "cmd+\\",
-    "command": "-workbench.action.terminal.splitInstance",
-    "when": "terminalProcessSupported && terminalTabsFocus"
-  },
-  {
-    "key": "cmd+k cmd+\\",
-    "command": "workbench.action.splitEditorOrthogonal",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "cmd+k cmd+\\",
-    "command": "-workbench.action.splitEditorOrthogonal"
-  },
-  // =============================================== Meta Navigation commands ==============================================
-  {
-    "key": "cmd+h",
+    "key": "ctrl+h",
     "command": "extension.multiCommand.execute",
     "args": {
       "sequence": [
@@ -128,49 +111,6 @@
           "command": "list.focusFirst",
         }
       ]
-    }
-  },
-  {
-    "key": "cmd+l",
-    "command": "workbench.action.navigateRight"
-  },
-  {
-    "key": "cmd+k",
-    "command": "extension.multiCommand.execute",
-    "args": {
-      "sequence": [
-        {
-          "command": "workbench.action.focusActiveEditorGroup",
-          "when": "terminalFocus"
-        },
-        {
-          "command": "workbench.action.navigateUp",
-          "when": "!terminalFocus"
-        },
-      ],
-    }
-  },
-  {
-    "key": "cmd+j",
-    "command": "workbench.action.terminal.focus"
-  },
-  {
-    "key": "cmd+\\",
-    "command": "workbench.action.toggleMaximizedPanel",
-    "when": "terminalIsOpen && terminalFocus && terminalProcessSupported",
-  },
-  {
-    // close editor and terminal viewers if in editor
-    "key": "cmd+\\",
-    "when": "editorTextFocus",
-    "command": "extension.multiCommand.execute",
-    "args": {
-      "sequence": [
-        "workbench.action.closeSidebar",
-        "workbench.action.closePanel",
-        "workbench.action.activityBarLocation.hide",
-        "workbench.action.toggleMaximizeEditorGroup",
-      ],
     }
   },
   // =============================================== Menu Navigation commands ==============================================
@@ -214,17 +154,6 @@
   //     "command": "workbench.action.quickOpenNavigatePrevious",
   //     "when": "inQuickOpen"
   // },
-  // =============================================== Editors Navigation commands ==============================================
-  {
-    "key": "alt+h",
-    "command": "workbench.action.previousEditorInGroup",
-    "when": "!terminalFocus",
-  },
-  {
-    "key": "alt+l",
-    "command": "workbench.action.nextEditorInGroup",
-    "when": "!terminalFocus"
-  },
   // =============================================== Quick Select commands ==================================================
   // This command described in settings.json :: "vim.normalModeKeyBindings": [...]
   // {
