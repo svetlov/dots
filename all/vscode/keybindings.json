@@ -76,6 +76,11 @@
     "command": "workbench.action.closeSidebar",
   },
   {
+    "key": "\\ escape",
+    "when": "sideBarVisible",
+    "command": "workbench.action.closeSidebar",
+  },
+  {
     "key": "v",
     "command": "explorer.openToSide",
     "when": "explorerViewletFocus && explorerViewletVisible && !inputFocus"
