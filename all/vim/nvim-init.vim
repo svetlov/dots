@@ -129,7 +129,6 @@ if !exists('g:vscode')
     let g:NERDTreeDirArrowCollapsible = '▾'
     let g:NERDTreeGlyphReadOnly = "RO"
 
-
     " =============================================================================
     " ================================ file switch ================================
     " =============================================================================
@@ -166,6 +165,11 @@ if !exists('g:vscode')
         execute a:command
         execute "wincmd ="
     endfunction
+
+
+    " =============================================================================
+    let g:load_doxygen_syntax = 1           " For doxygen syntax highlight
+    let g:python_highlight_all = 1          " For full python syntax highlight
 
     " =============================================================================
     " ====================== Extentions KeyMap Settings ===========================
@@ -255,9 +259,9 @@ else
   endif
 endif
 
-nnoremap S :%s/
-vnoremap s :s/
-nnoremap V <c-v>  " shift+v to enter visual mode
+nnoremap S :%s/   " normal mode + S for replacement in the whole file
+vnoremap s :s/    " visual selection + s for ranged replacement
+nnoremap V <c-v>  " shift+v to enter visual mode (for windows console)
 
 " =============================================================================
 " ================================= Global Settings ===========================
@@ -290,9 +294,6 @@ set fdm=indent                          " folding based on indent lvl
 set foldlevelstart=99                   " all folds open by default
 set splitright                          " Open splits to the right
 
-let g:load_doxygen_syntax = 1           " For doxygen syntax highlight
-let g:python_highlight_all = 1          " For full python syntax highlight
-
 scriptencoding utf-8
 set encoding=utf-8
 set fileencodings=utf-8,cp1251,koi8-r
@@ -309,8 +310,6 @@ set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,
 set suffixesadd=.pl,.pm,.yml,.yaml,.tyaml
 
 set hidden                              " more native buffer behavior
-set undolevels=1000                     " use many levels of undo
-
 
 set updatetime=300                      " longer updatetime (default is 4000 ms) leads to noticeable delays
 
@@ -345,6 +344,7 @@ let g:is_posix = 1
 set backspace=indent,eol,start	" more powerful backspacing
 set dir=~/.vim/swap   " district directory for all swap files
 set backupcopy=yes " keep a backup file
+set undolevels=1000                     " use many levels of undo
 if has("persistent_undo")
   set undofile    " Persistent  undo
   set undodir=~/.vim/undo

@@ -161,4 +161,6 @@
   },
   "git.suggestSmartCommit": false,
   "git.openRepositoryInParentFolders": "never",
+  // send keybindings to shell, so that we can use them in terminal, like ctrl+c, ctrl+v for visual selection in vim
+  "terminal.integrated.sendKeybindingsToShell": true,
 }
