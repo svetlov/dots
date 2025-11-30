@@ -2,11 +2,12 @@ export LC=en_US.UTF-8;
 export LC_CTYPE=en_US.UTF-8;
 export LC_ALL=en_US.UTF-8;
 export LANG=en_US.UTF-8;
-export EDITOR='vim';
+export EDITOR='nvim';
 
 _uname=$(uname);
 [[ $_uname == "Linux" ]] && is_linux=true || is_linux=false;
 [[ $_uname == "Darwin" ]] && is_darwin=true || is_darwin=false;
+[[ $(hostname) == "vsvetlov-rog" ]] && is_wsl_host=true || is_wsl_host=false;
 
 export HOME=$(cd ${HOME}; pwd -P);
 export WORKSPACE="${HOME}/workspace"
@@ -51,17 +52,17 @@ export COLOR_CYAN=$'\e[0;36m'         # Cyan
 export COLOR_WHITE=$'\e[0;37m'        # White
 
 
-alias zshconfig="vim ~/.zshrc"
-alias editor="vim"
-alias vimlarge="vim -u NONE -U NONE -N"
-alias vimconfig="vim ~/.config/nvim/init.vim"
-alias ohmyzsh="vim ~/.oh-my-zsh"
+alias editor="nvim"
+alias vim='nvim'
+alias zshconfig="nvim ~/.zshrc"
+alias vimlarge="nvim -u NONE -U NONE -N"
+alias vimconfig="nvim ~/.config/nvim/init.vim"
+alias ohmyzsh="nvim ~/.oh-my-zsh"
 alias cx="chmod +x "
 alias rm="rm -i"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
-
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
 
 
@@ -137,13 +138,13 @@ _to_clean_env() {
 }
 
 _update_env() {
-    PATH=$(_smart_append ${PATH} "${LOCAL_OS_SPECIFIC}/bin"); 
+    PATH=$(_smart_append ${PATH} "${LOCAL_OS_SPECIFIC}/bin");
     PATH=$(_smart_append ${PATH} "${LOCAL}/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
     PATH=$(_smart_append ${PATH} "/usr/texbin");
 
-    CPATH=$(_smart_append ${CPATH} "${LOCAL_OS_SPECIFIC}/bin"); 
+    CPATH=$(_smart_append ${CPATH} "${LOCAL_OS_SPECIFIC}/bin");
     CPATH=$(_smart_append ${CPATH} "${LOCAL}/include");
     CPATH=$(_smart_append ${CPATH} "/usr/local/include");
 
@@ -209,7 +210,6 @@ else
     ZSH_THEME="maran";
 fi
 
-
 ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
@@ -217,173 +217,6 @@ HIST_STAMPS="yyyy-mm-dd"
 plugins=(git tmux python brew history-substring-search uv vi-mode fzf-zsh)
 
 source ${ZSH}/oh-my-zsh.sh
-
-
-# =====================================================================================================================
-# ================================================ Twitter Settings ===================================================
-# =====================================================================================================================
-
-_update_twitter_settings() {
-    if [[ $is_darwin == true ]]; then
-      export VISUAL='code --wait';
-      export EDITOR="$VISUAL";
-
-      # Automatically placed at end of file by MDE. To disable this behavior: touch ~/.no-mde-dotfile. 
-      # Ideally you do not need to do this. Please contact us on Slack at #mde-contributors to discuss long-term alternatives.
-      source /opt/twitter_mde/etc/zshrc
-    elif [[ $is_linux == true ]]; then
-      export PYTHONPATH=${LOCAL}/lib/python3.7/site-packages;  # for virtualenvwrapper
-      export YUM_LOCAL_PACKAGES_DIR=${WORKSPACE}/tmp/yum/yum/;
-      
-      yum-install-local () {
-         (
-          cd ${WORKSPACE}/.local
-          yumdownloader --destdir ${YUM_LOCAL_PACKAGES_DIR} -x '*i686' --resolve $@;
-          ls $YUM_LOCAL_PACKAGES_DIR | xargs -I %  sh -c "echo % >&2 && rpm2cpio /home/sandbox/workspace/tmp/yum/yum/%| cpio -id"
-         )
-      }
-    fi
-
-    alias ipy="ipython --ipython-dir=/tmp"
-    alias mykubectl="kubectl --context=kf-cxp-stg -n vsvetlov ";
-
-    export SOURCE="${WORKSPACE}/source"
-    twsrc() { cd ${SOURCE}; };
-
-    cd () {
-        if [[ "$#" -eq 1 && ! -z "${1}" && ! -d "${1}" && -d "${SOURCE}/${1}" ]]; then
-            echo "cd ${SOURCE}/${1}";
-            builtin cd ${SOURCE}/${1};
-        else
-            builtin cd ${@};
-        fi
-    }
-
-}
-
-# _update_twitter_settings
-
- 
-
-# =====================================================================================================================
-# ================================================ Yandex Settings ====================================================
-# =====================================================================================================================
-
-ya-deploy() {
-    sudo apt-get install yandex-arc-launcher -y --force-yes
-
-    mkdir -p ${ARCADIA_ROOT}/arcadia ${ARCADIA_ROOT}/store ${ARCADIA_ROOT_GENERATED};
-    nice arc mount -m ${ARCADIA_ROOT}/ -S ${ARCADIA_ROOT}/../store/;
-
-    _update_arcadia_env;
-}
-
-
-_update_arcadia_env () {
-    alias curln="curl -H \"Authorization: OAuth $(cat ${HOME}/.nirvana/token)\"";
-
-    if [[ ! -z "${ARCADIA_ROOT+x}" ]]; then
-        export FZF_DEFAULT_COMMAND="${DOTS_HOME}/all/vim/cat-arcadia-files.sh"
-
-        export ARCADIA_ROOT="${HOME}/projects/arcadia/arcadia";
-        arcadia () { cd ${ARCADIA_ROOT}; };
-
-        cd () {
-            if [[ ! -z "${1}" && ! -d "${1}" && -d "${ARCADIA_ROOT}/${1}" ]]; then
-                echo "cd $ARCADIA_ROOT/${1}";
-                builtin cd $ARCADIA_ROOT/${1};
-            else
-                builtin cd ${1};
-            fi
-        }
-
-        export ARCADIA_CONTRIB="${ARCADIA_ROOT}/contrib";
-        contrib () { cd ${ARCADIA_CONTRIB}; };
-
-        export TFAPP="${ARCADIA_ROOT}/cv/imgclassifiers/tf_applicator";
-        tfapp () { cd ${TFAPP}; };
-
-        export NDL="${ARCADIA_ROOT}/cv/imgclassifiers/framework/nirvana/nirvana_dl";
-        ndl() { cd ${NDL}; };
-
-        export PYDL="${ARCADIA_ROOT}/ml/nirvana/python_deep_learning";
-        pydl() { cd ${PYDL}; };
-
-        export YTF="${ARCADIA_ROOT}/ml/tensorflow/ytensorflow";
-        ytf () { cd ${YTF}; };
-
-        export UB="${ARCADIA_ROOT}/ml/tensorflow/models/userbert";
-        ub () { cd ${UB}; };
-
-        export VPQ="${ARCADIA_ROOT}/ml/tensorflow/models/vpq";
-        vpq () { cd ${VPQ}; };
-
-        export JUNK="${ARCADIA_ROOT}/junk/splinter";
-        junk () { cd ${JUNK}; };
-
-        export DANET="${ARCADIA_ROOT}/cv/imgclassifiers/danet";
-        danet () { cd ${DANET}; };
-
-        arcadia_root_call() {
-            # $1 -- original cmd
-            # $2 -- arcadia cmd
-            if [[ $(pwd -P) == ${ARCADIA_ROOT}* ]]; then
-                array=( ${(s. .)"${2}"} )
-            else
-                array=( ${(s. .)"${1}"} )
-            fi
-            ${array[@]} ${@:3};
-        }
-
-        ya () { (unset CC; unset CXX; unset CPATH; ${ARCADIA_ROOT}/ya "$@";) }
-        alias gdb='arcadia_root_call gdb "ya tool gdb"';
-        alias svn='arcadia_root_call svn "ya tool svn"';
-
-        export ARC_EDITOR=${EDITOR};
-
-        arc() {
-            if [[ "${1}" = "rbc" ]]; then
-                /usr/bin/arc rebase --continue;
-            elif [[ "${1}" = "rbs" ]]; then
-                /usr/bin/arc rebase --skip;
-            elif [[ "${1}" = "mt" ]]; then
-                /usr/bin/arc mergetool -y --tool=vimdiff;
-            elif [[ "${1}" = "cb" ]]; then
-                echo $(/usr/bin/arc branch | grep '\*' | cut -f2 -d\ );
-            elif [[ "${1}" = "s" ]]; then
-                /usr/bin/arc status --short ${@:2} \
-                    | sed "s/^## \(.*\)\.\.\.\(.*\)/* \1 -> $COLOR_GREEN\2$COLOR_OFF */g" \
-                    | sed "s/^\(??.*\)/$COLOR_PURPLE\1$COLOR_OFF/g" \
-                    | sed "s/^\( M.*\)/$COLOR_RED\1$COLOR_OFF/g" \
-                    | sed "s/^\(A .*\)/$COLOR_GREEN\1$COLOR_OFF/g" \
-                    | tac
-            elif [[ "${1}" = "undo" ]]; then
-                /usr/bin/arc checkout $(arc cb) ${@:2};
-            elif [[ "${1}" = "unstage" ]]; then
-                /usr/bin/arc reset $(arc cb) ${@:2};
-            else
-                /usr/bin/arc ${@}
-            fi
-        }
-
-        ycm () {
-            ya make -rj32 \
-                --add-protobuf-result \
-                --add-result='.h' --add-result='.hh' --add-result='.hpp' \
-                --add-result='.c' --add-result='.cc' --add-result='.cpp' \
-                --output ${ARCADIA_ROOT}/../generated \
-                --no-src-links --keep-going $@;
-        }
-    fi
-
-    if [ -e "${HOME}/.yt/token" ]; then
-        export YT_PROXY=arnold.yt.yandex.net
-        export YT_TOKEN=`cat ~/.yt/token`
-        export YT_HOME=//home/cvtest/splinter
-    fi
-}
-
-# _update_arcadia_env;
 
 # =====================================================================================================================
 # ================================================= OhMyZsh Settings ==================================================
@@ -421,7 +254,7 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git tmux python brew history-substring-search virtualenvwrapper vi-mode fzf-zsh)
+plugins=(git tmux python brew history-substring-search vi-mode fzf-zsh uv)
 
 # do not forget to make zsh directories properly owned in case of compinit problmes
 # chown -R $USER $ZSH_INSTALL_PREFIX/share/zsh/
@@ -429,159 +262,45 @@ plugins=(git tmux python brew history-substring-search virtualenvwrapper vi-mode
 
 source ${ZSH}/oh-my-zsh.sh
 
+_ssh_agent_maybe_launch() {
+  if [[ -z "$SSH_AGENT_PID" ]]; then
+    if command -v keychain > /dev/null 2>&1; then
+      eval $(keychain --eval --quiet --inherit any github.ed25519)
+    else
+      # On Ubuntu/Debian: sudo apt install keychain
+      # On macOS: brew install keychain
+      echo "Please install keychain command"
+    fi
+  fi
+  _ssh_agent_attach_fixed_path
+}
+
+_ssh_agent_attach_fixed_path() {
+  # Maintain symlink to socket (like Linux section does)
+  if [[ -n "$SSH_AUTH_SOCK" && "$SSH_AUTH_SOCK" =~ ^/tmp/ ]]; then
+    # Create symlink if it doesn't exist or points to wrong location
+    if [[ ! -L ~/.ssh/ssh_auth_sock ]] || \
+       [[ "$(readlink -f ~/.ssh/ssh_auth_sock)" != "$(readlink -f "$SSH_AUTH_SOCK")" ]]; then
+	ln -sf "$SSH_AUTH_SOCK" ~/.ssh/ssh_auth_sock
+    fi
+  fi
+}
+
 # =====================================================================================================================
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
-if [[ $is_darwin == true ]]; then
+if [[ $is_darwin == true || $is_wsl_host == true ]]; then
+    _ssh_agent_maybe_launch;
     if [[ "${#TMUX}" -eq 0 ]]; then
         tmux attach || tmux new -A
     fi
 elif [[ $is_linux == true ]]; then
     if [[ -L "${HOME}/.zshrc" ]]; then
         if [[ "${#TMUX}" -eq 0 ]]; then
-            if [[ -n "$SSH_AUTH_SOCK" && "`readlink ~/.ssh/ssh_auth_sock`" != "$SSH_AUTH_SOCK" ]]; then
-                ln -sf $SSH_AUTH_SOCK ~/.ssh/ssh_auth_sock
-            fi
+	        _ssh_agent_attach_fixed_path;
             tmux attach || tmux new -A
         fi
     fi
 else
     echo "${COLOR_RED}Unknown host $(uname -s)${COLOR_OFF}";
 fi
-
-# =====================================================================================================================
-# ================================================= Deploy Function ===================================================
-# =====================================================================================================================
-
-_install_cmake() {
-    sudo apt-get install -y libcurl4-openssl-dev;
-
-    mkdir -p ${HOME}/.tmp.build.packages;
-    (
-        cd ${HOME}/.tmp.build.packages;
-        wget http://www.cmake.org/files/v3.10/cmake-3.10.1.tar.gz
-        tar -xvzf cmake-3.10.1.tar.gz
-        cd cmake-3.10.1/
-        ./bootstrap --prefix=${LOCAL}/cmake --system-curl
-        make -j
-        make install
-    )
-    rm -rf ${HOME}/.tmp.builld.packages;
-    _update_env;
-}
-
-_install_tmux() {
-    _safe_symlink "${DOTS_HOME}/all/tmux/tmux.conf" "${HOME}/.tmux.conf"
-    _safe_symlink "${DOTS_HOME}/all/tmux/tmux-vim-select-pane" "${LOCAL}/bin/tmux-vim-select-pane"
-
-    which tmux > /dev/null;
-    if [[ $? -eq 0 ]]; then
-        local tmux_version=$(tmux -V | sed 's/tmux //g');
-        if [[ ${tmux_version} -eq ${TMUX_VERSION} ]]; then
-            return;
-        fi
-        rm -rf ${LOCAL}/tmux;
-    fi
-
-    sudo apt install -y automake
-    sudo apt install -y build-essential
-    sudo apt install -y pkg-config
-    sudo apt install -y libevent-dev
-    sudo apt install -y libncurses5-dev
-
-    mkdir -p ${HOME}/.tmp.build.packages;
-    (
-        cd ${HOME}/.tmp.build.packages;
-        git clone https://github.com/tmux/tmux
-        cd tmux
-        git checkout ${TMUX_VERSION}
-        ./autogen.sh
-        ./configure --prefix=${LOCAL}/tmux
-        make -j
-        make install
-    )
-    rm -rf ${HOME}/.tmp.build.packages
-
-    _update_env;
-}
-
-_install_nvim() {
-    if [[ $is_darwin == true ]]; then
-        brew install neovim;
-    elif [[ $is_linux == true ]]; then
-        (
-            mkdir -p ${LOCAL}/nvim/bin;
-            cd ${LOCAL}/nvim/bin;
-            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-            chmod u+x nvim.appimage
-            ln -s ${LOCAL}/nvim/bin/nvim.appimage ${LOCAL}/nvim/bin/nvim;
-            ln -s ${LOCAL}/nvim/bin/nvim ${LOCAL}/nvim/bin/vim;
-        );
-    fi
-    _update_env;
-
-    mkdir -p "${HOME}/.config/nvim";
-    mkdir -p "${HOME}/.config/nvim/syntax";
-    mkdir -p "${HOME}/.config/nvim/undo";
-    mkdir -p "${HOME}/.config/nvim/swap";
-    _safe_symlink "${DOTS_HOME}/all/vim/nvim-init.vim" "${HOME}/.config/nvim/init.vim"
-    _safe_symlink "${DOTS_HOME}/all/vim/danet-config.vim" "${HOME}/.config/nvim/syntax/danet-config.vim";
-    nvim -e +PlugInstall +qall;
-}
-
-_install_ssh() {
-    if [[ $is_darwin == true ]]; then
-        LAUNCH_AGENTS_DIR="${HOME}/Library/LaunchAgents";
-
-        _launch() {
-            launchctl unload "${LAUNCH_AGENTS_DIR}/$1";
-            _safe_symlink "${DOTS_HOME}/all/ssh/$1" "${LAUNCH_AGENTS_DIR}/$1";
-            launchctl load "${LAUNCH_AGENTS_DIR}/$1";
-        }
-
-        _launch pbcopy.plist;
-        _launch pbpaste.plist;
-        _launch pbopen.plist;
-        _launch notebook.plist;
-    elif [[ $is_linux == true ]]; then
-        _safe_symlink "${DOTS_HOME}/all/ssh/pbcopy-remote.sh" "${LOCAL}/bin/pbcopy";
-        _safe_symlink "${DOTS_HOME}/all/ssh/pbpaste-remote.sh" "${LOCAL}/bin/pbpaste";
-        _safe_symlink "${DOTS_HOME}/all/ssh/pbopen.sh" "${LOCAL}/bin/pbopen";
-    fi
-    _safe_symlink "${DOTS_HOME}/all/ssh/notebook.sh" "${LOCAL}/bin/notebook.sh";
-    _safe_symlink "${DOTS_HOME}/all/ssh/config" "${HOME}/.ssh/config";
-    chmod 400 "${HOME}/.ssh/config";
-}
-
-
-deploy_env() {
-    if [[ $is_darwin == true ]]; then
-        brew install fd;
-    elif [[ $is_linux == true ]]; then
-        sudo apt-get update;
-        sudo apt-get install -y make git cmake libtool-bin;
-        sudo apt-get install -y python-pip python-setuptools python3-pip python3-setuptools;
-        sudo apt-get install -y software-properties-common python-software-properties;
-        sudo apt-get install -y curl libcurl4-openssl-dev;
-
-        wget https://github.com/sharkdp/fd/releases/download/v8.2.1/fd_8.2.1_amd64.deb;
-        sudo dpkg -i ./fd_8.2.1_amd64.deb; rm -rf ./fd_8.2.1_amd64.deb;
-
-        _install_cmake;
-        _install_tmux;
-    fi
-    _install_ssh;
-    _install_nvim;
-
-    echo "#\!/bin/bash\npython \"\$@\"" > ${LOCAL}/bin/venvpython;
-    chmod +x ${LOCAL}/bin/venvpython
-
-    pip3 install -U --user pip setuptools;
-    pip3 install -U --user matplotlib;
-    pip3 install -U --user pillow;
-    pip3 install -U --user 'ipython[all]';
-    pip3 install -U --user 'jupyter[all]';
-    pip3 install -U --user virtualenvwrapper;
-}
-
-

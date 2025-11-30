@@ -31,9 +31,9 @@ PATH=$(_smart_append "${PATH}" "${HOME}/.local/bin");
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   OSNAME=$(lsb_release -is);
   if [ "${OSNAME}" == "CentOS" ]; then
-    PATH=$(_smart_append ${PATH} "${HOME}/.local.centos/bin"); 
+    PATH=$(_smart_append "${PATH}" "${HOME}/.local.centos/bin"); 
   elif [ "${OSNAME}" == "Ubuntu" ]; then
-    PATH=$(_smart_append ${PATH} "${HOME}/.local.ubuntu/bin"); 
+    PATH=$(_smart_append "${PATH}" "${HOME}/.local.ubuntu/bin"); 
   fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   true  # doing nothing here atm

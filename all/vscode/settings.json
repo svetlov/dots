@@ -1,4 +1,7 @@
 {
+  "vscode-neovim.useWSL": true,
+  "vscode-neovim.neovimExecutablePaths.linux": "/home/vsvetlov/.local/bin/nvim",
+  "vscode-neovim.neovimInitVimPaths.linux": "/home/vsvetlov/.config/nvim/init.vim",
   "window.zoomLevel": 1,
   "editor.rulers": [
     120
@@ -87,7 +90,7 @@
   // ],
   // ============================================== vim settings =======================================================
   // "vim.enableNeovim": true,
-  // "vim.neovimUseConfigFile": true
+  "vim.neovimUseConfigFile": true,
   "vim.vimrc.enable": false,
   "vim.textwidth": 120, // set text width in vim to 120 symbols width
   "vim.useSystemClipboard": true,
@@ -117,6 +120,7 @@
   ],
   "python.logging.level": "info",
   "[python]": {
+    "editor.detectIndentation": false,
     "editor.formatOnType": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
