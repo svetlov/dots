@@ -56,7 +56,8 @@ alias editor="nvim"
 alias vim='nvim'
 alias zshconfig="nvim ~/.zshrc"
 alias vimlarge="nvim -u NONE -U NONE -N"
-alias vimconfig="nvim ~/.config/nvim/init.vim"
+alias vimconfig="nvim ~/.config/nvim/init.lua"
+alias vimplugins="nvim ~/.config/nvim/lua/plugins/core.lua"
 alias ohmyzsh="nvim ~/.oh-my-zsh"
 alias cx="chmod +x "
 alias rm="rm -i"
@@ -286,6 +287,13 @@ _ssh_agent_attach_fixed_path() {
   fi
 }
 
+# TODO FIXME
+# eval "$(/home/vsvetlov/miniconda3/bin/conda shell.zsh hook)"
+
+if [[ -f "${HOMEDIR}/.secrets.rc" ]]; then
+    source "${HOMEDIR}/.secrets.rc"
+fi
+
 # =====================================================================================================================
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
@@ -304,3 +312,4 @@ elif [[ $is_linux == true ]]; then
 else
     echo "${COLOR_RED}Unknown host $(uname -s)${COLOR_OFF}";
 fi
+
