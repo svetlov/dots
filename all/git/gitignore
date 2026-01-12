@@ -1,6 +1,3 @@
-.svn
-.svnignore
-svn-commit*
 bin/**
 
 **/dist
@@ -12,9 +9,6 @@ bin/**
 *.pyc
 *egg-info/
 
-*.json
+*.swp
 
 .color_coded
-
-ml/tensorflow/ytensorflow/cpp/ytensorflow/_build.cpp
-ml/tensorflow/ytensorflow/cpp/ytensorflow/ops/image/_build.cpp

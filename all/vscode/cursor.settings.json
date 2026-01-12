@@ -1,0 +1,46 @@
+{
+    "editor.semanticHighlighting.enabled": true,
+    "remote.autoForwardPortsSource": "hybrid",
+    "extensions.experimental.affinity": {
+        "detachhead.basedpyright": 1,
+        "asvetliakov.vscode-neovim": 2,
+    },
+    // ================================== cursor specific settings ================================
+    "workbench.preferredDarkColorTheme": "Default Dark Modern",
+    "workbench.activityBar.orientation": "vertical",
+    "window.autoDetectColorScheme": true,
+    // ============================================================================================
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.defaultColorDecorators": "auto",
+    },
+    "python.languageServer": "None",
+    "basedpyright.analysis.typeCheckingMode": "off",
+    "basedpyright.analysis.baselineFile": "/home/vsvetlov/.basedpyright/baseline.json",
+    // "basedpyright.analysis.exclude": [
+    //   "**/.git",
+    //   "**/__pycache__",
+    //   "*.pyc",
+    //   "**/*.pyc",
+    //   "**/*.pyo",
+    //   "**/*.pyd",
+    //   ".venv",
+    //   "**/.venv",
+    //   "venv",
+    //   "**/venv",
+    //   "env",
+    //   "**/env",
+    //   "**/.pytest_cache",
+    //   "**/.mypy_cache",
+    //   "**/.coverage",
+    //   "**/htmlcov",
+    //   "**/.nox",
+    //   "**/.tox",
+    //   "build",
+    //   "**/build",
+    //   "dist",
+    //   "**/dist",
+    //   "**/*.egg-info",
+    //   ".eggs"
+    // ],
+}

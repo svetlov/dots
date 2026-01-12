@@ -7,7 +7,7 @@ import argparse
 import subprocess as sb
 import contextlib
 
-ISLINUX = sys.platform != "darwin"
+ISLINUX = sys.platform.startswith("linux")
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
@@ -38,6 +38,9 @@ def get_free_name(path):
 
 
 def symlink(source, destination):
+    if not os.path.exists(source):
+        print("Warning: source path does not exist, skipping: {}".format(source))
+        return
     if os.path.lexists(destination):
         if os.path.islink(destination) and not os.path.exists(
             destination
@@ -93,6 +96,12 @@ class OhMyZshInstaller(Installer):
     src_bashrc = os.path.join(PWD, "all", "zsh", "bashrc")
     dst_bashrc = os.path.join(HOME, ".bashrc")
 
+    src_bash_profile = os.path.join(PWD, "all", "zsh", "bash_profile")
+    dst_bash_profile = os.path.join(HOME, ".bash_profile")
+
+    src_zprofile = os.path.join(PWD, "all", "zsh", "zprofile")
+    dst_zprofile = os.path.join(HOME, ".zprofile")
+
     src_zshrc = os.path.join(PWD, "all", "zsh", "zshrc")
     dst_zshrc = os.path.join(HOME, ".zshrc")
 
@@ -102,7 +111,9 @@ class OhMyZshInstaller(Installer):
     @classmethod
     def install(cls):
         symlink(cls.src_bashrc, cls.dst_bashrc)
+        symlink(cls.src_bash_profile, cls.dst_bash_profile)
         symlink(cls.src_zshrc, cls.dst_zshrc)
+        symlink(cls.src_zprofile, cls.dst_zprofile)
 
         os.makedirs(cls.themes, exist_ok=True)
         symlink(os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"), cls.mytheme)
@@ -163,11 +174,29 @@ class VSCodeInstaller(Installer):
             )
 
 
+class CodeAgentsInstaller(Installer):
+    name = "code-agents"
+    CODEX_DIR = os.path.join(HOME, ".codex")
+
+    @classmethod
+    def install(cls):
+        os.makedirs(cls.CODEX_DIR, exist_ok=True)
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "codex.toml"),
+            os.path.join(cls.CODEX_DIR, "config.toml"),
+        )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "prompts"),
+            os.path.join(cls.CODEX_DIR, "prompts"),
+        )
+
+
 class SSHInstaller(Installer):
     name = "ssh"
 
     @staticmethod
     def install():
+        os.makedirs(os.path.join(HOME, ".ssh"), exist_ok=True)
         if ISLINUX:
             symlink(
                 os.path.join(PWD, "all", "ssh", "pbcopy-remote.sh"),
@@ -183,6 +212,7 @@ class SSHInstaller(Installer):
             )
         else:
             launch_agents_path = os.path.join(HOME, "Library", "LaunchAgents")
+            os.makedirs(launch_agents_path, exist_ok=True)
 
             pbcopy_agent = os.path.join(launch_agents_path, "pbcopy.plist")
             sb.call(["launchctl", "unload", pbcopy_agent])
@@ -235,6 +265,7 @@ class ConfigsInstall(Installer):
         TmuxInstaller.install()
         VSCodeInstaller.install()
         NVimInstaller.install()
+        CodeAgentsInstaller.install()
 
 
 def parse_args():
@@ -248,7 +279,11 @@ def parse_args():
         p.add_argument(
             "names", type=str, metavar="package", nargs="+", choices=INSTALLERS.keys()
         )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.action is None:
+        parser.print_help()
+        sys.exit(2)
+    return args
 
 
 def install(args):
