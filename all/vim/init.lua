@@ -1,6 +1,11 @@
 vim.g.mapleader = "\\"
 vim.g.maplocalleader = "\\"
 
+
+--- for neovim python provider (molten requires external python3 packages)
+--- https://github.com/benlubas/molten-nvim/blob/main/docs/Not-So-Quick-Start-Guide.md#python-deps
+vim.g.python3_host_prog=vim.fn.expand("~/.virtualenvs/nvim/bin/python3")
+
 vim.cmd("filetype plugin indent on")  -- to fix proper filetype detection
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then

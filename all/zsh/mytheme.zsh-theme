@@ -46,8 +46,7 @@ function arc_branch_prompt() {
 }
 
 function venv_prompt() {
-    venv_name=$(basename $VIRTUAL_ENV 2> /dev/null) || return;
-    print " ($venv_name)";
+  [[ -v VIRTUAL_ENV_PROMPT ]] && print " ($VIRTUAL_ENV_PROMPT)" || return
 }
 
 function return_code_prompt() {

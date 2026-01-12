@@ -1,0 +1,10 @@
+# should be placed in ~/.codex/config.toml
+
+[features]
+web_search_request = true        # allow the model to request web searches
+
+[sandbox_workspace_write]
+network_access = true
+
+[projects.'/home/vsvetlov/workspace/iedit/']
+trust_level = "trusted"

@@ -7,7 +7,7 @@ import argparse
 import subprocess as sb
 import contextlib
 
-ISLINUX = (sys.platform != 'darwin')
+ISLINUX = sys.platform != "darwin"
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
@@ -39,13 +39,19 @@ def get_free_name(path):
 
 def symlink(source, destination):
     if os.path.lexists(destination):
-        if os.path.islink(destination) and not os.path.exists(destination):  # broken symbolic link
+        if os.path.islink(destination) and not os.path.exists(
+            destination
+        ):  # broken symbolic link
             os.remove(destination)
         elif os.path.realpath(source) == os.path.realpath(destination):  # same link
             return
         else:
             olddestination = get_free_name(destination + ".old")
-            print("Warning: {} path already exists, move it to {}".format(destination, olddestination))
+            print(
+                "Warning: {} path already exists, move it to {}".format(
+                    destination, olddestination
+                )
+            )
             os.rename(destination, olddestination)
     os.symlink(source, destination)
 
@@ -71,7 +77,7 @@ class Installer(object, metaclass=RegisterInstallerMetaclass):
 
 
 class GitConfigInstaller(Installer):
-    name = 'git'
+    name = "git"
     gitconfig = os.path.join(HOME, ".gitconfig")
     gitignore = os.path.join(HOME, ".gitignore")
 
@@ -82,12 +88,12 @@ class GitConfigInstaller(Installer):
 
 
 class OhMyZshInstaller(Installer):
-    name = 'zsh'
+    name = "zsh"
 
-    src_bashrc = os.path.join(PWD, 'all', 'zsh', 'bashrc')
+    src_bashrc = os.path.join(PWD, "all", "zsh", "bashrc")
     dst_bashrc = os.path.join(HOME, ".bashrc")
 
-    src_zshrc = os.path.join(PWD, 'all', 'zsh', 'zshrc')
+    src_zshrc = os.path.join(PWD, "all", "zsh", "zshrc")
     dst_zshrc = os.path.join(HOME, ".zshrc")
 
     themes = os.path.join(HOME, ".oh-my-zsh", "custom", "themes")
@@ -101,80 +107,35 @@ class OhMyZshInstaller(Installer):
         os.makedirs(cls.themes, exist_ok=True)
         symlink(os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"), cls.mytheme)
 
+
 class NVimInstaller(Installer):
-    name = 'nvim'
+    name = "nvim"
 
     @classmethod
     def install(cls):
         import distutils.sysconfig as sysconfig
 
         os.makedirs(os.path.join(HOME, ".config", "nvim"), exist_ok=True)
+        os.makedirs(
+            os.path.join(HOME, ".config", "nvim", "lua", "plugins"), exist_ok=True
+        )
         os.makedirs(os.path.join(HOME, ".config", "nvim", "syntax"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".config", "nvim", "undo"), exist_ok=True)
         os.makedirs(os.path.join(HOME, ".config", "nvim", "swap"), exist_ok=True)
 
         symlink(
-            os.path.join(PWD, "all", "vim", "nvim-init.vim"),
-            os.path.join(HOME, ".config", "nvim", "init.vim"))
+            os.path.join(PWD, "all", "vim", "init.lua"),
+            os.path.join(HOME, ".config", "nvim", "init.lua"),
+        )
         symlink(
-            os.path.join(PWD, "all", "vim", "danet-config.vim"),
-            os.path.join(HOME, ".config", "nvim", "syntax", "danet-config.vim"))
-
-        sb.call(["nvim", "-e", "+PluginInstall", "+qall"])
-
-        env = os.environ.copy()
-        env["CC"] = os.environ["CLANG39_CC"]
-        env["CXX"] = os.environ["CLANG39_CXX"]
-        env['PYTHON_INCLUDE_DIRS'] = sysconfig.get_python_inc()
-
-        with PathGuard(os.path.join(HOME, ".config", "nvim", "bundle", "YouCompleteMe")):
-            sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
-            sb.call(["./install.py", "--clang-completer"], env=env)
-
-# class VimInstaller(Installer):
-#     name = 'vim'
-#     vimrc = os.path.join(HOME, ".vimrc")
-
-#     @classmethod
-#     def install(cls):
-#         symlink(os.path.join(PWD, "all", "vim", "vimrc"), cls.vimrc)
-#         sb.call(["vim", "-e", "+PluginInstall", "+qall"])
-
-#         os.makedirs(os.path.join(HOME, ".vim", "syntax"), exist_ok=True)
-#         os.makedirs(os.path.join(HOME, ".vim", "undo"), exist_ok=True)
-#         os.makedirs(os.path.join(HOME, ".vim", "swap"), exist_ok=True)
-
-#         symlink(
-#             os.path.join(PWD, "all", "vim", "NERDTreeBookmarks"),
-#             os.path.join(HOME, ".NERDTreeBookmarks")
-#         )
-
-#         symlink(
-#             os.path.join(PWD, "all", "vim", "danet-config.vim"),
-#             os.path.join(HOME, ".vim", "syntax", "danet-config.vim")
-#         )
-
-#         env = os.environ.copy()
-#         env["CC"] = os.environ["CLANG39_CC"]
-#         env["CXX"] = os.environ["CLANG39_CXX"]
-
-#         with PathGuard(os.path.join(HOME, ".vim", "bundle", "YouCompleteMe")):
-#             sb.call(["git", "submodule", "update", "--init", "--recursive"], env=env)
-#             sb.call(["./install.py", "--clang-completer"], env=env)
-
-#         with PathGuard(os.path.join(HOME, ".vim", "bundle", "color_coded")):
-#             sb.call(["mkdir", "-p", "build"])
-#             with PathGuard("build"):
-#                 sb.call(["cmake", "-DCMAKE_PREFIX_PATH={}".format(LOCAL), ".."], env=env)
-#                 sb.call(["make", "-j"], env=env)
-#                 sb.call(["make", "install"], env=env)
-#                 sb.call(["make", "clean"])
-
-       #      open(os.path.join(HOME, ".color_coded"), 'w').write('-fcolor-diagnostics')
+            os.path.join(PWD, "all", "vim", "core.lua"),
+            os.path.join(HOME, ".config", "nvim", "lua", "plugins", "core.lua"),
+        )
+        pass
 
 
 class TmuxInstaller(Installer):
-    name = 'tmux'
+    name = "tmux"
     tmuxconf = os.path.join(HOME, ".tmux.conf")
 
     @classmethod
@@ -182,21 +143,24 @@ class TmuxInstaller(Installer):
         symlink(os.path.join(PWD, "all", "tmux", "tmux.conf"), cls.tmuxconf)
         symlink(
             os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
-            os.path.join(LOCAL_BIN, "tmux-vim-select-pane")
+            os.path.join(LOCAL_BIN, "tmux-vim-select-pane"),
         )
 
-class VSCodeInstaller(Installer):
-  name = "vscode"
-  VSCODE_SETTINGS_DIR = os.path.join(HOME, "Library", "Application Support", "Code", "User")
 
-  @classmethod
-  def install(cls):
-    os.makedirs(cls.VSCODE_SETTINGS_DIR, exist_ok=True)
-    for config in ("settings.json", "keybindings.json"):
-      symlink(
-        os.path.join(PWD, "all", "vscode", config),
-        os.path.join(cls.VSCODE_SETTINGS_DIR, config),
-      )
+class VSCodeInstaller(Installer):
+    name = "vscode"
+    VSCODE_SETTINGS_DIR = os.path.join(
+        HOME, "Library", "Application Support", "Code", "User"
+    )
+
+    @classmethod
+    def install(cls):
+        os.makedirs(cls.VSCODE_SETTINGS_DIR, exist_ok=True)
+        for config in ("settings.json", "keybindings.json"):
+            symlink(
+                os.path.join(PWD, "all", "vscode", config),
+                os.path.join(cls.VSCODE_SETTINGS_DIR, config),
+            )
 
 
 class SSHInstaller(Installer):
@@ -205,39 +169,54 @@ class SSHInstaller(Installer):
     @staticmethod
     def install():
         if ISLINUX:
-            symlink(os.path.join(PWD, "all", "ssh","pbcopy-remote.sh"), os.path.join(LOCAL_BIN, "pbcopy"))
-            symlink(os.path.join(PWD, "all", "ssh","pbpaste-remote.sh"), os.path.join(LOCAL_BIN, "pbpaste"))
-            symlink(os.path.join(PWD, "all", "ssh","pbopen.sh"), os.path.join(LOCAL_BIN, "pbopen"))
+            symlink(
+                os.path.join(PWD, "all", "ssh", "pbcopy-remote.sh"),
+                os.path.join(LOCAL_BIN, "pbcopy"),
+            )
+            symlink(
+                os.path.join(PWD, "all", "ssh", "pbpaste-remote.sh"),
+                os.path.join(LOCAL_BIN, "pbpaste"),
+            )
+            symlink(
+                os.path.join(PWD, "all", "ssh", "pbopen.sh"),
+                os.path.join(LOCAL_BIN, "pbopen"),
+            )
         else:
             launch_agents_path = os.path.join(HOME, "Library", "LaunchAgents")
 
             pbcopy_agent = os.path.join(launch_agents_path, "pbcopy.plist")
-            sb.call(['launchctl', 'unload', pbcopy_agent])
+            sb.call(["launchctl", "unload", pbcopy_agent])
             symlink(os.path.join(PWD, "all", "ssh", "pbcopy.plist"), pbcopy_agent)
-            sb.check_call(['launchctl', 'load', pbcopy_agent])
+            sb.check_call(["launchctl", "load", pbcopy_agent])
 
             pbpaste_agent = os.path.join(launch_agents_path, "pbpaste.plist")
-            sb.call(['launchctl', 'unload', pbpaste_agent])
+            sb.call(["launchctl", "unload", pbpaste_agent])
             symlink(os.path.join(PWD, "all", "ssh", "pbpaste.plist"), pbpaste_agent)
-            sb.check_call(['launchctl', 'load', pbpaste_agent])
+            sb.check_call(["launchctl", "load", pbpaste_agent])
 
             pbopen_agent = os.path.join(launch_agents_path, "pbopen.plist")
-            sb.call(['launchctl', 'unload', pbopen_agent])
+            sb.call(["launchctl", "unload", pbopen_agent])
             symlink(os.path.join(PWD, "all", "ssh", "pbopen.plist"), pbopen_agent)
-            sb.check_call(['launchctl', 'load', pbopen_agent])
+            sb.check_call(["launchctl", "load", pbopen_agent])
 
             notebook_agent = os.path.join(launch_agents_path, "notebook.plist")
-            sb.call(['launchctl', 'unload', notebook_agent])
+            sb.call(["launchctl", "unload", notebook_agent])
             symlink(os.path.join(PWD, "all", "ssh", "notebook.plist"), notebook_agent)
-            sb.check_call(['launchctl', 'load', notebook_agent])
+            sb.check_call(["launchctl", "load", notebook_agent])
 
-        symlink(os.path.join(PWD, "all", "ssh", "notebook.sh"), os.path.join(LOCAL_BIN, "notebook"))
-        symlink(os.path.join(PWD, "all", "ssh", "config"), os.path.join(HOME, ".ssh", "config"))
+        symlink(
+            os.path.join(PWD, "all", "ssh", "notebook.sh"),
+            os.path.join(LOCAL_BIN, "notebook"),
+        )
+        symlink(
+            os.path.join(PWD, "all", "ssh", "config"),
+            os.path.join(HOME, ".ssh", "config"),
+        )
         os.chmod(os.path.join(HOME, ".ssh", "config"), 0o644)
 
 
 class MercurialInstaller(Installer):
-    name = 'hg'
+    name = "hg"
 
     @staticmethod
     def install():
@@ -245,7 +224,7 @@ class MercurialInstaller(Installer):
 
 
 class ConfigsInstall(Installer):
-    name = 'configs'
+    name = "configs"
 
     @staticmethod
     def install():
@@ -260,15 +239,14 @@ class ConfigsInstall(Installer):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help='actions', dest='action')
-    install = subparsers.add_parser('install')
-    remove = subparsers.add_parser('remove')
-    show = subparsers.add_parser('list')
+    subparsers = parser.add_subparsers(help="actions", dest="action")
+    install = subparsers.add_parser("install")
+    remove = subparsers.add_parser("remove")
+    show = subparsers.add_parser("list")
 
     for p in [install, remove]:
         p.add_argument(
-            'names', type=str, metavar='package',
-            nargs='+', choices=INSTALLERS.keys()
+            "names", type=str, metavar="package", nargs="+", choices=INSTALLERS.keys()
         )
     return parser.parse_args()
 
@@ -290,13 +268,9 @@ def show(args):
 
 def main():
     args = parse_args()
-    action = {
-        'install': install,
-        'remove': remove,
-        'list': show
-    }
+    action = {"install": install, "remove": remove, "list": show}
     action[args.action](args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

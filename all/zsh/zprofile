@@ -1,0 +1,162 @@
+export LC=en_US.UTF-8;
+export LC_CTYPE=en_US.UTF-8;
+export LC_ALL=en_US.UTF-8;
+export LANG=en_US.UTF-8;
+
+if [[ ! -v UNAME ]]; then
+    export UNAME=$(uname);
+    [[ $UNAME == "Linux" ]] && is_linux=true || is_linux=false;
+    [[ $UNAME == "Darwin" ]] && is_darwin=true || is_darwin=false;
+
+    $(type wslinfo > /dev/null)  # to check wslinfo existance
+    [[ $? -eq 0 ]] && is_wsl=true || is_wsl=false;
+
+    export IS_LINUX=${is_linux};
+    export IS_DARWIN=${is_darwin};
+    export IS_WSL=${is_wsl};
+
+    if [[ ${IS_LINUX} == true ]]; then
+        export OSNAME=$(lsb_release -is);
+    fi
+fi
+
+export HOME=$(cd ${HOME}; pwd -P);
+if [[ -d "${WORKSPACE}/.local" ]]; then
+  export HOMEDIR=${WORKSPACE};
+else
+  export HOMEDIR=${HOME};
+fi
+
+export WORKSPACE="${HOMEDIR}/workspace"
+export LOCAL=${HOMEDIR}/.local;
+if [[ $IS_DARWIN == true ]]; then
+  export LOCAL_OS_SPECIFIC=${HOMEDIR}/.local.mac
+elif [[ $IS_LINUX == true ]]; then
+  if [[ "${OSNAME}" == "CentOS" ]]; then
+    export LOCAL_OS_SPECIFIC=${HOMEDIR}/.local.centos
+  elif [[ "${OSNAME}" == "Ubuntu" ]]; then
+    export LOCAL_OS_SPECIFIC=${HOMEDIR}/.local.ubuntu
+  else
+    echo "Unknown linux system: ${OSNAME}";
+  fi
+fi
+
+_pathstr_contains() {
+    # check $2 is a subpart of pathes of $1
+    splitted=$( echo $1 | tr ":" "\n" );
+    echo ${splitted[@]} | grep -q -w -E "^$2$" > /dev/null;
+    [[ $? -eq 0 ]] && return 1 || return 0;
+}
+
+_safe_symlink() {
+    if [[ -f "$2" ]]; then  # destination exists
+        if [[ -L "$2" ]]; then   # destination is symlink
+            local realDstPath=$(readlink -f "$2");
+            if [[ "${realDstPath}" == "$1" ]]; then  # destination is linked to source
+                echo "Destination file '$2' already exists and points to source '$1'" 1>&2;
+                return;
+            elif [[ ! -f "${realDstPath}" ]]; then  # destination is broken symlink
+                rm "$2";
+            else  # desitnation is link
+                if [[ -f "${2}.back" ]]; then  # back file exits, failing
+                    echo "Destination file '$2' already exists, and .back file also already exists" 1>&2;
+                    return;
+                fi
+                echo "Making backup for existing destination file '$2'" 1>&2;
+                ln -s ${realDstPath} "$2.back"
+            fi
+        elif [[ "${realDstPath}" == "$2" ]]; then  # destination exists and it's regular file
+            if [[ -f "${2}.back" ]]; then  # back file exits, failing
+                echo "Destination file '$2' already exists, and .back file also already exists" 1>&2;
+                return;
+            fi
+            echo "Making backup for existing destination file '$2'">&2;
+            cp $2 "$2.back"
+        fi
+    fi
+
+    echo "Linking source $1 to destination $2" 1>&2;
+    ln -s $1 $2;
+}
+
+_smart_append() {
+  if [[ "$#" -eq 2 ]]; then
+    _pathstr_contains $1 $2;
+    if [[ $? -eq 0  && -d $2 ]] ; then
+        echo "$2:$1";  # $2 is not substring of $1 and exists
+    else
+        echo "$1";
+    fi
+  elif [[ "$#" -eq 1 ]]; then
+    echo "$1";
+  else
+    echo "Illegal number of paramters in _smart_append function" 1>&2;
+  fi
+}
+
+# =====================================================================================================================
+# =============================================== Env Creator Settings ================================================
+# =====================================================================================================================
+
+_to_clean_env() {
+    echo "${COLOR_RED}don't forget call 'tmux detach'${COLOR_OFF}";
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+    CPATH="/usr/local/include";
+    LIBRARY_PATH="/usr/local/lib";
+    LD_LIBRARY_PATH="/usr/local/lib";
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH;
+}
+
+_update_env() {
+    PATH=$(_smart_append ${PATH} "${LOCAL_OS_SPECIFIC}/bin");
+    PATH=$(_smart_append ${PATH} "${LOCAL}/bin");
+    PATH=$(_smart_append ${PATH} "/usr/local/bin");
+    PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
+    PATH=$(_smart_append ${PATH} "/usr/texbin");
+
+    CPATH=$(_smart_append ${CPATH} "${LOCAL_OS_SPECIFIC}/bin");
+    CPATH=$(_smart_append ${CPATH} "${LOCAL}/include");
+    CPATH=$(_smart_append ${CPATH} "/usr/local/include");
+
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${LOCAL_OS_SPECIFIC}/usr/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${LOCAL_OS_SPECIFIC}/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${LOCAL}/usr/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${LOCAL}/lib");
+    LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/usr/local/lib");
+
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${LOCAL_OS_SPECIFIC}/usr/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${LOCAL_OS_SPECIFIC}/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${LOCAL}/usr/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${LOCAL}/lib");
+    LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/usr/local/lib");
+
+    if [[ -d "/usr/local/cuda" ]]; then
+        export CUDA_HOME="/usr/local/cuda";
+        PATH=$(_smart_append ${PATH} "${CUDA_HOME}/bin");
+        CPATH=$(_smart_append ${CPATH} "${CUDA_HOME}/include");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${CUDA_HOME}/lib64");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64");  # libcudart
+        # LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/lib64/stubs");  # libcuda
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
+    fi
+
+    if [[ -d "/opt/openmpi" ]]; then
+        export MPI_PATH="/opt/openmpi";
+        export CPLUS_INCLUDE_PATH="${MPI_PATH}/include";
+        PATH=$(_smart_append ${PATH} "${MPI_PATH}/bin");
+        CPATH=$(_smart_append ${CPATH} "${MPI_PATH}/include");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "${MPI_PATH}/lib");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${MPI_PATH}/lib");
+    fi
+
+    export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
+}
+
+_update_env;
+
+export _update_env;
+export _to_clean_env;
+export _smart_append;
+export _safe_symlink;
+export _pathstr_contains;

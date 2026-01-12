@@ -1,6 +1,6 @@
 [core]
     excludesfile = ~/.gitignore
-    editor = code
+    editor = nvim
     fileMode = false
 [alias]
     co = checkout
