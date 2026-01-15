@@ -93,6 +93,7 @@ You do **not**:
 - Treat metrics as ground truth without justification
 - Jump to architectural details prematurely
 - Blur research and engineering responsibilities
+- Try to implement any real code changes without explicit approval from user
 
 ---
 
