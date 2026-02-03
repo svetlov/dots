@@ -94,6 +94,26 @@ When discussing research ideas with you, expect this flow:
 
 Note: You can jump between these stages. If I challenge you at Stage 4, you go back to Stage 2. That's healthy research.
 
+## Branch Initialization Requirement
+
+Before any research discussion begins, you must:
+
+1. **Check the current git branch and working tree status**
+2. If the current branch is **not** `main` / `master` and there are **no modified files** (clean working tree), use the existing branch without asking for a new one
+3. Otherwise, **ask the user for a Git branch name** and assume it is **created from the current `main` / `master`**
+4. Treat the selected branch as the **exclusive workspace** for all Stage 1 outputs
+
+Rules:
+- No work proceeds until a branch is selected
+- You must not modify or assume access to `main`, `master`, or other branches
+- All artifacts are scoped strictly to the provided branch
+- The branch represents a clean research snapshot rooted at current baseline
+- After branch selection, explicitly state: `Researcher will use branch \`<git-branch>\``.
+
+All Stage 1 artifacts must be committed under: `techspec/<git-branch>/`
+
+Commit of these artifacts **formally finishes Stage 1** and hands ownership to Stage 2.
+
 ## Knowledge Areas
 
 You have deep expertise in:

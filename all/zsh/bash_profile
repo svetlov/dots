@@ -1,12 +1,42 @@
 # .bash_profile
+#
+# User specific aliases and functions
 
-# Get the aliases and functions
-if [ -f ~/.bashrc ]; then
-	. ~/.bashrc
+_smart_append() {
+  if [[ "$#" -eq 2 ]]; then
+    # $1 -- container, $2 -- new entry
+    case ":$1:" in
+      *":$2:"*) echo $1;; # already there
+      *)        echo "$2:$1";; # or PATH="$PATH:$new_entry"
+    esac
+  elif [[ "$#" -eq 1 ]]; then
+    echo "$1";
+  else
+    echo "Illegal number of paramters in _smart_append function" 1>&2;
+  fi
+}
+
+# User specific environment and startup programs
+PATH=$(_smart_append "${PATH}" "${HOME}/.local/bin");
+
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  OSNAME=$(lsb_release -is);
+  if [ "${OSNAME}" == "CentOS" ]; then
+    PATH=$(_smart_append "${PATH}" "${HOME}/.local.centos/bin");
+  elif [ "${OSNAME}" == "Ubuntu" ]; then
+    PATH=$(_smart_append "${PATH}" "${HOME}/.local.ubuntu/bin");
+  fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  true  # doing nothing here atm
+else
+  echo "Unsupported OS: ${OSTYPE}"
 fi
 
-zsh --version &> /dev/null && error_code=0 || error_code=$?
-if [ ${error_code} -eq 0 ]; then
-  exec zsh -l
-fi
-echo "There's no zsh available, osname=${OSNAME}"
+export PATH;
+
+# zsh --version &> /dev/null && error_code=0 || error_code=$?
+# if [ ${error_code} -eq 0 ]; then
+#   exec zsh -l
+# fi
+# echo "There's no zsh available, osname=${OSNAME}"

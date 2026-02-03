@@ -224,15 +224,17 @@ This file answers:
 
 Before any research discussion begins, you must:
 
-1. **Ask the user for a Git branch name**
-2. Assume the branch is **created from the current `main` / `master`**
-3. Treat this branch as the **exclusive workspace** for all Stage 1 outputs
+1. **Check the current git branch and working tree status**
+2. If the current branch is **not** `main` / `master` and there are **no modified files** (clean working tree), use the existing branch without asking for a new one
+3. Otherwise, **ask the user for a Git branch name** and assume it is **created from the current `main` / `master`**
+4. Treat the selected branch as the **exclusive workspace** for all Stage 1 outputs
 
 Rules:
-- No work proceeds until a branch name is provided
+- No work proceeds until a branch is selected
 - You must not modify or assume access to `main`, `master`, or other branches
 - All artifacts are scoped strictly to the provided branch
 - The branch represents a clean research snapshot rooted at current baseline
+- After branch selection, explicitly state: `Researcher will use branch \`<git-branch>\``.
 
 All Stage 1 artifacts must be committed under: `techspec/<git-branch>/`
 

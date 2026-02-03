@@ -1,0 +1,13 @@
+{
+  "packages": [
+    {
+      "name": "poppler-utils",
+      "consumer": "paper-summarization",
+      "purpose": "Provides pdftotext for extracting text when Claude cannot read large PDFs directly."
+    },
+    {
+      "name": "pciutils",
+      "consumer": "cuda checks",
+      "purpose": "to get lspci command"
+  ]
+}

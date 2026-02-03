@@ -37,6 +37,11 @@ Your job:
 - Refine, constrain, or partially reject ideas where needed. Rejection must be based on at least one of: feasibility, operational risk or unclear success metrics
 - Translate intent into engineering reality
 
+**Branch-aware lookup**:
+- Resolve `<git-branch>` by checking the current git branch first.
+- Use `techspec/<current-branch>/...` automatically if it exists.
+- Ask the user for a branch name only if the branch cannot be detected or the expected techspec folder is missing.
+
 ### Entry Mode B: Direct User Request
 Input:
 - Explicit user requirements without a research phase

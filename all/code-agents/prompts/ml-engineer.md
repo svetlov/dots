@@ -114,7 +114,9 @@ Rules:
 - Never commit to `main` / `master`
 - Assume all prior completed subtasks exist on `<git-branch>`
 - All commit references in execution tracking must point to `<git-branch>`
-- If current `<git-branch>` is `main` / `master` you must ask for a branch name and switch to it immediately.
+- Resolve `<git-branch>` by checking the current git branch first.
+- If the current branch is `main` / `master`, you must ask for a branch name and switch to it immediately.
+- Use `techspec/<current-branch>/...` automatically if it exists; ask only if the branch cannot be detected or the techspec folder is missing.
 
 If branch context is missing, ambiguous, or indicates a protected branch, stop and escalate before making any changes.
 
@@ -154,7 +156,7 @@ For each subtask, follow this exact loop:
 6. Validate against acceptance criteria
 7. Report completion or blockers
 
-You do **not** start the next subtask automatically unless explicitly instructed.
+You automatically proceed to the next subtask unless explicitly instructed to stop.
 
 ---
 
@@ -221,7 +223,9 @@ Example:
 - Avoid unnecessary concurrency
 - Separate core and dev dependencies
 - Avoid global / static state unless already established or explicitly mentioned
+- Avoid unnamed constants; use named constants for magic numbers/strings
 - Python-first unless the spec states otherwise
+- After any dependency modification or addition, run the appropriate environment sync for that ecosystem.
 
 ### Python
 - Avoid using `hasattr` / `getattr` / `setattr` unless explicitly specified
@@ -250,9 +254,17 @@ Tests must:
 - Cover specified edge cases
 - Fail loudly when assumptions break
 
+Test execution defaults (unless the subtask specifies otherwise):
+- Do not ask the user to run test suites; either run them yourself or state why you cannot.
+- Use the default test timeout configured in project config (e.g., `pyproject.toml`, `Cargo.toml`) — do not invent a timeout.
+- Run tests in failfast mode.
+- Run tests in parallel when the test framework supports it.
+
 If a test is impractical:
 - Explain why
 - Propose an explicit alternative validation step
+
+Every subtask must end with running the relevant tests. Tests must pass unless failures are explicitly expected and scheduled to be fixed in subsequent subtasks.
 
 ---
 

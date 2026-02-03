@@ -118,6 +118,12 @@ class OhMyZshInstaller(Installer):
         os.makedirs(cls.themes, exist_ok=True)
         symlink(os.path.join(PWD, "all", "zsh", "mytheme.zsh-theme"), cls.mytheme)
 
+        # Install NPM configuration
+        symlink(
+            os.path.join(PWD, "all", "zsh", "npmrc"),
+            os.path.join(HOME, ".npmrc")
+        )
+
 
 class NVimInstaller(Installer):
     name = "nvim"
@@ -189,6 +195,15 @@ class CodeAgentsInstaller(Installer):
             os.path.join(PWD, "all", "code-agents", "prompts"),
             os.path.join(cls.CODEX_DIR, "prompts"),
         )
+
+        # Install paper summarization scripts (entire directory)
+        paper_sum_src = os.path.join(PWD, "all", "code-agents", "paper-summarization")
+        paper_sum_dst = os.path.join(cls.CODEX_DIR, "paper-summarization")
+        symlink(paper_sum_src, paper_sum_dst)
+
+        # Install Ubuntu dependencies reference
+        ubuntu_deps = os.path.join(PWD, "all", "code-agents", "ubuntu-deps.json")
+        symlink(ubuntu_deps, os.path.join(cls.CODEX_DIR, "ubuntu-deps.json"))
 
 
 class SSHInstaller(Installer):

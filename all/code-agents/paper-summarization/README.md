@@ -4,6 +4,22 @@ Summarize academic papers using Claude CLI custom slash commands.
 
 ## Setup
 
+### 0. Install Node.js (includes npm)
+
+You need npm to install the Claude CLI. The easiest way is to install the latest LTS Node.js:
+
+- Windows/macOS: download and install from https://nodejs.org
+- Windows (winget): `winget install OpenJS.NodeJS.LTS`
+- macOS (Homebrew): `brew install node`
+- Linux (Debian/Ubuntu): `sudo apt-get install nodejs npm`
+
+Verify:
+
+```bash
+node -v
+npm -v
+```
+
 ### 1. Install Claude CLI
 
 ```bash
