@@ -1,3 +1,6 @@
+personality = "pragmatic"
+model = "gpt-5.3-codex"
+model_reasoning_effort = "medium"
 # should be placed in ~/.codex/config.toml
 
 [features]
@@ -7,4 +10,10 @@ web_search_request = true        # allow the model to request web searches
 network_access = true
 
 [projects.'/home/vsvetlov/workspace/iedit/']
+trust_level = "trusted"
+
+[projects."/home/vsvetlov/workspace/keenable"]
+trust_level = "trusted"
+
+[projects."/home/vsvetlov/workspace/dots"]
 trust_level = "trusted"

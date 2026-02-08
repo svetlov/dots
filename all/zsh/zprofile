@@ -5,19 +5,27 @@ export LANG=en_US.UTF-8;
 
 if [[ ! -v UNAME ]]; then
     export UNAME=$(uname);
-    [[ $UNAME == "Linux" ]] && is_linux=true || is_linux=false;
-    [[ $UNAME == "Darwin" ]] && is_darwin=true || is_darwin=false;
+fi
+[[ $UNAME == "Linux" ]] && is_linux=true || is_linux=false;
+[[ $UNAME == "Darwin" ]] && is_darwin=true || is_darwin=false;
 
-    $(type wslinfo > /dev/null)  # to check wslinfo existance
-    [[ $? -eq 0 ]] && is_wsl=true || is_wsl=false;
+is_wsl=false;
+if [[ "${is_linux}" == true ]]; then
+  if [[ -n "${WSL_DISTRO_NAME}" || -n "${WSL_INTEROP}" ]]; then
+    is_wsl=true;
+  elif [[ -r /proc/sys/kernel/osrelease ]] && grep -qi microsoft /proc/sys/kernel/osrelease; then
+    is_wsl=true;
+  elif uname -r 2>/dev/null | grep -qi microsoft; then
+    is_wsl=true;
+  fi
+fi
 
-    export IS_LINUX=${is_linux};
-    export IS_DARWIN=${is_darwin};
-    export IS_WSL=${is_wsl};
+export IS_LINUX=${is_linux};
+export IS_DARWIN=${is_darwin};
+export IS_WSL=${is_wsl};
 
-    if [[ ${IS_LINUX} == true ]]; then
-        export OSNAME=$(lsb_release -is);
-    fi
+if [[ ${IS_LINUX} == true && ! -v OSNAME ]]; then
+    export OSNAME=$(lsb_release -is);
 fi
 
 export HOME=$(cd ${HOME}; pwd -P);

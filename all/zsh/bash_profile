@@ -1,5 +1,4 @@
 # .bash_profile
-#
 # User specific aliases and functions
 
 _smart_append() {
@@ -18,7 +17,6 @@ _smart_append() {
 
 # User specific environment and startup programs
 PATH=$(_smart_append "${PATH}" "${HOME}/.local/bin");
-
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   OSNAME=$(lsb_release -is);

@@ -1,7 +1,6 @@
 vim.g.mapleader = "\\"
 vim.g.maplocalleader = "\\"
 
-
 --- for neovim python provider (molten requires external python3 packages)
 --- https://github.com/benlubas/molten-nvim/blob/main/docs/Not-So-Quick-Start-Guide.md#python-deps
 vim.g.python3_host_prog=vim.fn.expand("~/.virtualenvs/nvim/bin/python3")
@@ -32,19 +31,22 @@ require("lazy").setup("plugins")
 
 -- to prevent ^M symbol at the end of line when copy from windows to wsl
 -- https://www.reddit.com/r/bashonubuntuonwindows/comments/1i0svwc/comment/mr8hbre/
-vim.opt.clipboard = "unnamed,unnamedplus"
-vim.g.clipboard = {
-  name = 'WslClipboard',
-  copy = {
-    ['+'] = 'clip.exe',
-    ['*'] = 'clip.exe',
-  },
-  paste = {
-    ['+'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-    ['*'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-  },
-  cache_enabled = 0,
-}
+if vim.fn.has("wsl") == 1 then
+  vim.opt.clipboard = "unnamed,unnamedplus"
+  vim.g.clipboard = {
+    name = 'WslClipboard',
+    copy = {
+      ['+'] = vim.fn.expand('~/.local/bin/wslcopy.sh'),
+      ['*'] = vim.fn.expand('~/.local/bin/wslcopy.sh'),
+    },
+    paste = {
+      ['+'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+      ['*'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    },
+    cache_enabled = 0,
+  }
+end
+
 
 
 -- =============================================================================

@@ -8,6 +8,10 @@ import subprocess as sb
 import contextlib
 
 ISLINUX = sys.platform.startswith("linux")
+ISWSL = ISLINUX and (
+    "WSL_DISTRO_NAME" in os.environ
+    or "microsoft" in os.uname().release.lower()
+)
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 HOME = os.path.expanduser("~")
@@ -148,7 +152,12 @@ class NVimInstaller(Installer):
             os.path.join(PWD, "all", "vim", "core.lua"),
             os.path.join(HOME, ".config", "nvim", "lua", "plugins", "core.lua"),
         )
-        pass
+
+        if ISWSL:
+            symlink(
+                os.path.join(PWD, "all", "vim", "wslcopy.sh"),
+                os.path.join(LOCAL_BIN, "wslcopy.sh"),
+            )
 
 
 class TmuxInstaller(Installer):
