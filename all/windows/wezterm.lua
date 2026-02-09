@@ -59,6 +59,6 @@ config.colors = {
 }
 
 -- Default shell: WSL with zsh login shell
--- config.default_prog = { 'wsl.exe', '-e', 'zsh', '-l' }
+onfig.default_prog = { 'wsl.exe', '-e', 'zsh', '-l' }
 
 return config
