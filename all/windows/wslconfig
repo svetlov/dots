@@ -1,0 +1,3 @@
+[wsl2]
+swap=34359738368
+networkingMode=mirrored
