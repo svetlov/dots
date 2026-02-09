@@ -38,3 +38,4 @@ export PATH;
 #   exec zsh -l
 # fi
 # echo "There's no zsh available, osname=${OSNAME}"
+source "$HOME/.cargo/env"

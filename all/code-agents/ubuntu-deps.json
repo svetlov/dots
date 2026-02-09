@@ -9,5 +9,6 @@
       "name": "pciutils",
       "consumer": "cuda checks",
       "purpose": "to get lspci command"
+    }
   ]
 }

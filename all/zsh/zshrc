@@ -1,3 +1,6 @@
+# Source zprofile for non-login shells (login shells already source it)
+[[ ! -o login ]] && source "${HOME}/.zprofile"
+
 export EDITOR='nvim';
 
 export DOTS_HOME=${WORKSPACE}/dots;
@@ -35,11 +38,9 @@ reset-ssh() {
 _ssh_agent_maybe_launch() {
   if [[ -z "$SSH_AGENT_PID" ]]; then
     if command -v keychain > /dev/null 2>&1; then
-      eval $(keychain --eval --quiet --inherit any github.ed25519)
+      eval $(keychain --eval --quiet --inherit any)
     else
-      # On Ubuntu/Debian: sudo apt install keychain
-      # On macOS: brew install keychain
-      echo "Please install keychain command"
+      eval $(ssh-agent -s) > /dev/null 2>&1
     fi
   fi
   _ssh_agent_attach_fixed_path
@@ -63,11 +64,17 @@ _ssh_agent_attach_fixed_path() {
 export ZSH=${HOMEDIR}/.oh-my-zsh
 
 if [[ ! -f ${ZSH}/oh-my-zsh.sh ]]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    # Remove broken/partial oh-my-zsh directory if it exists
+    if [[ -d ${ZSH} && "${ZSH}" == */.oh-my-zsh && "${ZSH}" == ${HOME}/* ]]; then
+        rm -rf ${ZSH}
+    fi
 
-    git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
+    RUNZSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+    [[ ! -d ${ZSH}/custom/plugins/fzf ]] && git clone https://github.com/junegunn/fzf.git ${ZSH}/custom/plugins/fzf;
     ${ZSH}/custom/plugins/fzf/install --bin;
-    git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
+    [[ ! -d ${ZSH}/custom/plugins/fzf-zsh ]] && git clone https://github.com/Treri/fzf-zsh.git ${ZSH}/custom/plugins/fzf-zsh;
+    [[ ! -d ${ZSH}/custom/plugins/zsh-uv-env ]] && git clone https://github.com/matthiasha/zsh-uv-env.git ${ZSH}/custom/plugins/zsh-uv-env;
     _update_env;
 
     _safe_symlink "${DOTS_HOME}/all/zsh/bashrc" "${HOMEDIR}/.bashrc"

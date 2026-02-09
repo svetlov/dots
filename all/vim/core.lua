@@ -61,24 +61,21 @@ return {
     {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",
-        -- event = { "BufReadPost", "BufNewFile" },
         event = "FileType",
-        config = function()
-            require("nvim-treesitter.configs").setup({
-                ensure_installed = {
-                    "lua",
-                    "python",
-                    "rust",
-                    "bash",
-                    "json",
-                    "yaml",
-                    "markdown",
-                    "markdown_inline",
-                },
-                highlight = { enable = true },
-                indent = { enable = true },
-            })
-        end,
+        opts = {
+            ensure_installed = {
+                "lua",
+                "python",
+                "rust",
+                "bash",
+                "json",
+                "yaml",
+                "markdown",
+                "markdown_inline",
+            },
+            highlight = { enable = true },
+            indent = { enable = true },
+        },
     },
     {
         'stevearc/aerial.nvim',
@@ -619,7 +616,7 @@ return {
     -- Telescope: fuzzy finder (files, grep, buffers, help, etc.)
     {
         "nvim-telescope/telescope.nvim",
-        branch = "0.1.x",
+        branch = "master",
         cmd = "Telescope",
         dependencies = {
             "nvim-lua/plenary.nvim",
@@ -784,7 +781,7 @@ return {
 
     -- Leap: fast in-buffer jumps (EasyMotion/Sneak-style)
     {
-        "ggandor/leap.nvim",
+        url = "https://codeberg.org/andyg/leap.nvim",
         event = "VeryLazy",
         config = function()
             local leap = require("leap")
