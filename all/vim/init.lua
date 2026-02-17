@@ -177,3 +177,11 @@ if vim.fn.has("persistent_undo") == 1 then
   -- undodir=~/.vim/undo
   vim.o.undodir = vim.fn.expand("~/.vim/undo")
 end
+
+-- Force unix line endings on save (strip \r from CRLF files)
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    vim.bo.fileformat = "unix"
+  end,
+})

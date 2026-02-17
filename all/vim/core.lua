@@ -628,10 +628,18 @@ return {
             { "<leader>fd", "<cmd>Telescope aerial<cr>",                   desc = "Code map" },
             { "<leader>fb", "<cmd>Telescope buffers theme=dropdown<cr>",   desc = "Buffers" },
             { "<leader>fh", "<cmd>Telescope help_tags theme=dropdown<cr>", desc = "Help tags" },
+            { "<leader>fs", "<cmd>Telescope git_status<cr>",               desc = "Git changed files" },
+            { "<leader>ft", "<cmd>TodoTelescope<cr>",                      desc = "Review comments" },
         },
         config = function()
             local telescope = require("telescope")
             local themes = require("telescope.themes")
+
+            vim.api.nvim_set_hl(0, "TelescopeResultsDiffAdd", { fg = "#76946a" })
+            vim.api.nvim_set_hl(0, "TelescopeResultsDiffChange", { fg = "#dca561" })
+            vim.api.nvim_set_hl(0, "TelescopeResultsDiffDelete", { fg = "#c34043" })
+            vim.api.nvim_set_hl(0, "TelescopeResultsDiffUntracked", { fg = "#727169" })
+
             telescope.setup({
                 defaults = {
                     mappings = {
@@ -654,6 +662,57 @@ return {
                         layout_config = {
                             height = 0.75, -- 50% of screen height -> more result lines
                             width  = 0.75, -- widen if you want
+                        },
+                    }),
+                    git_status = themes.get_dropdown({
+                        previewer = true,
+                        layout_config = {
+                            height = 0.75,
+                            width  = 0.75,
+                        },
+                        git_icons = {
+                            added = "A",
+                            changed = "M",
+                            copied = "C",
+                            deleted = "D",
+                            renamed = "R",
+                            unmerged = "U",
+                            untracked = "?",
+                        },
+                        mappings = {
+                            i = {
+                                ["<C-d>"] = function(prompt_bufnr)
+                                    local action_state = require("telescope.actions.state")
+                                    local actions = require("telescope.actions")
+                                    local entry = action_state.get_selected_entry()
+                                    actions.close(prompt_bufnr)
+                                    vim.schedule(function()
+                                        vim.cmd("DiffviewOpen -- " .. entry.value)
+                                        vim.cmd("DiffviewToggleFiles")
+                                    end)
+                                end,
+                                ["<C-u>"] = function(prompt_bufnr)
+                                    local action_state = require("telescope.actions.state")
+                                    local actions = require("telescope.actions")
+                                    local entry = action_state.get_selected_entry()
+                                    actions.close(prompt_bufnr)
+                                    vim.schedule(function()
+                                        vim.cmd("edit " .. entry.value)
+                                        vim.cmd("Unified")
+                                        -- close the file tree sidebar, keep inline diff
+                                        vim.defer_fn(function()
+                                            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                                                local buf = vim.api.nvim_win_get_buf(win)
+                                                if vim.bo[buf].filetype == "unified_tree" then
+                                                    vim.api.nvim_win_close(win, true)
+                                                    break
+                                                end
+                                            end
+                                        end, 100)
+
+                                    end)
+                                end,
+                            },
                         },
                     }),
                 },
@@ -770,9 +829,20 @@ return {
         cmd = { "DiffviewOpen", "DiffviewFileHistory" },
         keys = {
             { "<leader>gd", "<cmd>DiffviewOpen<cr>",        desc = "Diffview: open" },
+            { "<leader>gc", "<cmd>DiffviewOpen --cached<cr>", desc = "Diffview: staged changes" },
             { "<leader>gh", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: file history" },
         },
         dependencies = { "nvim-lua/plenary.nvim" },
+    },
+
+    -- Unified.nvim: inline unified diffs in buffer
+    {
+        "axkirillov/unified.nvim",
+        cmd = "Unified",
+        keys = {
+            { "<leader>gu", "<cmd>Unified<cr>", desc = "Unified diff (inline)" },
+        },
+        opts = {},
     },
 
     ---------------------------------------------------------------------------
@@ -795,6 +865,30 @@ return {
     ---------------------------------------------------------------------------
     -- Comments, surround, which-key, indent guides
     ---------------------------------------------------------------------------
+
+    -- todo-comments: highlight and search review annotations (AGENT, FIX, Q, TODO)
+    {
+        "folke/todo-comments.nvim",
+        event = "FileType",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        config = function()
+            require("todo-comments").setup({
+                keywords = {
+                    AGENT = { icon = " ", color = "hint" },
+                    FIX   = { icon = " ", color = "error" },
+                    TODO  = { icon = " ", color = "info" },
+                    NOTE  = { icon = " ", color = "hint" },
+                    Q     = { icon = "?", color = "warning", alt = { "QUESTION" } },
+                },
+            })
+            vim.keymap.set("n", "]t", function()
+                require("todo-comments").jump_next()
+            end, { desc = "Next todo comment" })
+            vim.keymap.set("n", "[t", function()
+                require("todo-comments").jump_prev()
+            end, { desc = "Previous todo comment" })
+        end,
+    },
 
     -- Comment.nvim: toggle comments (gc, gcc, etc.)
     {
