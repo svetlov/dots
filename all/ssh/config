@@ -1,3 +1,8 @@
+# AWS devbox config
+Include ~/.ssh/aws-config
+
+# Added by SkyPilot for ssh config of all clusters
+Include ~/.sky/generated/ssh/*
 Host *
     ForwardAgent yes
     # RemoteForward 2224 127.0.0.1:2224
@@ -5,10 +10,10 @@ Host *
     # RemoteForward 2226 127.0.0.1:2226
     # RemoteForward 2227 127.0.0.1:2227
 
-    LocalForward 2224 127.0.0.1:2224
-    LocalForward 2225 127.0.0.1:2225
-    LocalForward 2226 127.0.0.1:2226
-    LocalForward 2227 127.0.0.1:2227
+    # LocalForward 2224 127.0.0.1:2224
+    # LocalForward 2225 127.0.0.1:2225
+    # LocalForward 2226 127.0.0.1:2226
+    # LocalForward 2227 127.0.0.1:2227
 
 Host router
     User root
