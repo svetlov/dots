@@ -192,10 +192,13 @@ class VSCodeInstaller(Installer):
 class CodeAgentsInstaller(Installer):
     name = "code-agents"
     CODEX_DIR = os.path.join(HOME, ".codex")
+    CLAUDE_DIR = os.path.join(HOME, ".claude")
 
     @classmethod
     def install(cls):
         os.makedirs(cls.CODEX_DIR, exist_ok=True)
+        os.makedirs(cls.CLAUDE_DIR, exist_ok=True)
+
         symlink(
             os.path.join(PWD, "all", "code-agents", "codex.toml"),
             os.path.join(cls.CODEX_DIR, "config.toml"),
@@ -203,6 +206,10 @@ class CodeAgentsInstaller(Installer):
         symlink(
             os.path.join(PWD, "all", "code-agents", "prompts"),
             os.path.join(cls.CODEX_DIR, "prompts"),
+        )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "prompts"),
+            os.path.join(cls.CLAUDE_DIR, "commands"),
         )
 
         # Install paper summarization scripts (entire directory)
