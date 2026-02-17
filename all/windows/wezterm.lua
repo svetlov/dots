@@ -2,6 +2,7 @@ local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
 config.term = "xterm-256color"
+config.audible_bell = "Disabled"
 
 -- Font configuration
 config.font = wezterm.font('Google Sans Code NF', { weight = 'Regular' })
@@ -58,7 +59,16 @@ config.colors = {
   },
 }
 
+-- Shift+Click to open hyperlinks (works inside tmux)
+config.mouse_bindings = {
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'SHIFT',
+    action = wezterm.action.OpenLinkAtMouseCursor,
+  },
+}
+
 -- Default shell: WSL with zsh login shell
-onfig.default_prog = { 'wsl.exe', '-e', 'zsh', '-l' }
+config.default_prog = { 'wsl.exe', '-e', 'zsh', '-l' }
 
 return config
