@@ -11,6 +11,7 @@ return {
         priority = 1000,
         config = function()
             vim.cmd("colorscheme kanagawa-wave")
+            vim.opt.fillchars:append({ diff = " " })
         end,
     },
 
@@ -269,8 +270,6 @@ return {
         event = 'LspAttach',
         config = function()
             require("lspsaga").setup({
-                -- Your LSP Saga configuration here
-                -- You can customize the UI and behavior
                 lightbulb = {
                     enable = false,
                 },
@@ -679,38 +678,76 @@ return {
                             unmerged = "U",
                             untracked = "?",
                         },
+                        entry_maker = (function()
+                            local numstat, og
+                            return function(entry)
+                                if not og then
+                                    numstat = {}
+                                    local out = vim.fn.systemlist("git diff --numstat HEAD")
+                                    for _, line in ipairs(out) do
+                                        local a, d, f = line:match("^(%d+)%s+(%d+)%s+(.+)$")
+                                        if f then numstat[f] = { add = tonumber(a), del = tonumber(d) } end
+                                    end
+                                    og = require("telescope.make_entry").gen_from_git_status({
+                                        cwd = vim.fn.getcwd(),
+                                        git_icons = {
+                                            added = "A", changed = "M", copied = "C",
+                                            deleted = "D", renamed = "R", unmerged = "U", untracked = "?",
+                                        },
+                                    })
+                                end
+                                local result = og(entry)
+                                if result then
+                                    local stats = numstat[result.value]
+                                    if stats then
+                                        local og_display = result.display
+                                        result.display = function(e)
+                                            local text, hl = og_display(e)
+                                            local add_str = string.format("+%-4d", stats.add)
+                                            local del_str = string.format("-%-4d", stats.del)
+                                            local prefix = add_str .. del_str
+                                            local plen = #prefix
+                                            -- shift existing highlights by prefix length
+                                            local new_hl = {
+                                                { { 0, #add_str }, "TelescopeResultsDiffAdd" },
+                                                { { #add_str, plen }, "TelescopeResultsDiffDelete" },
+                                            }
+                                            if hl then
+                                                for _, h in ipairs(hl) do
+                                                    if h[1] then
+                                                        table.insert(new_hl, { { h[1][1] + plen, h[1][2] + plen }, h[2] })
+                                                    end
+                                                end
+                                            end
+                                            return prefix .. text, new_hl
+                                        end
+                                    end
+                                end
+                                return result
+                            end
+                        end)(),
                         mappings = {
                             i = {
+                                ["<CR>"] = function(prompt_bufnr)
+                                    local action_state = require("telescope.actions.state")
+                                    local entry = action_state.get_selected_entry()
+                                    require("telescope.actions").close(prompt_bufnr)
+                                    vim.schedule(function()
+                                        vim.cmd("edit " .. entry.value)
+                                        require("unified.diff").show_current("HEAD")
+                                    end)
+                                end,
                                 ["<C-d>"] = function(prompt_bufnr)
                                     local action_state = require("telescope.actions.state")
-                                    local actions = require("telescope.actions")
                                     local entry = action_state.get_selected_entry()
-                                    actions.close(prompt_bufnr)
+                                    require("telescope.actions").close(prompt_bufnr)
                                     vim.schedule(function()
                                         vim.cmd("DiffviewOpen -- " .. entry.value)
                                         vim.cmd("DiffviewToggleFiles")
                                     end)
                                 end,
-                                ["<C-u>"] = function(prompt_bufnr)
-                                    local action_state = require("telescope.actions.state")
-                                    local actions = require("telescope.actions")
-                                    local entry = action_state.get_selected_entry()
-                                    actions.close(prompt_bufnr)
-                                    vim.schedule(function()
-                                        vim.cmd("edit " .. entry.value)
-                                        vim.cmd("Unified")
-                                        -- close the file tree sidebar, keep inline diff
-                                        vim.defer_fn(function()
-                                            for _, win in ipairs(vim.api.nvim_list_wins()) do
-                                                local buf = vim.api.nvim_win_get_buf(win)
-                                                if vim.bo[buf].filetype == "unified_tree" then
-                                                    vim.api.nvim_win_close(win, true)
-                                                    break
-                                                end
-                                            end
-                                        end, 100)
-
-                                    end)
+                                ["<C-o>"] = function(prompt_bufnr)
+                                    require("telescope.actions").select_default(prompt_bufnr)
                                 end,
                             },
                         },
@@ -828,11 +865,36 @@ return {
         "sindrets/diffview.nvim",
         cmd = { "DiffviewOpen", "DiffviewFileHistory" },
         keys = {
-            { "<leader>gd", "<cmd>DiffviewOpen<cr>",        desc = "Diffview: open" },
-            { "<leader>gc", "<cmd>DiffviewOpen --cached<cr>", desc = "Diffview: staged changes" },
             { "<leader>gh", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: file history" },
         },
         dependencies = { "nvim-lua/plenary.nvim" },
+        config = function()
+            require("diffview").setup({
+                hooks = {
+                    view_opened = function()
+                        vim.o.showtabline = 0
+                    end,
+                    view_closed = function()
+                        vim.o.showtabline = 1
+                    end,
+                    diff_buf_win_enter = function(bufnr, winid)
+                        vim.schedule(function()
+                            if not vim.api.nvim_win_is_valid(winid) then return end
+                            -- lspsaga's init_winbar skips diff buffers (checks vim.o.diff),
+                            -- so temporarily disable diff to let it initialize the winbar
+                            vim.api.nvim_win_call(winid, function()
+                                local saved = vim.wo[winid].diff
+                                vim.wo[winid].diff = false
+                                pcall(function()
+                                    require("lspsaga.symbol.winbar").init_winbar(bufnr)
+                                end)
+                                vim.wo[winid].diff = saved
+                            end)
+                        end)
+                    end,
+                },
+            })
+        end,
     },
 
     -- Unified.nvim: inline unified diffs in buffer
@@ -840,7 +902,37 @@ return {
         "axkirillov/unified.nvim",
         cmd = "Unified",
         keys = {
-            { "<leader>gu", "<cmd>Unified<cr>", desc = "Unified diff (inline)" },
+            { "]c", function() require("unified.navigation").next_hunk() end, desc = "Next diff hunk" },
+            { "[c", function() require("unified.navigation").previous_hunk() end, desc = "Previous diff hunk" },
+            { "<leader>gD", function()
+                local hunks = vim.b.unified_hunks
+                if hunks and #hunks > 0 then
+                    vim.cmd("Unified reset")
+                else
+                    require("unified.diff").show_current("HEAD")
+                end
+            end, desc = "Toggle unified diff" },
+            { "<leader>gd", function()
+                local diffview_open = false
+                pcall(function()
+                    diffview_open = require("diffview.lib").get_current_view() ~= nil
+                end)
+                if diffview_open then
+                    vim.cmd("DiffviewClose")
+                    vim.schedule(function()
+                        require("unified.diff").show_current("HEAD")
+                    end)
+                else
+                    local file = vim.fn.expand("%:p")
+                    pcall(vim.cmd, "Unified reset")
+                    local ok, err = pcall(vim.cmd, "DiffviewOpen -- " .. file)
+                    if ok then
+                        vim.cmd("DiffviewToggleFiles")
+                    else
+                        vim.notify("DiffviewOpen failed: " .. err, vim.log.levels.WARN)
+                    end
+                end
+            end, desc = "Toggle unified/diffview" },
         },
         opts = {},
     },
