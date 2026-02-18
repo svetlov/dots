@@ -121,7 +121,7 @@ fi
 # =====================================================================================================================
 if [[ $IS_DARWIN == true || $IS_WSL == true ]]; then
     _ssh_agent_maybe_launch;
-    if [[ "${#TMUX}" -eq 0 ]]; then
+    if [[ -z "$WEZTERM_NO_TMUX" && "${#TMUX}" -eq 0 ]]; then
         tmux attach || tmux new -A
     fi
 elif [[ $IS_LINUX == true ]]; then
