@@ -215,6 +215,10 @@ class CodeAgentsInstaller(Installer):
             os.path.join(PWD, "all", "code-agents", "prompts"),
             os.path.join(cls.CLAUDE_DIR, "commands"),
         )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "CLAUDE.md"),
+            os.path.join(cls.CLAUDE_DIR, "CLAUDE.md"),
+        )
 
         # Install paper summarization scripts (entire directory)
         paper_sum_src = os.path.join(PWD, "all", "code-agents", "paper-summarization")
