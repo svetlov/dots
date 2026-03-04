@@ -1215,4 +1215,22 @@ return {
         },
     },
     -- } (jupyter)
+    {
+      dir = "/home/seva/workspace/review.nvim",
+      dependencies = {
+        "esmuellert/codediff.nvim",
+        "MunifTanjim/nui.nvim",
+      },
+      cmd = { "Review", "ReviewMCPServerStart", "ReviewMCPServerStop", "ReviewMCPServerRestart" },
+      keys = {
+        { "<leader>r", "<cmd>Review<cr>", desc = "Review" },
+        { "<leader>R", "<cmd>Review commits<cr>", desc = "Review commits" },
+      },
+      opts = {
+        mcp = {
+          command = "/home/seva/workspace/review.nvim/review-mcp/.venv/bin/python3",
+          args = { "-m", "review_mcp" },
+        },
+      },
+    }
 }
