@@ -126,6 +126,16 @@ install_uv() {
     fi
 }
 
+# Step 7b: zoxide (smart cd)
+install_zoxide() {
+    if command -v zoxide &>/dev/null; then
+        info "zoxide already installed, skipping"
+    else
+        info "Installing zoxide"
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+}
+
 # Step 8: Docker Engine
 install_docker() {
     if command -v docker &>/dev/null; then
@@ -177,6 +187,8 @@ install_ohmyzsh() {
     else
         echo "fzf-zsh-plugin already installed, skipping"
     fi
+
+
 }
 
 # Step 7: Dotfile configs via install.py
@@ -223,6 +235,7 @@ symlink_npmrc
 install_ai_tools
 install_rust
 install_uv
+install_zoxide
 install_docker
 install_ohmyzsh
 install_configs

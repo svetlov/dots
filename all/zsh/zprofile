@@ -149,6 +149,12 @@ _update_env() {
         LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${CUDA_HOME}/extras/CUPTI/lib64");  # libcupti
     fi
 
+    if [[ -d "/snap" ]]; then
+        PATH=$(_smart_append ${PATH} "/snap/bin");
+        LIBRARY_PATH=$(_smart_append ${LIBRARY_PATH} "/snap/lib");
+        LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "/snap/lib");
+    fi
+
     if [[ -d "/opt/openmpi" ]]; then
         export MPI_PATH="/opt/openmpi";
         export CPLUS_INCLUDE_PATH="${MPI_PATH}/include";

@@ -108,9 +108,38 @@ plugins=(git tmux python brew history-substring-search uv vi-mode fzf-zsh zsh-uv
 
 source ${ZSH}/oh-my-zsh.sh
 
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init zsh)"
+fi
+
+_fcd_or_complete() {
+    if [[ -z "$BUFFER" ]]; then
+        local dir
+        dir=$({
+            if command -v zoxide &>/dev/null; then
+                zoxide query -l 2>/dev/null | head -20
+            fi
+            find . -maxdepth 2 -type d 2>/dev/null | sed 's|^\./||'
+        } | awk '!seen[$0]++' | fzf --height=40% --reverse)
+        if [[ -n "$dir" ]]; then
+            BUFFER="cd $dir"
+            zle accept-line
+        fi
+    else
+        zle expand-or-complete
+    fi
+}
+zle -N _fcd_or_complete
+bindkey '^I' _fcd_or_complete
 
 # TODO FIXME
 # eval "$(/home/vsvetlov/miniconda3/bin/conda shell.zsh hook)"
+
+# Reset pane title when returning to prompt (after subprocess exits)
+if [[ -n "$TMUX" ]]; then
+    _reset_pane_title() { printf '\033]2;%s\033\\' "${PWD/#$HOME/~}" }
+    precmd_functions+=(_reset_pane_title)
+fi
 
 if [[ -f "${HOMEDIR}/.secrets.rc" ]]; then
     source "${HOMEDIR}/.secrets.rc"
