@@ -34,6 +34,15 @@ print(' '.join(p['name'] for p in json.load(open(sys.argv[1]))['packages']))
     sudo apt install -y "${base_packages[@]}" $dynamic_packages
 }
 
+# Step 1b: WSL utilities (wslu) — only on WSL
+install_wsl_utils() {
+    if [[ -n "${WSL_DISTRO_NAME:-}" || -n "${WSL_INTEROP:-}" ]] || \
+       grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+        info "Installing WSL utilities (wslu)"
+        sudo apt install -y wslu
+    fi
+}
+
 # Step 2: Neovim from GitHub release
 install_neovim() {
     local required_major=0
@@ -230,6 +239,7 @@ generate_locale() {
 # Main
 generate_locale
 install_apt_packages
+install_wsl_utils
 install_neovim
 install_nvm_node
 symlink_npmrc

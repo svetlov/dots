@@ -149,6 +149,9 @@ fi
 # =============================================== OS Specific Settings ================================================
 # =====================================================================================================================
 if [[ $IS_DARWIN == true || $IS_WSL == true ]]; then
+    if [[ $IS_WSL == true ]]; then
+        export BROWSER=wslview
+    fi
     _ssh_agent_maybe_launch;
     if [[ -z "$WEZTERM_NO_TMUX" && "${#TMUX}" -eq 0 ]]; then
         tmux attach || tmux new -A
