@@ -30,6 +30,8 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 - Avoid clever abstractions
 - Reuse existing code whenever possible, as long as it doesn't hurt readability
 - Keep implementations as simple as possible
+- Keep functions short and focused — extract helpers instead of growing monolithic functions
+- Each function should do one thing at one level of abstraction
 - Follow existing project conventions
 - Match existing logging, error handling, and config styles
 - Respect async vs sync boundaries
@@ -43,6 +45,7 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 ### Python
 - Avoid using `hasattr` / `getattr` / `setattr` unless explicitly specified
 - Use `pyproject.toml` and `uv` to manage python dependencies, do not touch `.venv` directory directly
+- in general prefer `uv run python` instead of `python` for python code invocation
 
 ### Rust
 - Do not use `.unwrap` unless it's mentioned explicitly
@@ -52,6 +55,7 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 - Only optimize what the spec explicitly calls out
 - If performance targets are stated, validate them
 - If regressions appear, report them immediately
+- Optimizations must justify their complexity — don't micro-optimize code that runs infrequently or isn't on a hot path
 
 ## Tests & Validation
 
@@ -67,6 +71,9 @@ Test execution defaults (unless the task specifies otherwise):
 - Run tests in parallel when the test framework supports it.
 
 Every task must end with running the relevant tests.
+
+## Commits & PRs
+- Do not include a "Test plan" section in commit messages or pull request descriptions.
 
 ## Error Handling
 
