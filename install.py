@@ -171,6 +171,10 @@ class TmuxInstaller(Installer):
             os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
             os.path.join(LOCAL_BIN, "tmux-vim-select-pane"),
         )
+        symlink(
+            os.path.join(PWD, "all", "tmux", "plugins"),
+            os.path.join(HOME, ".tmux", "plugins"),
+        )
 
 
 class VSCodeInstaller(Installer):

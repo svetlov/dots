@@ -1,0 +1,9 @@
+[submodule "all/tmux/plugins/tpm"]
+	path = all/tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm.git
+[submodule "all/tmux/plugins/tmux-resurrect"]
+	path = all/tmux/plugins/tmux-resurrect
+	url = https://github.com/tmux-plugins/tmux-resurrect.git
+[submodule "all/tmux/plugins/tmux-continuum"]
+	path = all/tmux/plugins/tmux-continuum
+	url = https://github.com/tmux-plugins/tmux-continuum.git

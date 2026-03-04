@@ -194,6 +194,7 @@ install_ohmyzsh() {
 # Step 7: Dotfile configs via install.py
 install_configs() {
     info "Installing dotfile configs via install.py"
+    git -C "$DOTS_DIR" submodule update --init --recursive
     python3 "$DOTS_DIR/install.py" install configs
 }
 
