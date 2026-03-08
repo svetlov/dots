@@ -1,0 +1,23 @@
+{
+  "gpu_mode_force_set": 1,
+  "performance_mode": 0,
+  "start_count": 25,
+  "performance_1": 0,
+  "gpu_mode": 1,
+  "internal_display": "ATNA40CU05-0 ",
+  "screen_max": 120,
+  "max_frequency": 120,
+  "frequency": 120,
+  "overdrive": 1,
+  "gpu_auto": 1,
+  "kill_gpu_apps": 1,
+  "bw_icon": 1,
+  "performance_0": 0,
+  "toggle_clamshell_mode": 1,
+  "nv_platform": 1,
+  "optimized_usbc": 1,
+  "gpu_fix": 1,
+  "screen_auto": 1,
+  "keyboard_timeout": 60,
+  "keyboard_ac_timeout": 30
+}
