@@ -31,6 +31,7 @@ alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
 
 
+
 reset-ssh() {
     sudo netstat -apn | grep -w 2224 | awk '{ print $7 }' | sed 's/\(.*\)\/.*/\1/' | sort -u | xargs -I{} kill -9 {};
 }
