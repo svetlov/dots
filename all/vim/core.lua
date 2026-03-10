@@ -65,25 +65,22 @@ return {
     -- Treesitter (syntax, highlighting, etc.)
     ---------------------------------------------------------------------------
 
-    -- Treesitter: better syntax highlighting, indentation, textobjects
+    -- Treesitter: parser manager + highlighting via nvim built-in
     {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",
-        event = "FileType",
-        opts = {
-            ensure_installed = {
-                "lua",
-                "python",
-                "rust",
-                "bash",
-                "json",
-                "yaml",
-                "markdown",
-                "markdown_inline",
-            },
-            highlight = { enable = true },
-            indent = { enable = true },
-        },
+        lazy = false,
+        config = function()
+            require("nvim-treesitter").install({
+                "lua", "python", "rust", "bash",
+                "json", "yaml", "markdown", "markdown_inline",
+            })
+            vim.api.nvim_create_autocmd("FileType", {
+                callback = function(args)
+                    pcall(vim.treesitter.start, args.buf)
+                end,
+            })
+        end,
     },
     {
         'stevearc/aerial.nvim',

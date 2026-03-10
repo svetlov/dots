@@ -20,6 +20,7 @@ install_apt_packages() {
         ripgrep fd-find
         python3 python3-pip python3-venv
         imagemagick libmagickwand-dev luarocks
+        libclang-dev
         jq
     )
 
@@ -125,7 +126,17 @@ install_rust() {
     fi
 }
 
-# Step 7: uv (Python package manager)
+# Step 7: tree-sitter CLI (needed by nvim-treesitter to compile parsers)
+install_tree_sitter() {
+    if command -v tree-sitter &>/dev/null; then
+        info "tree-sitter-cli already installed, skipping"
+    else
+        info "Installing tree-sitter-cli via cargo"
+        cargo install tree-sitter-cli
+    fi
+}
+
+# Step 8: uv (Python package manager)
 install_uv() {
     if command -v uv &>/dev/null; then
         info "uv already installed, skipping"
@@ -245,6 +256,7 @@ install_nvm_node
 symlink_npmrc
 install_ai_tools
 install_rust
+install_tree_sitter
 install_uv
 install_zoxide
 install_docker
