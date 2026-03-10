@@ -30,6 +30,14 @@ list=$(tmux list-windows -a -F "#{session_name}:#{window_index} #{?@custom_name,
     else
       printf "    %s\n" "$line"
     fi
+  elif [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
+    # Check if nvim has Claude blocked (set via @claude_nvim_blocked window option)
+    nvim_blocked=$(tmux display-message -t "$win" -p "#{@claude_nvim_blocked}" 2>/dev/null)
+    if [ "$nvim_blocked" = "1" ]; then
+      printf "${RED}[?]${RST} %s\n" "$line"
+    else
+      printf "    %s\n" "$line"
+    fi
   else
     printf "    %s\n" "$line"
   fi

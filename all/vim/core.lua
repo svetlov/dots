@@ -43,21 +43,112 @@ return {
         event = "VeryLazy",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
-            require("lualine").setup({
-                icons_enabled = true,
-                options = {
-                    theme = "auto",
-                    globalstatus = true,
-                },
-                sections = {
-                    lualine_c = {
-                        {
-                            'filename',
-                            path = 1, -- 3: absolute with ~, 4: filename + parent with ~
+            -- Claude status polling: scan nvim terminal buffers + tmux panes
+            local claude_status = ""
+            local claude_state = nil
+            local in_tmux = vim.env.TMUX ~= nil
+            local tmux_pane = vim.env.TMUX_PANE
+            local function check_text(text)
+                local lines = type(text) == "table" and text or vim.split(text, "\n")
+                local tail = table.concat(lines, "\n", math.max(1, #lines - 4))
+                if text:find("Do you want to proceed") or text:find("Esc to cancel") then
+                    return "blocked", "[?] Claude waiting"
+                elseif tail:find("❯") or tail:find("%? for shortcuts") then
+                    return "idle", "[>] Claude idle"
+                elseif tail:find("esc to interrupt") then
+                    return "thinking", "[*] Claude thinking"
+                end
+                return nil, ""
+            end
+            local function tmux_set_blocked(blocked)
+                if in_tmux and tmux_pane then
+                    if blocked then
+                        vim.fn.system("tmux set -wq -t " .. tmux_pane .. " @claude_nvim_blocked 1")
+                    else
+                        vim.fn.system("tmux set -wuq -t " .. tmux_pane .. " @claude_nvim_blocked")
+                    end
+                end
+            end
+            local prev_blocked = false
+            local claude_timer = vim.uv.new_timer()
+            claude_timer:start(0, 2000, vim.schedule_wrap(function()
+                local state = nil
+                local status = ""
+                -- Check nvim terminal buffers (claude-code.nvim floating terminal)
+                for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                    if vim.api.nvim_buf_is_loaded(buf)
+                        and vim.bo[buf].buftype == "terminal"
+                    then
+                        local lines = vim.api.nvim_buf_get_lines(buf, -30, -1, false)
+                        local text = table.concat(lines, "\n")
+                        local s, st = check_text(text)
+                        if s == "blocked" then
+                            state, status = s, st
+                            break
+                        elseif s and (not state or s == "thinking") then
+                            state, status = s, st
+                        end
+                    end
+                end
+                claude_status = status
+                local blocked = state == "blocked"
+                if blocked ~= prev_blocked then
+                    prev_blocked = blocked
+                    tmux_set_blocked(blocked)
+                end
+                if state ~= claude_state then
+                    claude_state = state
+                    require("lualine").setup(lualine_cfg(state))
+                end
+            end))
+
+            -- Full-bar red theme only for blocked state
+            local blocked_theme = {
+                normal   = { a = { bg = "#c34043", fg = "#1f1f28", gui = "bold" },
+                             b = { bg = "#43242b", fg = "#c34043" },
+                             c = { bg = "#2a1519", fg = "#e46876" } },
+                insert   = { a = { bg = "#c34043", fg = "#1f1f28", gui = "bold" } },
+                visual   = { a = { bg = "#c34043", fg = "#1f1f28", gui = "bold" } },
+                command  = { a = { bg = "#c34043", fg = "#1f1f28", gui = "bold" } },
+                inactive = { c = { bg = "#2a1519", fg = "#c34043" } },
+            }
+
+            -- Small badge colors: colored bg with black text
+            local badge_colors = {
+                blocked  = { bg = "#c34043", fg = "#1f1f28", gui = "bold" },
+                thinking = { bg = "#76946a", fg = "#1f1f28", gui = "bold" },
+                idle     = { bg = "#dca561", fg = "#1f1f28", gui = "bold" },
+            }
+
+            function lualine_cfg(state)
+                return {
+                    icons_enabled = true,
+                    options = {
+                        theme = state == "blocked" and blocked_theme or "auto",
+                        globalstatus = true,
+                    },
+                    sections = {
+                        lualine_b = {
+                            {
+                                function() return claude_status end,
+                                color = function()
+                                    return badge_colors[claude_state]
+                                end,
+                                cond = function() return claude_status ~= "" end,
+                            },
+                            'branch',
+                        },
+                        lualine_c = {
+                            {
+                                'filename',
+                                path = 1,
+                            },
                         }
                     }
                 }
-            })
+            end
+
+            require("lualine").setup(lualine_cfg(nil))
         end,
     },
 
@@ -519,65 +610,87 @@ return {
     --     },
     --   },
     -- },
+    -- Claude Code: floating terminal (no plugin, just native nvim terminal)
+    -- <leader>aa (toggle/continue), <leader>aA (new session), <leader>ar (resume picker)
+    -- The floating window + terminal buffer are reused across toggles.
     {
-        "olimorris/codecompanion.nvim",
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "nvim-treesitter/nvim-treesitter",
+        "nvim-lua/plenary.nvim", -- already a dep elsewhere, just using this entry for the config block
+        keys = {
+            { "<leader>aa", function() _G.claude_float_toggle("--continue") end, desc = "Claude toggle/continue" },
+            { "<leader>aA", function() _G.claude_float_toggle() end, desc = "Claude new session" },
+            { "<leader>ar", function() _G.claude_float_toggle("--resume") end, desc = "Claude resume session" },
         },
         config = function()
-            require("codecompanion").setup({
-                strategies = {
-                    chat = {
-                        adapter = "codex",
-                        slash_commands = {
-                            ["file"] = {
-                                opts = {
-                                    provider = "telescope",
-                                },
-                            },
-                        },
-                    },
-                    inline = {
-                        adapter = "codex",
-                    },
-                },
-                adapters = {
-                    acp = {
-                        codex = function()
-                            return require("codecompanion.adapters").extend("codex", {
-                                env = {
-                                  cmd = "codex --sandbox danger-full-access",
-                                },
-                                defaults = {
-                                  auth_method = "chatgpt", -- "openai-api-key"|"codex-api-key"|"chatgpt"
-                                },
-                            })
-                        end,
-                    },
-                },
-                -- opts = {
-                --   log_level = "DEBUG", -- or "TRACE"
-                -- },
-            })
+            local claude_buf = nil
+            local claude_win = nil
+            local claude_cmd = nil  -- tracks which flags the current buffer was started with
 
-            vim.keymap.set("n", "<leader>ac", function()
-                vim.cmd("CodeCompanionChat")
-            end, { desc = "Open CodeCompanion chat" })
+            local function open_float(buf)
+                local width = vim.o.columns - 2  -- full width minus border
+                -- vim.o.lines includes statusline + cmdline (2 rows); border takes 2 more
+                local usable = vim.o.lines - 2
+                local height = usable - 2  -- fill all usable space minus border
+                local row = 0
+                local col = math.floor((vim.o.columns - width) / 2)
+                claude_win = vim.api.nvim_open_win(buf, true, {
+                    relative = "editor",
+                    width = width,
+                    height = height,
+                    row = row,
+                    col = col,
+                    style = "minimal",
+                    border = "rounded",
+                })
+            end
 
-            vim.keymap.set("n", "<leader>aa", function()
-                vim.cmd("CodeCompanionChat Toggle")
-            end, { desc = "Toggle CodeCompanion" })
-            
-            -- For sending visual selection to CodeCompanion
-            vim.keymap.set("v", "<leader>ac", function()
-              vim.cmd("'<,'>CodeCompanionChat")
-            end, { desc = "Send selection to CodeCompanion chat" })
+            ---@param flags? string  e.g. "--continue", "--resume", or nil for new session
+            function _G.claude_float_toggle(flags)
+                -- If float is visible, hide it
+                if claude_win and vim.api.nvim_win_is_valid(claude_win) then
+                    vim.api.nvim_win_hide(claude_win)
+                    claude_win = nil
+                    return
+                end
 
-            -- For adding visual selection to existing chat
-            vim.keymap.set("v", "<leader>aa", function()
-              vim.cmd("'<,'>CodeCompanionChat Add")
-            end, { desc = "Add selection to existing chat" })
+                -- Reuse existing buffer if it matches the requested flags and is alive
+                if claude_buf
+                    and vim.api.nvim_buf_is_valid(claude_buf)
+                    and vim.bo[claude_buf].channel ~= 0
+                    and claude_cmd == (flags or "")
+                then
+                    open_float(claude_buf)
+                    vim.cmd("startinsert")
+                    return
+                end
+
+                -- New terminal buffer
+                claude_buf = vim.api.nvim_create_buf(false, true)
+                open_float(claude_buf)
+                local cmd = "claude"
+                if flags then cmd = cmd .. " " .. flags end
+                vim.fn.termopen(cmd, {
+                    on_exit = function()
+                        -- Clean up when claude process exits
+                        if claude_win and vim.api.nvim_win_is_valid(claude_win) then
+                            vim.api.nvim_win_hide(claude_win)
+                            claude_win = nil
+                        end
+                        claude_buf = nil
+                        claude_cmd = nil
+                    end,
+                })
+                claude_cmd = flags or ""
+                vim.cmd("startinsert")
+            end
+
+            -- Terminal-mode: \an escapes to normal mode, \aa hides the float
+            vim.keymap.set("t", "<leader>a[", [[<C-\><C-n>]], { desc = "Claude normal mode" })
+            vim.keymap.set("t", "<leader>aa", function()
+                if claude_win and vim.api.nvim_win_is_valid(claude_win) then
+                    vim.api.nvim_win_hide(claude_win)
+                    claude_win = nil
+                end
+            end, { desc = "Claude hide float" })
         end,
     },
 

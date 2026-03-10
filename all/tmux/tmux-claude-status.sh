@@ -48,18 +48,26 @@ while true; do
     done
     [ $skip -eq 1 ] && continue
 
-    # Only check panes running claude
+    # Check panes running claude directly, or nvim with @claude_nvim_blocked
     cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null)
-    [ "$cmd" = "claude" ] || continue
-
-    # Capture full visible pane content and look for permission dialog markers
-    pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-    if echo "$pane" | grep -q "Do you want to proceed\|Esc to cancel"; then
-      # Format matches ctrl+b w window list for consistency
-      label=$(tmux display-message -t "$win" -p "#{session_name}:#{window_index} #{?@custom_name,#{@custom_name} | ,}#{pane_title} (#{pane_current_command})" 2>/dev/null)
-      tmux set -gq "status-format[$i]" "#[align=left] [?] $label " 2>/dev/null
-      i=$((i + 1))
+    if [ "$cmd" = "claude" ]; then
+      # Capture full visible pane content and look for permission dialog markers
+      pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
+      if ! echo "$pane" | grep -q "Do you want to proceed\|Esc to cancel"; then
+        continue
+      fi
+    elif [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
+      # nvim sets @claude_nvim_blocked when Claude inside it needs permission
+      blocked=$(tmux display-message -t "$win" -p "#{@claude_nvim_blocked}" 2>/dev/null)
+      [ "$blocked" = "1" ] || continue
+    else
+      continue
     fi
+
+    # Format matches ctrl+b w window list for consistency
+    label=$(tmux display-message -t "$win" -p "#{session_name}:#{window_index} #{?@custom_name,#{@custom_name} | ,}#{pane_title} (#{pane_current_command})" 2>/dev/null)
+    tmux set -gq "status-format[$i]" "#[align=left] [?] $label " 2>/dev/null
+    i=$((i + 1))
   done
 
   # Clear any status-format lines left over from a previous iteration
