@@ -12,6 +12,13 @@ return {
         config = function()
             vim.cmd("colorscheme kanagawa-wave")
             vim.opt.fillchars:append({ diff = " " })
+            -- kanagawa Normal fg is beige (#DCD7BA); use true white in terminal buffers
+            vim.api.nvim_set_hl(0, "TermNormal", { fg = "#FFFFFF", bg = "#1F1F28" })
+            vim.api.nvim_create_autocmd("TermOpen", {
+                callback = function()
+                    vim.wo.winhighlight = "Normal:TermNormal"
+                end,
+            })
         end,
     },
 
