@@ -33,15 +33,16 @@ require("lazy").setup("plugins")
 -- https://www.reddit.com/r/bashonubuntuonwindows/comments/1i0svwc/comment/mr8hbre/
 if vim.fn.has("wsl") == 1 then
   vim.opt.clipboard = "unnamed,unnamedplus"
+  local clip = vim.fn.expand('~/.local/bin/wslcopy.sh')
   vim.g.clipboard = {
     name = 'WslClipboard',
     copy = {
-      ['+'] = vim.fn.expand('~/.local/bin/wslcopy.sh'),
-      ['*'] = vim.fn.expand('~/.local/bin/wslcopy.sh'),
+      ['+'] = clip,
+      ['*'] = clip,
     },
     paste = {
-      ['+'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-      ['*'] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+      ['+'] = { clip, '--paste' },
+      ['*'] = { clip, '--paste' },
     },
     cache_enabled = 0,
   }
