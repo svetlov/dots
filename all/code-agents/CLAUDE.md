@@ -74,6 +74,8 @@ Every task must end with running the relevant tests.
 
 ## Commits & PRs
 - Do not include a "Test plan" section in commit messages or pull request descriptions.
+- Keep PRs reviewable by a human: aim for ~500 LOC of meaningful code (excluding configs, tests, docs, and boilerplate). Not a hard limit, but if a PR grows well past this, split it.
+- PR descriptions should include a list of core files changed (skip tests, configs, docs, and boilerplate).
 
 ## Error Handling
 
@@ -81,3 +83,9 @@ Every task must end with running the relevant tests.
 - Do not swallow exceptions
 - Prefer clear failure over silent degradation
 - Match retry semantics exactly as specified
+
+## Logging
+
+- Prefer `logging` / `structlog` / `loguru` over `print` for new code
+- Keep logs machine-readable: structured key=value pairs, timestamps, source context
+- No rich/fancy formatting or emojis in logs
