@@ -22,7 +22,7 @@
     }; f"
 [user]
   name = Vsevolod Svetlov
-  email = vsvetlov@twitter.com
+  email = svetlov.vsevolod@gmail.com
 [color]
   diff = auto
   status = auto
@@ -42,8 +42,8 @@
 [init]
 	defaultBranch = master
 [credential "https://github.com"]
-	helper = 
+	helper =
 	helper = !/home/seva/.local/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = 
+	helper =
 	helper = !/home/seva/.local/bin/gh auth git-credential
