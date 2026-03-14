@@ -15,9 +15,10 @@ Rules:
 - If something is missing/unclear, write "Not specified" and (where possible) point to the closest place in the paper.
 - Use LaTeX for any math (equations, losses, definitions). Prefer minimal, readable LaTeX; inline `$...$` for short expressions and display `$$...$$`
 only for key equations.
-- If the PDF is too large or cannot be read directly, do NOT ask for permissions. Instead:
-  1) If you can infer an arXiv ID or link from the file name/metadata, fetch the HTML from ar5iv/arXiv using WebFetch and summarize from that.
-  2) Otherwise, use `pdftotext` via Bash to extract text from the local PDF and summarize from the extracted text.
+- PDF reading strategy (do NOT ask for permissions, just proceed):
+  1) For papers ≤20 pages, read the full PDF natively via Read.
+  2) For longer papers, read the first 20 pages natively via Read (pages parameter), then use `pdftotext` via Bash to extract remaining pages for appendix content.
+  3) If the PDF cannot be read at all: infer an arXiv ID from the file name/metadata and fetch HTML from ar5iv via WebFetch; if that fails, fall back to `pdftotext` for the entire paper.
 
 Output: compact but exhaustive Markdown with EXACTLY these sections:
 
@@ -39,19 +40,23 @@ Output: compact but exhaustive Markdown with EXACTLY these sections:
 - Where it would be used (systems/product/research).
 - What assumption it relaxes or what bottleneck it addresses.
 
-## 3) High-level implementation details
+## 3) Method & architecture
 - Inputs/outputs and overall pipeline stages.
 - Model/architecture components (what's new vs standard).
 - Objective/losses, training setup, inference/runtime path (include key equations in LaTeX if present).
-- Data: datasets, labeling, preprocessing, retrieval/index details (if any).
-- Evaluation: metrics, baselines, key results (with numbers).
 - Compute/cost notes, dependencies, reproducibility notes (code/models released?).
 
-## 4) Differences vs predecessors
+## 4) Experimental results
+- Data: datasets, labeling, preprocessing, retrieval/index details (if any).
+- Metrics and baselines used.
+- Key results with numbers (cite tables/figures).
+- Include appendix findings if they contain key ablations or hyperparameters.
+
+## 5) Differences vs predecessors
 Create a table: Aspect | This paper | Prior work it contrasts with (as cited in the paper)
 (Only name predecessors that the paper explicitly compares/cites; otherwise say "Not explicitly compared".)
 
-## 5) Problems / limitations
+## 6) Problems / limitations
 - Technical weaknesses, missing ablations, confounders, unclear claims.
 - Failure modes, scaling issues, edge cases.
 - What would you need to verify before adopting it.
@@ -64,9 +69,10 @@ Create a table: Aspect | This paper | Prior work it contrasts with (as cited in 
 Constraints:
 - 1) Main ideas: max 6 bullets.
 - 2) Why it matters: max 4 bullets.
-- 3) High-level implementation details: max 10 bullets + optional 5-10 lines pseudocode.
-- 4) Differences vs predecessors: table with 3-6 rows.
-- 5) Problems / limitations: max 8 bullets.
+- 3) Method & architecture: max 6 bullets + optional 5-10 lines pseudocode.
+- 4) Experimental results: max 6 bullets.
+- 5) Differences vs predecessors: table with 3-6 rows.
+- 6) Problems / limitations: max 8 bullets.
 - Key takeaways: exactly 3 bullets.
 
 At the very end, add exactly two final separate lines, in this exact format:
