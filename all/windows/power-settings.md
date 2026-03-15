@@ -134,16 +134,34 @@ powercfg /hibernate off
 
 **Known issue:** GHelper may fail to re-enable NVIDIA GPU after hibernate resume. Monitor and revert if this occurs.
 
-### 8. Low battery + idle auto-hibernate
+### 8. Standby battery budget: 70% drain allowed
 
-**Why:** Safety net for when the laptop is left idle on battery at low charge. Hibernates if battery < 15% and user has been idle > 1 hour. Separate from the 18h timeout which catches long standby regardless of battery level.
+**Why:** Windows Modern Standby has a built-in "Adaptive Hibernate" feature that forces hibernate when battery drain during standby exceeds a budget. The default is 5% per 12-hour window — far too aggressive, causing unexpected hibernate after ~2 hours of standby. Increased to 70% so the system stays in standby until battery reaches ~30% remaining (from full charge), then hibernates.
 
-Implemented as a scheduled task (`LowBatteryHibernate`) that runs every 15 minutes. Script at `C:\ProgramData\PowerScripts\LowBatteryHibernate.ps1`, logs to `hibernate.log` in the same directory.
-
-To remove:
 ```powershell
-Unregister-ScheduledTask -TaskName "LowBatteryHibernate" -Confirm:$false
-Remove-Item "C:\ProgramData\PowerScripts" -Recurse -Force
+# SUB_PRESENCE / STANDBYBUDGETPERCENT (powercfg requires GUIDs for these)
+powercfg /setdcvalueindex SCHEME_CURRENT `
+    8619b916-e004-4dd8-9b66-dae86f806698 `
+    9fe527be-1b70-48da-930d-7bcf17b44990 70
+powercfg /setactive SCHEME_CURRENT
+```
+
+Other protections still active: 18h hibernate timeout (step 7), critical battery hibernate at 2% (system default).
+
+To verify:
+```powershell
+powercfg /qh SCHEME_CURRENT `
+    8619b916-e004-4dd8-9b66-dae86f806698 `
+    9fe527be-1b70-48da-930d-7bcf17b44990
+# DC value should be 0x00000046 (70)
+```
+
+To revert to default (5%):
+```powershell
+powercfg /setdcvalueindex SCHEME_CURRENT `
+    8619b916-e004-4dd8-9b66-dae86f806698 `
+    9fe527be-1b70-48da-930d-7bcf17b44990 5
+powercfg /setactive SCHEME_CURRENT
 ```
 
 ### 9. Windows Update: AC-only, once per day
@@ -328,10 +346,6 @@ To unregister:
 ```powershell
 Unregister-ScheduledTask -TaskName "GHelperResumeRestart" -Confirm:$false
 ```
-
-### Other machine-wide tasks (registered separately)
-
-- **LowBatteryHibernate** (step 8) — hibernates if battery <15% and idle >1h. Runs as S4U, triggers `shutdown /h`.
 
 ## Verification
 
