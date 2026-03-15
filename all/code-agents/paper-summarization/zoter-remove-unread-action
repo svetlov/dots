@@ -1,0 +1,20 @@
+type: ActionsTagsBackup
+author: svetlov
+platformVersion: 8.0.4
+pluginVersion: 2.4.0
+timestamp: '2026-03-15T08:49:33.846Z'
+actions:
+  default1:
+    event: 3
+    operation: 2
+    data: meta_unread
+    shortcut: ''
+    enabled: true
+    menu: ''
+    name: Remove Unread When Close Tab
+    showInMenu:
+      item: true
+      collection: true
+      tools: true
+      reader: true
+      readerAnnotation: true

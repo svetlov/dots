@@ -1,0 +1,377 @@
+type: ActionsTagsBackup
+author: svetlov
+platformVersion: 8.0.4
+pluginVersion: 2.4.0
+timestamp: '2026-03-15T08:49:59.051Z'
+actions:
+  1768403883962-UnjkpZLv:
+    event: 1
+    operation: 4
+    data: |
+      /*
+       * Zotero Actions & Tags - Paper Summarizer (simplified)
+       */
+
+      var CONFIG = {
+          command: "summarize-paper",
+          notePrefix: "AI Summary",
+          summaryTag: "meta_summarized",
+          noteTags: ["meta_summary", "meta_ai_generated"],
+          skipIfTagged: true,
+          // Use WSL to run claude inside your Linux environment
+          useWsl: true,
+          // Optional: specify distro name (e.g. "Ubuntu-22.04")
+          wslDistro: null,
+          // Hide console window via wscript wrapper
+          useHiddenWsl: true,
+          // Write a short debug file only on errors
+          debug: false
+      };
+
+      async function runSummarizer() {
+          var targetItem = item || (items && items[0]);
+
+          if (!targetItem) {
+              return "No item selected";
+          }
+
+          if (CONFIG.skipIfTagged) {
+              var tags = targetItem.getTags();
+              if (tags.some(function(t) { return t.tag === CONFIG.summaryTag; })) {
+                  return "Item already summarized";
+              }
+          }
+
+          var attachmentIDs = targetItem.getAttachments();
+          if (!attachmentIDs || attachmentIDs.length === 0) {
+              return "No attachments found";
+          }
+
+          var pdfPath = null;
+          for (var i = 0; i < attachmentIDs.length; i++) {
+              var attachment = await Zotero.Items.getAsync(attachmentIDs[i]);
+              if (attachment && attachment.attachmentContentType === "application/pdf") {
+                  pdfPath = await attachment.getFilePathAsync();
+                  break;
+              }
+          }
+
+          if (!pdfPath) {
+              return "No PDF attachment found";
+          }
+
+          var isWindows = Zotero.isWin;
+          var sep = isWindows ? "\\" : "/";
+          var pdfDir = pdfPath.substring(0, pdfPath.lastIndexOf(sep));
+
+          var timestamp = Date.now();
+          var pdfBasename = pdfPath.substring(pdfPath.lastIndexOf(sep) + 1).replace(".pdf", "");
+          var outputPath = PathUtils.join(PathUtils.tempDir, "zotero_summary_" + pdfBasename + "_" + timestamp + ".txt");
+
+          function winToWslPath(winPath) {
+              var p = String(winPath);
+              var drive = p.substring(0, 2);
+              var rest = p.substring(2).replace(/\\/g, "/");
+              var driveLetter = drive.charAt(0).toLowerCase();
+              return "/mnt/" + driveLetter + rest;
+          }
+
+          function bashQuote(value) {
+              return "'" + String(value).replace(/'/g, "'\"'\"'") + "'";
+          }
+          function winQuote(value) {
+              return "\"" + String(value).replace(/"/g, "\"\"") + "\"";
+          }
+
+          function isMdConvertError(text) {
+              if (!text) return false;
+              var s = String(text);
+              return s.indexOf("TypeError:") === 0 || s.indexOf("TypeError:") >= 0 || s.indexOf("Error:") === 0;
+          }
+
+          async function getAllTagNames(libraryID) {
+              var s = new Zotero.Search();
+              s.libraryID = libraryID;
+              s.addCondition("itemType", "isNot", "attachment");
+              var itemIDs = await s.search();
+              var tagSet = new Set();
+              var batchSize = 500;
+              for (var i = 0; i < itemIDs.length; i += batchSize) {
+                  var batchIDs = itemIDs.slice(i, i + batchSize);
+                  var itemsBatch = await Zotero.Items.getAsync(batchIDs);
+                  for (var j = 0; j < itemsBatch.length; j++) {
+                      var tags = itemsBatch[j].getTags();
+                      for (var k = 0; k < tags.length; k++) {
+                          if (tags[k] && tags[k].tag) {
+                              var name = tags[k].tag;
+                              if (name.indexOf("Computer Science") === 0) continue;
+                              tagSet.add(name);
+                          }
+                      }
+                  }
+              }
+              return Array.from(tagSet).sort();
+          }
+
+          async function mdToNoteHtml(mdContent) {
+              try {
+                  if (Zotero.BetterNotes && Zotero.BetterNotes.api && Zotero.BetterNotes.api.convert) {
+                      var convert = Zotero.BetterNotes.api.convert;
+                      if (typeof convert.md2note === "function") {
+                          try {
+                              var res = await convert.md2note(mdContent);
+                              if (typeof res === "string" && !isMdConvertError(res)) {
+                                  return res;
+                              }
+                              if (res && typeof res.html === "string" && !isMdConvertError(res.html)) {
+                                  return res.html;
+                              }
+                          } catch (e) {}
+                      }
+                      if (typeof convert.md2html === "function") {
+                          try {
+                              var html = await convert.md2html(mdContent);
+                              if (typeof html === "string" && !isMdConvertError(html)) {
+                                  return html;
+                              }
+                          } catch (e) {}
+                      }
+                  }
+              } catch (e) {}
+              return null;
+          }
+
+          var execCmd;
+          var execArgs;
+          var wslExecCmd = null;
+          var wslExecArgs = null;
+          var useWsl = isWindows && CONFIG.useWsl;
+          var wslOutputPath = null;
+          var tagsPath = null;
+          var vbsPath = null;
+          var cmdLinePath = null;
+          var wslScriptPath = null;
+          var wslScriptPathUnix = null;
+
+          // Remove generic arXiv category tags like "Computer Science - ..." before tag scan
+          try {
+              var currentTags = targetItem.getTags();
+              for (var ct = 0; ct < currentTags.length; ct++) {
+                  var tagName = currentTags[ct] && currentTags[ct].tag;
+                  if (tagName && tagName.indexOf("Computer Science") === 0) {
+                      targetItem.removeTag(tagName);
+                  }
+              }
+              await targetItem.saveTx();
+          } catch (e) {}
+
+          var tagBlock = "";
+          try {
+              var allTags = await getAllTagNames(targetItem.libraryID || Zotero.Libraries.userLibraryID);
+              if (allTags && allTags.length) {
+                  tagBlock = allTags.join("\n");
+              }
+          } catch (e) {}
+
+          if (tagBlock) {
+              tagsPath = PathUtils.join(PathUtils.tempDir, "zotero_tags_" + timestamp + ".txt");
+              try { await Zotero.File.putContentsAsync(tagsPath, tagBlock); } catch (e) {}
+          }
+
+          if (useWsl) {
+              var wslPdfPath = winToWslPath(pdfPath);
+              var wslPdfDir = winToWslPath(pdfDir);
+              wslOutputPath = winToWslPath(outputPath);
+              var wslTagsPath = tagsPath ? winToWslPath(tagsPath) : null;
+              var promptValueWsl = "/" + CONFIG.command + " " + wslPdfPath + (wslTagsPath ? (" " + wslTagsPath) : "");
+              var wslCmd = "export SHELL=/bin/bash ZDOTDIR=/tmp/empty; mkdir -p /tmp/empty; " +
+                  "claude -p " + bashQuote(promptValueWsl) +
+                  " --output-format text --add-dir " + bashQuote(wslPdfDir) +
+                  " > " + bashQuote(wslOutputPath) + " 2>&1";
+              var sysRoot = (Zotero.getEnv && Zotero.getEnv("SystemRoot")) || "C:\\\\Windows";
+              var wslExe = sysRoot + "\\\\System32\\\\wsl.exe";
+              wslExecCmd = wslExe;
+              execArgs = [];
+              if (CONFIG.wslDistro) {
+                  execArgs.push("-d", CONFIG.wslDistro);
+              }
+              wslScriptPath = PathUtils.join(PathUtils.tempDir, "zotero_wsl_cmd_" + Date.now() + ".sh");
+              wslScriptPathUnix = winToWslPath(wslScriptPath);
+              await Zotero.File.putContentsAsync(wslScriptPath, wslCmd + "\n");
+              execArgs.push("bash", "-lc", "source " + wslScriptPathUnix);
+              wslExecArgs = execArgs.slice();
+              if (CONFIG.useHiddenWsl) {
+                  var wslCmdLine = winQuote(wslExe);
+                  for (var i = 0; i < execArgs.length; i++) {
+                      wslCmdLine += " " + winQuote(execArgs[i]);
+                  }
+                  cmdLinePath = PathUtils.join(PathUtils.tempDir, "zotero_wsl_cmdline_" + Date.now() + ".txt");
+                  await Zotero.File.putContentsAsync(cmdLinePath, wslCmdLine);
+                  vbsPath = PathUtils.join(PathUtils.tempDir, "zotero_wsl_" + Date.now() + ".vbs");
+                  var vbs = [
+                      "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
+                      "Set f = fso.OpenTextFile(" + winQuote(cmdLinePath) + ", 1)",
+                      "cmd = f.ReadAll",
+                      "f.Close",
+                      "Set sh = CreateObject(\"Wscript.Shell\")",
+                      "rc = sh.Run(cmd, 0, True)",
+                      "WScript.Quit rc"
+                  ].join("\r\n");
+                  await Zotero.File.putContentsAsync(vbsPath, vbs);
+                  execCmd = sysRoot + "\\\\System32\\\\wscript.exe";
+                  execArgs = [vbsPath];
+              } else {
+                  execCmd = wslExe;
+              }
+          } else {
+              execCmd = "/bin/sh";
+              var promptValueLocal = "/" + CONFIG.command + " " + pdfPath + (tagsPath ? (" " + tagsPath) : "");
+              execArgs = ["-c", "claude -p " + bashQuote(promptValueLocal) +
+                  " --output-format text --add-dir " + bashQuote(pdfDir) +
+                  " > " + bashQuote(outputPath) + " 2>&1"];
+          }
+
+          try {
+              try {
+                  await Zotero.Utilities.Internal.exec(execCmd, execArgs);
+              } catch (e) {
+                  if (useWsl && CONFIG.useHiddenWsl && wslExecCmd && wslExecArgs) {
+                      await Zotero.Utilities.Internal.exec(wslExecCmd, wslExecArgs);
+                  } else {
+                      throw e;
+                  }
+              }
+              await Zotero.Promise.delay(3000);
+
+              var summary = "";
+              try { summary = await Zotero.File.getContentsAsync(outputPath); } catch (e) { summary = ""; }
+
+              if (!summary || !summary.trim()) {
+                  return "No summary generated - check Claude CLI";
+              }
+
+              var title = targetItem.getField("title") || "Untitled";
+              var mdContent = "# " + CONFIG.notePrefix + ": " + title + "\n\n" + summary.trim() +
+                  "\n\n---\n\n_Generated with /" + CONFIG.command + "_";
+              var htmlFromMd = await mdToNoteHtml(mdContent);
+              var noteContent = htmlFromMd || mdContent;
+
+              // Parse scoring lines for tags on the parent item
+              var importanceMatch = summary.match(/AI IMPORTANCE SCORE:\s*(WASTE_OF_TIME|LIMITED_APPLICATION|IMPACTFUL|BANGER)\s*$/mi);
+              var recommendMatch = summary.match(/RECOMMEND TO READ:\s*(true|false)\s*$/mi);
+              if (recommendMatch && recommendMatch[1].toLowerCase() === "true") {
+                  targetItem.addTag("meta_ai_recommend_to_read");
+              }
+              if (importanceMatch) {
+                  var score = importanceMatch[1].toLowerCase();
+                  if (score !== "waste_of_time") {
+                      targetItem.addTag("meta_ai_score_" + score);
+                  }
+              }
+              function extractShortTitle(text) {
+                  var patterns = [
+                      /^\s*[-*ΓÇóΓÇôΓÇö]\s*\**Short Title\**\s*:\s*(.+?)\s*$/mi,
+                      /^\s*\**Short Title\**\s*:\s*(.+?)\s*$/mi,
+                      /Short Title\s*:\s*([^\n\r]+)/i
+                  ];
+                  for (var i = 0; i < patterns.length; i++) {
+                      var match = text.match(patterns[i]);
+                      if (match && match[1]) {
+                          var value = match[1].trim();
+                          if (value && !/^not specified$/i.test(value)) {
+                              return value;
+                          }
+                      }
+                  }
+                  return "";
+              }
+
+              var shortTitle = extractShortTitle(summary);
+              if (shortTitle) {
+                  var existingShortTitle = targetItem.getField("shortTitle");
+                  if (!existingShortTitle || !existingShortTitle.trim()) {
+                      targetItem.setField("shortTitle", shortTitle);
+                  }
+              }
+
+              function extractTags(text) {
+                  var m = text.match(/^\s*[-*ΓÇóΓÇôΓÇö]?\s*Tags\s*:\s*(.+?)\s*$/mi);
+                  if (!m || !m[1]) return [];
+                  var raw = m[1];
+                  return raw.split(",").map(function(t) { return t.trim(); }).filter(function(t) { return t; });
+              }
+
+              var parsedTags = extractTags(summary);
+              if (parsedTags && parsedTags.length) {
+                  parsedTags = Array.from(new Set(parsedTags)).sort();
+                  for (var pt = 0; pt < parsedTags.length; pt++) {
+                      targetItem.addTag(parsedTags[pt]);
+                  }
+              }
+
+              var note = new Zotero.Item("note");
+              note.setNote(noteContent);
+              note.parentID = targetItem.id;
+              note.libraryID = targetItem.libraryID;
+              if (CONFIG.noteTags && CONFIG.noteTags.length) {
+                  CONFIG.noteTags.forEach(function(tag) { note.addTag(tag); });
+              }
+              await note.saveTx();
+
+              targetItem.addTag(CONFIG.summaryTag);
+              await targetItem.saveTx();
+
+              try { await IOUtils.remove(outputPath); } catch (e) {}
+              if (vbsPath) {
+                  try { await IOUtils.remove(vbsPath); } catch (e) {}
+              }
+              if (cmdLinePath) {
+                  try { await IOUtils.remove(cmdLinePath); } catch (e) {}
+              }
+              if (tagsPath) {
+                  try { await IOUtils.remove(tagsPath); } catch (e) {}
+              }
+              if (wslScriptPath) {
+                  try { await IOUtils.remove(wslScriptPath); } catch (e) {}
+              }
+              return "Summary created for: " + title;
+
+          } catch (error) {
+              var detail = "";
+              try { detail = await Zotero.File.getContentsAsync(outputPath); } catch (e) {}
+              var errDebugPath = PathUtils.join(PathUtils.tempDir, "zotero_debug_" + Date.now() + ".txt");
+              var errPayload = [
+                  "Error: " + (error.message || error),
+                  "execCmd=" + execCmd,
+                  "execArgs=" + JSON.stringify(execArgs),
+                  "wslOutputPath=" + (wslOutputPath || ""),
+                  detail ? "outputContents=" + detail : "outputContents=<empty or missing>"
+              ].join("\n");
+              try { await Zotero.File.putContentsAsync(errDebugPath, errPayload); } catch (e) {}
+              if (vbsPath) {
+                  try { await IOUtils.remove(vbsPath); } catch (e) {}
+              }
+              if (cmdLinePath) {
+                  try { await IOUtils.remove(cmdLinePath); } catch (e) {}
+              }
+              if (tagsPath) {
+                  try { await IOUtils.remove(tagsPath); } catch (e) {}
+              }
+              if (wslScriptPath) {
+                  try { await IOUtils.remove(wslScriptPath); } catch (e) {}
+              }
+              return "Error: " + (error.message || error) + "\nDebug file: " + errDebugPath;
+          }
+      }
+
+      return await runSummarizer();
+    shortcut: ''
+    enabled: true
+    menu: Summarize Paper [claude]
+    name: Summarize Paper
+    showInMenu:
+      item: true
+      collection: false
+      tools: true
+      reader: false
+      readerAnnotation: true

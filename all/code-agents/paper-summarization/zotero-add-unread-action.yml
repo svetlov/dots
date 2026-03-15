@@ -1,0 +1,20 @@
+type: ActionsTagsBackup
+author: svetlov
+platformVersion: 8.0.4
+pluginVersion: 2.4.0
+timestamp: '2026-03-15T08:48:20.321Z'
+actions:
+  default0:
+    event: 1
+    operation: 1
+    data: meta_unread
+    shortcut: ''
+    enabled: true
+    menu: ''
+    name: Add Unread When Create Item
+    showInMenu:
+      item: true
+      collection: true
+      tools: true
+      reader: true
+      readerAnnotation: true
