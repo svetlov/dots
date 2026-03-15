@@ -19,6 +19,21 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credentia
 
 **GUID:** `{8AF662BF-65A0-4D0A-A540-A338A999D36F}` = Windows Hello Face credential provider.
 
+## IP Helper Service (iphlpsvc) — Disabled
+
+Set to Manual startup to prevent it from binding to port 23119 and blocking Zotero's connector. IP Helper provides IPv6 transition tunneling (6to4, ISATAP, Teredo) which is rarely needed on modern networks.
+
+```
+Set-Service iphlpsvc -StartupType Manual
+Stop-Service iphlpsvc -Force
+```
+
+To re-enable:
+```
+Set-Service iphlpsvc -StartupType Automatic
+Start-Service iphlpsvc
+```
+
 ## Other Configs
 
 - [power-settings.md](power-settings.md) — Modern Standby, background services, fan noise fixes, USB selective suspend, standby battery drain
