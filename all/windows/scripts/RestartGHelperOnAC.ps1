@@ -1,7 +1,10 @@
-# Restart GHelper after:
+# Start or restart GHelper after:
 # 1. AC plug-in during Modern Standby (Event 105 + Event 506 check)
 # 2. User session switch (Event 25 — session reconnect)
 # Scoped to current session only — safe with multiple user sessions.
+# If GHelper is not running in the current session, starts it fresh.
+
+$ghDefaultPath = "C:\Program Files\G-Helper\GHelper.exe"
 
 $logFile = "$env:ProgramData\PowerScripts\ghelper-restart.log"
 function Log($msg) {
@@ -67,5 +70,13 @@ if ($gh) {
     Start-Process $ghPath
     Log "GHelper restarted"
 } else {
-    Log "No GHelper found in session $mySession"
+    # GHelper not running in this session — start it fresh
+    $ghPath = $ghDefaultPath
+    if (Test-Path $ghPath) {
+        Log "No GHelper in session $mySession, starting from $ghPath"
+        Start-Process $ghPath
+        Log "GHelper started"
+    } else {
+        Log "GHelper not found at $ghPath"
+    }
 }
