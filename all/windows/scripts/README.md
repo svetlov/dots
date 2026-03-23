@@ -34,9 +34,9 @@ If SearchHost is stuck after a GPU switch: `Stop-Process -Name SearchHost -Force
 ## Uninstall
 
 ```powershell
-# Per-user (run as each user):
-Unregister-ScheduledTask -TaskName "GHelperResumeRestart" -Confirm:$false
+# Per-user (run as each user, where $env:USERNAME is the current user):
+Unregister-ScheduledTask -TaskName "GHelperResumeRestart-$env:USERNAME" -Confirm:$false
 
-# Remove scripts directory:
+# Remove scripts directory (after unregistering all users' tasks):
 Remove-Item "C:\ProgramData\PowerScripts" -Recurse -Force
 ```

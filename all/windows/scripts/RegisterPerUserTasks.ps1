@@ -5,6 +5,7 @@
 $ErrorActionPreference = "Stop"
 $sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$shortUser = $user.Split('\')[-1]
 
 # GHelperResumeRestart — restart GHelper after:
 #   1. AC plug-in during Modern Standby (Kernel-Power Event 105)
@@ -46,8 +47,9 @@ $taskXml = @"
 </Task>
 "@
 
-Register-ScheduledTask -TaskName "GHelperResumeRestart" -Xml $taskXml -Force | Out-Null
-Write-Host "Registered GHelperResumeRestart for $user"
+$taskName = "GHelperResumeRestart-$shortUser"
+Register-ScheduledTask -TaskName $taskName -Xml $taskXml -Force | Out-Null
+Write-Host "Registered $taskName for $user"
 
 # Add more per-user tasks here as needed.
 
