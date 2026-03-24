@@ -23,7 +23,10 @@ Mappings:
 
 **Requires:** [AutoHotkey v2](https://www.autohotkey.com/) (`winget install AutoHotkey.AutoHotkey`)
 
-Runs on login via copy in `shell:startup`.
+**Each user** must copy to their startup folder (runs per-session):
+```powershell
+Copy-Item "C:\Users\seva\workspace\dots\all\windows\scripts\keyremap.ahk" -Destination ([Environment]::GetFolderPath('Startup'))
+```
 
 ## DLNA TV Streaming (Play on LG TV)
 
