@@ -40,4 +40,4 @@ Start-Service iphlpsvc
 - [wslconfig](wslconfig) — WSL2 configuration
 - [wezterm.lua](wezterm.lua) — WezTerm terminal config
 - [spacedesk/](spacedesk/) — Spacedesk display driver config
-- [scripts/](scripts/) — Power management scripts (deployed to `C:\ProgramData\PowerScripts\`)
+- [scripts/](scripts/) — Power management, key remapping (AHK v2), DLNA TV streaming

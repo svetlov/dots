@@ -164,7 +164,32 @@ powercfg /setdcvalueindex SCHEME_CURRENT `
 powercfg /setactive SCHEME_CURRENT
 ```
 
-### 9. Windows Update: AC-only, once per day
+### 9. PCIe Link State Power Management: Off on AC
+
+**Why:** NVIDIA dGPU (RTX 5080) frequently enters `CM_PROB_FAILED_POST_START` after Modern Standby resume, especially when external USB-C monitor is unplugged/replugged with lid closed. PCIe ASPM can prevent the lane from powering up in time, causing the GPU driver to fail initialization. Disabled on AC only — battery keeps maximum power savings since dGPU is off in Optimized mode anyway.
+
+```powershell
+powercfg /SETACVALUEINDEX SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 0
+powercfg /SETACTIVE SCHEME_CURRENT
+```
+
+Also set TDR (Timeout Detection and Recovery) to 10s (default 2s) to give the GPU more time to initialize after resume:
+
+```powershell
+$regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
+New-ItemProperty -Path $regPath -Name "TdrDelay" -Value 10 -PropertyType DWord -Force
+New-ItemProperty -Path $regPath -Name "TdrDdiDelay" -Value 10 -PropertyType DWord -Force
+# Reboot required
+```
+
+To revert:
+```powershell
+powercfg /SETACVALUEINDEX SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 1
+powercfg /SETACTIVE SCHEME_CURRENT
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "TdrDelay","TdrDdiDelay"
+```
+
+### 10. Windows Update: AC-only, once per day
 
 **Why:** MoUsoCoreWorker (Update Orchestrator) was scanning during Modern Standby on battery (~47 min active time). Default scan interval was every 6 hours; several tasks had `DisallowStartIfOnBatteries=false`.
 
@@ -186,7 +211,7 @@ foreach ($name in @("Schedule Scan", "Schedule Scan Static Task", "USO_UxBroker"
 
 **May be reset by:** Windows feature updates, cumulative updates that replace task definitions.
 
-### 10. Battery power plan optimizations
+### 11. Battery power plan optimizations
 
 **Why:** Multiple power plan settings were identical for AC and battery — no power savings when unplugged.
 
@@ -222,7 +247,7 @@ powercfg /SETACTIVE SCHEME_CURRENT
 
 **May be reset by:** Windows feature updates, power plan resets.
 
-### 11. Disabled unnecessary services and startup items
+### 12. Disabled unnecessary services and startup items
 
 **Why:** Multiple services and startup apps running constantly with no benefit.
 
@@ -250,7 +275,7 @@ Start-Service <ServiceName>
 # Reinstall AMD Noise Suppression from AMD Adrenalin software
 ```
 
-### 12. GHelper: Optimized GPU mode + force set on startup
+### 13. GHelper: Optimized GPU mode + force set on startup
 
 **Why:** The RTX 5080 dGPU was always on in Standard mode, drawing ~5W at idle even during desktop use. Optimized mode auto-switches: Eco (dGPU off) on battery, Standard (dGPU on) on AC.
 
@@ -271,7 +296,7 @@ To verify dGPU is off on battery:
 nvidia-smi
 ```
 
-### 13. Forced SearchHost and WezTerm to iGPU
+### 14. Forced SearchHost and WezTerm to iGPU
 
 **Why:** `SearchHost.exe` was the sole process keeping the RTX 5080 at 23W on AC despite 0% GPU utilization. WezTerm (GPU-accelerated terminal) would hang when the dGPU toggled on/off during power source changes.
 
@@ -284,7 +309,7 @@ Set-ItemProperty -Path $regPath -Name "C:\Program Files\WezTerm\wezterm-gui.exe"
 
 `GpuPreference=1` = Power Saving (integrated GPU). Same as Settings → Display → Graphics → app → Power Saving.
 
-### 14. Auto-restart GHelper after standby AC plug-in
+### 15. Auto-restart GHelper after standby AC plug-in
 
 **Why:** GHelper misses the AC plug-in event during Modern Standby, so the dGPU stays off after sleep+replug. A per-user scheduled task triggers on Kernel-Power Event 105 (power source change), checks the event log to determine if the system was in Modern Standby when plugged in, and restarts GHelper if so.
 
@@ -300,7 +325,7 @@ Scripts at `C:\ProgramData\PowerScripts\`:
 
 **Must be registered per-user** — see [Per-User Setup](#per-user-setup).
 
-### 15. Disabled WiFi Wake on Magic Packet
+### 16. Disabled WiFi Wake on Magic Packet
 
 **Why:** Keeps WiFi radio partially active during sleep, draining battery.
 
@@ -313,7 +338,7 @@ To re-enable:
 Set-NetAdapterPowerManagement -Name "WiFi" -WakeOnMagicPacket Enabled
 ```
 
-### 16. Shared GHelper config across users
+### 17. Shared GHelper config across users
 
 **Why:** Both user accounts run GHelper, which controls system-level hardware (GPU mode, fan curves, performance profiles). Separate configs would conflict. A single config file in the repo is the source of truth, symlinked from both users' `%APPDATA%\GHelper\config.json`.
 

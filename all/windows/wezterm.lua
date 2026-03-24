@@ -3,6 +3,7 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 
 config.term = "xterm-256color"
+
 config.audible_bell = "Disabled"
 
 -- Font configuration

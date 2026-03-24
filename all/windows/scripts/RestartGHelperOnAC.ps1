@@ -1,8 +1,9 @@
-# Start or restart GHelper after:
+# Start or restart GHelper and recover NVIDIA dGPU after:
 # 1. AC plug-in during Modern Standby (Event 105 + Event 506 check)
 # 2. User session switch (Event 25 — session reconnect)
 # Scoped to current session only — safe with multiple user sessions.
 # If GHelper is not running in the current session, starts it fresh.
+# After GHelper restart, checks if NVIDIA dGPU is in error state and cycles it.
 
 $ghDefaultPath = "C:\Program Files\G-Helper\GHelper.exe"
 
@@ -79,4 +80,34 @@ if ($gh) {
     } else {
         Log "GHelper not found at $ghPath"
     }
+}
+
+# Recover NVIDIA dGPU if it's in error state (CM_PROB_FAILED_POST_START)
+Start-Sleep 5
+$nv = Get-PnpDevice -Class Display -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -match "NVIDIA" }
+if ($nv) {
+    if ($nv.Status -ne "OK") {
+        Log "NVIDIA GPU in error state: Status=$($nv.Status) Problem=$($nv.Problem) — attempting recovery"
+        $maxAttempts = 3
+        for ($i = 1; $i -le $maxAttempts; $i++) {
+            Log "dGPU recovery attempt $i/$maxAttempts"
+            Disable-PnpDevice -InstanceId $nv.InstanceId -Confirm:$false -ErrorAction SilentlyContinue
+            Start-Sleep 5
+            Enable-PnpDevice -InstanceId $nv.InstanceId -Confirm:$false -ErrorAction SilentlyContinue
+            Start-Sleep 5
+            $nv = Get-PnpDevice -Class Display -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -match "NVIDIA" }
+            if ($nv.Status -eq "OK") {
+                Log "dGPU recovered on attempt $i"
+                break
+            }
+            Log "dGPU still in error after attempt $i: Status=$($nv.Status)"
+        }
+        if ($nv.Status -ne "OK") {
+            Log "dGPU recovery FAILED after $maxAttempts attempts — reboot required"
+        }
+    } else {
+        Log "NVIDIA GPU status OK, no recovery needed"
+    }
+} else {
+    Log "No NVIDIA GPU found (Eco mode?)"
 }

@@ -1,14 +1,47 @@
-# Power Management Scripts
+# Scripts
 
 ASUS ROG Zephyrus G14 (GA403WW) — Windows 11 Home with GHelper.
-Full documentation: see `power-settings.md` in the dots repo.
 
-## Scripts
+## Power Management
 
-- **RestartGHelperOnAC.ps1** — Restarts GHelper after AC plug-in during Modern Standby, so `gpu_mode_force_set` re-enables the dGPU. Checks Event 506/507 to only fire after standby, not normal plug/unplug. Session-scoped.
+- **RestartGHelperOnAC.ps1** — Restarts GHelper after AC plug-in during Modern Standby and recovers NVIDIA dGPU if it's in error state (`CM_PROB_FAILED_POST_START`). Session-scoped.
 - **RegisterPerUserTasks.ps1** — Registers per-user scheduled tasks. **Each user must run this once** from admin PowerShell.
 
-## Setup
+Full documentation: see `power-settings.md` in the dots repo.
+
+## Key Remapping (keyremap.ahk)
+
+AutoHotkey v2 script replacing PowerToys Keyboard Manager. KBM injects characters via clipboard + Ctrl+V, which breaks in terminals (WezTerm, Windows Terminal). AHK uses `SendInput`/`SendText` which works everywhere.
+
+Mappings:
+- CapsLock → Esc
+- LShift+Backspace → Delete, RShift+Backspace → CapsLock, Ctrl+Backspace → Delete
+- LAlt+{A,C,F,X,Z} → Ctrl+{A,C,F,X,Z} (macOS-like shortcuts)
+- LAlt+Q → Alt+F4, LAlt+R → Ctrl+R, LAlt+V → Ctrl+V
+- LAlt+Shift+Z → Ctrl+Shift+Z (redo)
+- LShift+ISO key (SC056) → tilde, LShift+Esc → backtick
+
+**Requires:** [AutoHotkey v2](https://www.autohotkey.com/) (`winget install AutoHotkey.AutoHotkey`)
+
+Runs on login via copy in `shell:startup`.
+
+## DLNA TV Streaming (Play on LG TV)
+
+Right-click context menu for streaming video files to LG B2 TV via DLNA.
+
+- **play_on_tv.ps1** — Starts HTTP server, sends DLNA SOAP commands (Stop → SetAVTransportURI → Play) to TV
+- **serve_video.js** — Node.js HTTP file server with range request support (needed for seeking). Serves raw file without re-muxing, preserving all audio/subtitle tracks
+- **register_tv_menu.ps1** — Registers "Play on LG TV" in Explorer context menu for video extensions (.mkv, .mp4, .avi, etc.)
+- **kill_port.ps1** — Kills any process on port 8080 (cleanup utility)
+
+**Requires:** Node.js, NordVPN must be off (blocks SSDP/UPnP discovery)
+
+**Setup:**
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Users\seva\workspace\dots\all\windows\scripts\register_tv_menu.ps1"
+```
+
+## Per-User Setup
 
 Each user account must do the following from admin PowerShell:
 
