@@ -397,6 +397,39 @@ Get-ScheduledTask -TaskPath "\HP\HP Print Scan Doctor\" | Select-Object TaskName
 powercfg /sleepstudy
 ```
 
+### 18. Away Mode on AC (prevent standby while display is off)
+
+**Why:** On S0-only systems, "display off" = enter Modern Standby. There is no "display off but system awake" state by default. This breaks scenarios like DLNA video streaming where the laptop must stay awake to serve files. Away Mode keeps the system fully active (CPU, network, disk) when the display turns off on AC. Battery retains normal Modern Standby behavior.
+
+```powershell
+powercfg -attributes SUB_SLEEP 25dfa149-5dd1-4736-b5ab-e8a37b5b8187 -ATTRIB_HIDE
+powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_SLEEP 25dfa149-5dd1-4736-b5ab-e8a37b5b8187 1
+powercfg /SETDCVALUEINDEX SCHEME_CURRENT SUB_SLEEP 25dfa149-5dd1-4736-b5ab-e8a37b5b8187 0
+powercfg /SETACTIVE SCHEME_CURRENT
+```
+
+To revert:
+```powershell
+powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_SLEEP 25dfa149-5dd1-4736-b5ab-e8a37b5b8187 0
+powercfg /SETACTIVE SCHEME_CURRENT
+```
+
+**May be reset by:** Windows feature updates, power plan resets.
+
+### 19. Disabled WSLg (no Linux GUI apps needed)
+
+**Why:** WSLg's `msrdc.exe` holds DISPLAY + SYSTEM power requests ("RAIL Power Request") even when no Linux GUI apps are running, blocking Modern Standby on battery. Since no Linux GUI apps are used, WSLg is disabled entirely.
+
+Config: `~/.wslconfig`
+```ini
+[wsl2]
+guiApplications=false
+```
+
+Requires `wsl --shutdown` and restart to take effect.
+
+To re-enable: remove the line or set `guiApplications=true`.
+
 ## Background: The Fan Problem
 
 With lid closed on AC, fans would spin up aggressively and CPU would drop immediately when the lid was opened. This was NOT malware — it was Windows running background maintenance during Modern Standby (WSAIFabricSvc, SearchIndexer, automatic maintenance, DCOM retry loops). Opening the lid exits Modern Standby, which deprioritizes those tasks.

@@ -3,8 +3,33 @@ param([string]$FilePath)
 $tvIP = "192.168.1.106"
 $pcIP = "192.168.1.110"
 $port = 8080
-$controlURL = "http://${tvIP}:1831/AVTransport/78783ef6-91e4-382b-7403-bb0acecc752f/control.xml"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# Discover TV DLNA port via SSDP (port changes on TV reboot)
+$udp = New-Object System.Net.Sockets.UdpClient
+$udp.Client.ReceiveTimeout = 3000
+$msg = "M-SEARCH * HTTP/1.1`r`nHOST: 239.255.255.250:1900`r`nMAN: `"ssdp:discover`"`r`nMX: 2`r`nST: urn:schemas-upnp-org:service:AVTransport:1`r`n`r`n"
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($msg)
+$ep = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Parse('239.255.255.250'), 1900)
+$udp.Send($bytes, $bytes.Length, $ep) | Out-Null
+$tvPort = $null
+try {
+    while ($true) {
+        $rep = New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Any, 0)
+        $data = $udp.Receive([ref]$rep)
+        if ($rep.Address.ToString() -eq $tvIP) {
+            $text = [System.Text.Encoding]::UTF8.GetString($data)
+            if ($text -match 'LOCATION:\s*http://[^:]+:(\d+)/') { $tvPort = $Matches[1]; break }
+        }
+    }
+} catch {}
+$udp.Close()
+if (-not $tvPort) {
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show("TV not found on network. Is it on? Is NordVPN off?", "Play on TV", 0, 16)
+    exit 1
+}
+$controlURL = "http://${tvIP}:${tvPort}/AVTransport/78783ef6-91e4-382b-7403-bb0acecc752f/control.xml"
 
 # Kill any previous server on this port
 $conns = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
