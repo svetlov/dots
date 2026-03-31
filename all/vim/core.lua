@@ -702,37 +702,37 @@ return {
         end,
     },
 
-    {
-        "Exafunction/windsurf.nvim",
-        -- :Codeium Auth  --
-        dependencies = {
-            "nvim-lua/plenary.nvim",
-            "hrsh7th/nvim-cmp",
-        },
-        config = function()
-            require("codeium").setup({
-                enable_cmp_source = false, -- do not show codeium in completion, virtual text only
-                enable_chat = false,       -- there's another plugin for that (codecompanion or avante)
-                workspace_root = {
-                    use_lsp = true,
-                },
-                virtual_text = {
-                    enabled = true,
-                    filetypes = {
-                        rust = true,
-                        python = true,
-                        lua = true,
-                        toml = true,
-                    },
-                    default_filetype_enabled = false,
-                    key_bindings = {
-                        next = "<C-J>",
-                        prev = "<C-K>",
-                    },
-                },
-            })
-        end
-    },
+    -- {
+    --     "Exafunction/windsurf.nvim",
+    --     -- :Codeium Auth  --
+    --     dependencies = {
+    --         "nvim-lua/plenary.nvim",
+    --         "hrsh7th/nvim-cmp",
+    --     },
+    --     config = function()
+    --         require("codeium").setup({
+    --             enable_cmp_source = false, -- do not show codeium in completion, virtual text only
+    --             enable_chat = false,       -- there's another plugin for that (codecompanion or avante)
+    --             workspace_root = {
+    --                 use_lsp = true,
+    --             },
+    --             virtual_text = {
+    --                 enabled = true,
+    --                 filetypes = {
+    --                     rust = true,
+    --                     python = true,
+    --                     lua = true,
+    --                     toml = true,
+    --                 },
+    --                 default_filetype_enabled = false,
+    --                 key_bindings = {
+    --                     next = "<C-J>",
+    --                     prev = "<C-K>",
+    --                 },
+    --             },
+    --         })
+    --     end
+    -- },
     ---------------------------------------------------------------------------
     -- Telescope (files, buffers, live grep)
     ---------------------------------------------------------------------------
