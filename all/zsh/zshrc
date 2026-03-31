@@ -30,7 +30,23 @@ alias wgetn="wget --no-check-certificate";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
 
-
+# git worktree helpers (gwt/gwta/gwtls/gwtrm provided by oh-my-zsh git plugin)
+gwtn() {
+  local branch="$1"
+  if [[ -z "$branch" ]]; then
+    echo "usage: gwtn <branch>" >&2
+    return 1
+  fi
+  local repo=$(basename "$(git rev-parse --show-toplevel)")
+  local dir="$(git rev-parse --show-toplevel)/../${repo}__${branch//\//-}"
+  if git show-ref --verify --quiet "refs/heads/$branch" || \
+     git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git worktree add "$dir" "$branch"
+  else
+    local main=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+    git worktree add -b "$branch" "$dir" "${main:-main}"
+  fi && cd "$dir"
+}
 
 reset-ssh() {
     sudo netstat -apn | grep -w 2224 | awk '{ print $7 }' | sed 's/\(.*\)\/.*/\1/' | sort -u | xargs -I{} kill -9 {};
@@ -118,9 +134,9 @@ _fcd_or_complete() {
         local dir
         dir=$({
             if command -v zoxide &>/dev/null; then
-                zoxide query -l 2>/dev/null | head -20
+                zoxide query -l 2>/dev/null | head -100
             fi
-            find . -maxdepth 2 -type d 2>/dev/null | sed 's|^\./||'
+            find "$PWD" -maxdepth 2 -type d 2>/dev/null
         } | awk '!seen[$0]++' | fzf --height=40% --reverse)
         if [[ -n "$dir" ]]; then
             BUFFER="cd $dir"
