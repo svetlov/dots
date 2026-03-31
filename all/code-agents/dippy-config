@@ -1,0 +1,196 @@
+# deny rules
+ask python "Use uv run python instead"
+deny rm -rf "Use trash or be more targeted"
+deny-redirect **/.env* "Never write secrets, ask me to do it"
+
+# git read-only
+allow git status *
+allow git status
+allow git log *
+allow git diff *
+allow git show *
+allow git branch *
+allow git branch
+allow git rev-parse *
+allow git remote *
+allow git tag *
+allow git tag
+allow git stash list *
+allow git stash list
+allow git stash show *
+allow git shortlog *
+allow git describe *
+allow git blame *
+allow git ls-files *
+allow git ls-files
+allow git ls-tree *
+allow git ls-remote *
+allow git cat-file *
+allow git config --get *
+allow git config --list *
+allow git config --list
+allow git reflog *
+allow git reflog
+allow git cherry *
+allow git count-objects *
+allow git count-objects
+allow git worktree list *
+allow git worktree list
+allow git -C *
+
+# gcloud read-only
+allow gcloud auth list *
+allow gcloud auth list
+allow gcloud auth print-access-token *
+allow gcloud auth print-access-token
+allow gcloud auth application-default print-access-token *
+allow gcloud auth application-default print-access-token
+allow gcloud config list *
+allow gcloud config list
+allow gcloud config get-value *
+allow gcloud projects list *
+allow gcloud projects list
+allow gcloud projects describe *
+allow gcloud projects get-iam-policy *
+allow gcloud iam service-accounts list *
+allow gcloud iam service-accounts describe *
+allow gcloud iam service-accounts get-iam-policy *
+allow gcloud iam roles list *
+allow gcloud iam roles describe *
+allow gcloud compute instances list *
+allow gcloud compute instances describe *
+allow gcloud compute regions list *
+allow gcloud compute zones list *
+allow gcloud container clusters list *
+allow gcloud container clusters describe *
+allow gcloud storage ls *
+allow gcloud storage cat *
+allow gcloud storage cp *
+allow gcloud storage stat *
+allow gcloud storage du *
+allow gcloud storage hash *
+allow gcloud storage objects list *
+allow gcloud storage objects describe *
+allow gcloud storage buckets list *
+allow gcloud storage buckets list
+allow gcloud storage buckets describe *
+allow gcloud bigtable instances list *
+allow gcloud bigtable instances describe *
+allow gcloud bigtable tables list *
+allow gcloud bigtable tables describe *
+allow gcloud sql instances list *
+allow gcloud sql instances describe *
+allow gcloud services list *
+allow gcloud logging read *
+allow gcloud artifacts repositories list *
+allow gcloud artifacts docker images list *
+allow gsutil ls *
+allow gsutil cat *
+allow gsutil cp *
+allow gsutil stat *
+allow gsutil du *
+allow gsutil hash *
+allow gsutil version *
+allow gsutil version
+
+# aws read-only
+allow aws sts get-caller-identity *
+allow aws sts get-caller-identity
+allow aws configure list *
+allow aws configure list
+allow aws configure export-credentials *
+allow aws s3 ls *
+allow aws s3 cp *
+allow aws s3api list-buckets *
+allow aws s3api list-buckets
+allow aws s3api list-objects *
+allow aws s3api head-object *
+allow aws s3api get-object *
+allow aws ec2 describe-instances *
+allow aws ec2 describe-vpcs *
+allow aws ec2 describe-subnets *
+allow aws ec2 describe-security-groups *
+allow aws ec2 describe-regions *
+allow aws eks list-clusters *
+allow aws eks describe-cluster *
+allow aws iam list-roles *
+allow aws iam list-users *
+allow aws iam get-role *
+allow aws iam get-user *
+allow aws iam get-policy *
+allow aws iam list-attached-role-policies *
+allow aws iam list-attached-user-policies *
+allow aws rds describe-db-instances *
+allow aws rds describe-db-clusters *
+allow aws ecr describe-repositories *
+allow aws ecr list-images *
+allow aws logs describe-log-groups *
+allow aws logs get-log-events *
+allow aws logs filter-log-events *
+allow aws secretsmanager list-secrets *
+allow aws secretsmanager get-secret-value *
+allow aws cloudformation describe-stacks *
+allow aws cloudformation list-stacks *
+allow aws codeartifact *
+
+# gh read-only
+allow gh pr list *
+allow gh pr list
+allow gh pr view *
+allow gh pr status *
+allow gh pr status
+allow gh pr diff *
+allow gh pr checks *
+allow gh issue list *
+allow gh issue list
+allow gh issue view *
+allow gh issue status *
+allow gh issue status
+allow gh repo list *
+allow gh repo view *
+allow gh repo clone *
+allow gh run list *
+allow gh run list
+allow gh run view *
+allow gh run watch *
+allow gh release list *
+allow gh release list
+allow gh release view *
+allow gh auth status *
+allow gh auth status
+allow gh api *
+allow gh search *
+allow gh label list *
+allow gh label list
+
+# kubectl read-only
+allow kubectl get *
+allow kubectl describe *
+allow kubectl logs *
+allow kubectl top *
+allow kubectl explain *
+allow kubectl api-resources *
+allow kubectl api-resources
+allow kubectl api-versions *
+allow kubectl api-versions
+allow kubectl cluster-info *
+allow kubectl cluster-info
+allow kubectl config view *
+allow kubectl config view
+allow kubectl config get-contexts *
+allow kubectl config get-contexts
+allow kubectl config current-context *
+allow kubectl config current-context
+allow kubectl version *
+allow kubectl version
+allow kubectl auth can-i *
+allow kubectl auth whoami *
+allow kubectl auth whoami
+allow kubectl diff *
+allow kubectl events *
+allow kubectl events
+allow kubectl wait *
+
+# misc
+allow mkdir *
+allow cp *

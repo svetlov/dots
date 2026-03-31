@@ -197,11 +197,13 @@ class CodeAgentsInstaller(Installer):
     name = "code-agents"
     CODEX_DIR = os.path.join(HOME, ".codex")
     CLAUDE_DIR = os.path.join(HOME, ".claude")
+    DIPPY_DIR = os.path.join(HOME, ".dippy")
 
     @classmethod
     def install(cls):
         os.makedirs(cls.CODEX_DIR, exist_ok=True)
         os.makedirs(cls.CLAUDE_DIR, exist_ok=True)
+        os.makedirs(cls.DIPPY_DIR, exist_ok=True)
 
         symlink(
             os.path.join(PWD, "all", "code-agents", "codex.toml"),
@@ -218,6 +220,12 @@ class CodeAgentsInstaller(Installer):
         symlink(
             os.path.join(PWD, "all", "code-agents", "CLAUDE.md"),
             os.path.join(cls.CLAUDE_DIR, "CLAUDE.md"),
+        )
+
+        # Dippy (Claude Code bash safety hook) config
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "dippy-config"),
+            os.path.join(cls.DIPPY_DIR, "config"),
         )
 
         # Install paper summarization scripts (entire directory)

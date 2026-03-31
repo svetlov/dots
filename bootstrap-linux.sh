@@ -112,6 +112,14 @@ install_ai_tools() {
     else
         echo "codex already installed, skipping"
     fi
+
+    local dippy_dir="$HOME/.local/share/dippy"
+    if [[ -d "$dippy_dir" ]]; then
+        echo "dippy already installed, updating"
+        git -C "$dippy_dir" pull --ff-only
+    else
+        git clone https://github.com/ldayton/Dippy.git "$dippy_dir"
+    fi
 }
 
 # Step 6: Rust via rustup
