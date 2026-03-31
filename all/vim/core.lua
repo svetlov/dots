@@ -1135,6 +1135,22 @@ return {
         end,
     },
 
+    -- Wrapwidth: virtual soft-wrap at a specific column
+    {
+        "rickhowe/wrapwidth",
+        event = "FileType",
+        config = function()
+            vim.g.wrapwidth_sign = "↪"
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "markdown", "text", "gitcommit" },
+                callback = function()
+                    vim.wo.linebreak = true
+                    vim.cmd("Wrapwidth 88")
+                end,
+            })
+        end,
+    },
+
     -- Indent-blankline (ibl): show indent guides
     {
         "lukas-reineke/indent-blankline.nvim",
