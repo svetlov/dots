@@ -1360,12 +1360,13 @@ return {
       dir = "/home/seva/workspace/review.nvim",
       dependencies = {
         "esmuellert/codediff.nvim",
-        "MunifTanjim/nui.nvim",
       },
       cmd = { "Review", "ReviewMCPServerStart", "ReviewMCPServerStop", "ReviewMCPServerRestart" },
       keys = {
-        { "<leader>r", "<cmd>Review<cr>", desc = "Review" },
-        { "<leader>R", "<cmd>Review commits<cr>", desc = "Review commits" },
+        { "<leader>r", "<cmd>Review pick<cr>", desc = "Review: pick branch commits" },
+        { "<leader>R", "<cmd>Review pick_all<cr>", desc = "Review: pick all commits" },
+        { "<leader>fr", "<cmd>Review tree<cr>", desc = "Review: file tree of active range" },
+        { "<leader>fR", "<cmd>Review files<cr>", desc = "Review: pick file in active range" },
       },
       opts = {
         mcp = {
