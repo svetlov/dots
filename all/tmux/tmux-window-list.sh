@@ -19,7 +19,7 @@ list=$(tmux list-windows -a -F "#{session_name}:#{window_index} #{?@custom_name,
   cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null)
   if [ "$cmd" = "claude" ]; then
     tail=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-    if echo "$tail" | grep -q "Do you want to proceed\|Esc to cancel"; then
+    if echo "$tail" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel"; then
       printf "${RED}[?]${RST} %s\n" "$line"
     elif echo "$tail" | grep -q "esc to interrupt"; then
       printf "[*] %s\n" "$line"

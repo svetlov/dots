@@ -53,7 +53,7 @@ while true; do
     if [ "$cmd" = "claude" ]; then
       # Capture full visible pane content and look for permission dialog markers
       pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-      if ! echo "$pane" | grep -q "Do you want to proceed\|Esc to cancel"; then
+      if ! echo "$pane" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel"; then
         continue
       fi
     elif [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
