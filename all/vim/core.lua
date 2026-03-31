@@ -617,13 +617,12 @@ return {
         "nvim-lua/plenary.nvim", -- already a dep elsewhere, just using this entry for the config block
         keys = {
             { "<leader>aa", function() _G.claude_float_toggle("--continue") end, desc = "Claude toggle/continue" },
-            { "<leader>aA", function() _G.claude_float_toggle() end, desc = "Claude new session" },
-            { "<leader>ar", function() _G.claude_float_toggle("--resume") end, desc = "Claude resume session" },
+            { "<leader>aA", function() _G.claude_float_new() end, desc = "Claude new session" },
+            { "<leader>ar", function() _G.claude_float_new("--resume") end, desc = "Claude resume session" },
         },
         config = function()
             local claude_buf = nil
             local claude_win = nil
-            local claude_cmd = nil  -- tracks which flags the current buffer was started with
 
             local function open_float(buf)
                 local width = vim.o.columns - 2  -- full width minus border
@@ -643,44 +642,53 @@ return {
                 })
             end
 
-            ---@param flags? string  e.g. "--continue", "--resume", or nil for new session
-            function _G.claude_float_toggle(flags)
-                -- If float is visible, hide it
-                if claude_win and vim.api.nvim_win_is_valid(claude_win) then
-                    vim.api.nvim_win_hide(claude_win)
-                    claude_win = nil
-                    return
-                end
+            local function buf_alive(buf)
+                return buf
+                    and vim.api.nvim_buf_is_valid(buf)
+                    and vim.bo[buf].channel ~= 0
+            end
 
-                -- Reuse existing buffer if it matches the requested flags and is alive
-                if claude_buf
-                    and vim.api.nvim_buf_is_valid(claude_buf)
-                    and vim.bo[claude_buf].channel ~= 0
-                    and claude_cmd == (flags or "")
-                then
-                    open_float(claude_buf)
-                    vim.cmd("startinsert")
-                    return
-                end
-
-                -- New terminal buffer
+            local function spawn_claude(flags)
                 claude_buf = vim.api.nvim_create_buf(false, true)
                 open_float(claude_buf)
                 local cmd = "claude"
                 if flags then cmd = cmd .. " " .. flags end
                 vim.fn.termopen(cmd, {
                     on_exit = function()
-                        -- Clean up when claude process exits
                         if claude_win and vim.api.nvim_win_is_valid(claude_win) then
                             vim.api.nvim_win_hide(claude_win)
                             claude_win = nil
                         end
                         claude_buf = nil
-                        claude_cmd = nil
                     end,
                 })
-                claude_cmd = flags or ""
                 vim.cmd("startinsert")
+            end
+
+            ---Toggle visibility of the current session; start with `flags` if no session exists.
+            ---@param flags? string  e.g. "--continue", "--resume"
+            function _G.claude_float_toggle(flags)
+                if claude_win and vim.api.nvim_win_is_valid(claude_win) then
+                    vim.api.nvim_win_hide(claude_win)
+                    claude_win = nil
+                    return
+                end
+                if buf_alive(claude_buf) then
+                    open_float(claude_buf)
+                    vim.cmd("startinsert")
+                    return
+                end
+                spawn_claude(flags)
+            end
+
+            ---Always start a brand-new session, replacing the current one.
+            ---@param flags? string
+            function _G.claude_float_new(flags)
+                if claude_win and vim.api.nvim_win_is_valid(claude_win) then
+                    vim.api.nvim_win_hide(claude_win)
+                    claude_win = nil
+                end
+                spawn_claude(flags)
             end
 
             -- Terminal-mode: \an escapes to normal mode, \aa hides the float
