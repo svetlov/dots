@@ -1192,7 +1192,7 @@ return {
             -- vim.g.molten_virt_lines_off_by_1 = false  -- this doesn't work properly
 
 
-            vim.keymap.set("n", "<leader>ri", function()
+            vim.keymap.set("n", "<leader>ji", function()
                 vim.cmd("QuartoActivate")
                 local venv = os.getenv("VIRTUAL_ENV_PROMPT") or os.getenv("CONDA_PREFIX")
                 if venv ~= nil then
@@ -1202,15 +1202,15 @@ return {
                 end
             end, { desc = "initialize ipynb kernel", silent = true })
 
-            vim.keymap.set('n', "<leader>rI", function()
+            vim.keymap.set('n', "<leader>jI", function()
                 vim.cmd("MoltenRestart")
             end, { desc = "restart ipynb kernel", silent = true })
 
-            vim.keymap.set('n', "<leader>rs", function()
+            vim.keymap.set('n', "<leader>js", function()
                 vim.cmd("MoltenInterrupt")
             end, { desc = "interrupt cell execution", silent = true })
 
-            vim.keymap.set("n", "<leader>ro", function()
+            vim.keymap.set("n", "<leader>jo", function()
                 local code_win = vim.api.nvim_get_current_win()
                 local code_win_height = vim.api.nvim_win_get_height(code_win)
                 local code_cursor_line = vim.api.nvim_win_get_cursor(code_win)[1]
@@ -1317,12 +1317,12 @@ return {
                 },
             })
             local runner = require("quarto.runner")
-            vim.keymap.set("n", "<leader>rc", runner.run_cell, { desc = "run cell", silent = true })
-            vim.keymap.set("n", "<leader>ra", runner.run_above, { desc = "run cell and above", silent = true })
-            vim.keymap.set("n", "<leader>rA", runner.run_all, { desc = "run all cells", silent = true })
-            vim.keymap.set("n", "<leader>rl", runner.run_line, { desc = "run line", silent = true })
-            vim.keymap.set("v", "<leader>r", runner.run_range, { desc = "run visual range", silent = true })
-            vim.keymap.set("n", "<leader>RA", function()
+            vim.keymap.set("n", "<leader>jc", runner.run_cell, { desc = "run cell", silent = true })
+            vim.keymap.set("n", "<leader>ja", runner.run_above, { desc = "run cell and above", silent = true })
+            vim.keymap.set("n", "<leader>jA", runner.run_all, { desc = "run all cells", silent = true })
+            vim.keymap.set("n", "<leader>jl", runner.run_line, { desc = "run line", silent = true })
+            vim.keymap.set("v", "<leader>j", runner.run_range, { desc = "run visual range", silent = true })
+            vim.keymap.set("n", "<leader>JA", function()
                 runner.run_all(true)
             end, { desc = "run all cells of all languages", silent = true })
         end,
