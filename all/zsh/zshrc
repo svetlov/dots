@@ -137,7 +137,7 @@ _fcd_or_complete() {
                 zoxide query -l 2>/dev/null | head -100
             fi
             find "$PWD" -maxdepth 2 -type d 2>/dev/null
-        } | awk '!seen[$0]++' | fzf --height=40% --reverse)
+        } | awk '!seen[$0]++' | fzf --height=40% --reverse --tiebreak=index)
         if [[ -n "$dir" ]]; then
             BUFFER="cd $dir"
             zle accept-line
