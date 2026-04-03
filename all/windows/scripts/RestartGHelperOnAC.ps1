@@ -1,6 +1,6 @@
 # Start or restart GHelper and recover NVIDIA dGPU after:
 # 1. AC plug-in during Modern Standby (Event 105 + Event 506 check)
-# 2. User session switch (Event 25 — session reconnect)
+# 2. User session logon/reconnect (Event 21 — logon, Event 25 — reconnect)
 # Scoped to current session only — safe with multiple user sessions.
 # If GHelper is not running in the current session, starts it fresh.
 # After GHelper restart, checks if NVIDIA dGPU is in error state and cycles it.
@@ -43,12 +43,13 @@ if ($event105) {
     }
 }
 
-# Check trigger 2: session reconnect (user switch)
-$event25 = Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'; Id=25} -MaxEvents 1 -ErrorAction SilentlyContinue
-if ($event25 -and ((Get-Date) - $event25.TimeCreated).TotalSeconds -lt 30) {
+# Check trigger 2: session logon or reconnect (user switch)
+$sessionEvent = Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-TerminalServices-LocalSessionManager/Operational'; Id=21,25} -MaxEvents 1 -ErrorAction SilentlyContinue
+if ($sessionEvent -and ((Get-Date) - $sessionEvent.TimeCreated).TotalSeconds -lt 30) {
     $shouldRestart = $true
-    $trigger = "session-reconnect"
-    Log "Event 25 (session reconnect) at $($event25.TimeCreated.ToString('HH:mm:ss.fff'))"
+    $eventName = if ($sessionEvent.Id -eq 21) { "session-logon" } else { "session-reconnect" }
+    $trigger = $eventName
+    Log "Event $($sessionEvent.Id) ($eventName) at $($sessionEvent.TimeCreated.ToString('HH:mm:ss.fff'))"
 }
 
 if (-not $shouldRestart) {

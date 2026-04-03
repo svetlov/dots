@@ -9,7 +9,7 @@ $shortUser = $user.Split('\')[-1]
 
 # GHelperResumeRestart — restart GHelper after:
 #   1. AC plug-in during Modern Standby (Kernel-Power Event 105)
-#   2. User session switch (TerminalServices Event 25 — session reconnect)
+#   2. User session logon/reconnect (TerminalServices Event 21/25)
 $taskXml = @"
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
@@ -20,7 +20,7 @@ $taskXml = @"
     </EventTrigger>
     <EventTrigger>
       <Enabled>true</Enabled>
-      <Subscription>&lt;QueryList&gt;&lt;Query Id="0" Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"&gt;&lt;Select Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"&gt;*[System[EventID=25]]&lt;/Select&gt;&lt;/Query&gt;&lt;/QueryList&gt;</Subscription>
+      <Subscription>&lt;QueryList&gt;&lt;Query Id="0" Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"&gt;&lt;Select Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"&gt;*[System[(EventID=21 or EventID=25)]]&lt;/Select&gt;&lt;/Query&gt;&lt;/QueryList&gt;</Subscription>
     </EventTrigger>
   </Triggers>
   <Principals>
