@@ -104,7 +104,9 @@ if ($nv) {
             Log "dGPU still in error after attempt $i: Status=$($nv.Status)"
         }
         if ($nv.Status -ne "OK") {
-            Log "dGPU recovery FAILED after $maxAttempts attempts — reboot required"
+            Log "dGPU recovery FAILED after $maxAttempts attempts — disabling GPU to prevent phantom power drain"
+            Disable-PnpDevice -InstanceId $nv.InstanceId -Confirm:$false -ErrorAction SilentlyContinue
+            Log "dGPU disabled (reboot required to fully restore)"
         }
     } else {
         Log "NVIDIA GPU status OK, no recovery needed"
