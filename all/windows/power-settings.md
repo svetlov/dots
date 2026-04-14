@@ -430,6 +430,111 @@ Requires `wsl --shutdown` and restart to take effect.
 
 To re-enable: remove the line or set `guiApplications=true`.
 
+### 20. Enabled USB device power management for all xHCI controllers and root hubs
+
+**Why:** Sleep study showed all 4 USB xHCI controllers active **100% of the time** during a 10-hour Modern Standby session, preventing DRIPS (Deepest Runtime Idle Platform State) and causing ~2%/h battery drain. Root cause: "Allow the computer to turn off this device to save power" was unchecked on all 4 USB Root Hubs and 3 of 4 xHCI controllers. The Logitech LIGHTSPEED Receiver kept the controllers awake all night.
+
+Devices fixed (WMI `MSPower_DeviceEnable` → `Enable = True`):
+- USB Root Hub (USB 3.0) × 4
+- AMD USB 3.10 eXtensible Host Controller - 1.20 (Microsoft) × 3
+
+```powershell
+# Enable power management for all USB root hubs and xHCI controllers
+Get-WmiObject MSPower_DeviceEnable -Namespace root\wmi | ForEach-Object {
+    $inst = $_.InstanceName -replace '_0$', '' -replace '\\\\', '\'
+    $pnp = Get-PnpDevice -InstanceId $inst -ErrorAction SilentlyContinue
+    $name = if ($pnp) { $pnp.FriendlyName } else { '' }
+    if ($_.Enable -eq $false -and ($name -like '*USB Root Hub*' -or $name -like '*eXtensible Host Controller*')) {
+        $_.Enable = $true
+        $_.Put() | Out-Null
+    }
+}
+```
+
+To verify:
+```powershell
+Get-WmiObject MSPower_DeviceEnable -Namespace root\wmi | ForEach-Object {
+    $inst = $_.InstanceName -replace '_0$', '' -replace '\\\\', '\'
+    $pnp = Get-PnpDevice -InstanceId $inst -ErrorAction SilentlyContinue
+    $name = if ($pnp) { $pnp.FriendlyName } else { '' }
+    if ($name -like '*USB*' -or $name -like '*Host Controller*') { "$($_.Enable) | $name" }
+}
+# All should show True
+```
+
+**May be reset by:** Driver updates, Windows feature updates, new USB device installation.
+
+### 21. GPU health check on lid open / power change (prevent phantom drain and thermal runaway)
+
+**Why:** When the NVIDIA dGPU gets stuck in `CM_PROB_FAILED_POST_START` (failed Eco→Standard switch), it draws 20-30W phantom power even though the driver can't communicate with it. With lid closed this causes thermal runaway — the ACPI `\_TZ.THRM` zone hits its 48°C `_HOT` threshold, triggering a hibernate loop that ends in a crash.
+
+**How it works:** A SYSTEM-level scheduled task runs `CheckGpuHealth.ps1` on every standby exit and power source change. The script checks the dGPU status, attempts 3 recovery cycles (disable/enable), and if all fail, disables the GPU entirely to stop power drain.
+
+Scripts at `C:\ProgramData\PowerScripts\`:
+- `CheckGpuHealth.ps1` — standalone GPU health check + recovery + disable
+- `RestartGHelperOnAC.ps1` — also calls `CheckGpuHealth.ps1` after GHelper restart
+
+Task: **GpuHealthCheck** (SYSTEM), triggers:
+- **Kernel-Power Event 507** — Modern Standby exit (lid open, keyboard input)
+- **Kernel-Power Event 105** — power source change (plug/unplug)
+
+```powershell
+# Register (already done via scripts/RegisterPerUserTasks.ps1 or manually):
+# See tmp_register_gpu.ps1 for the full XML task definition
+```
+
+To check GPU status manually:
+```powershell
+Get-PnpDevice -Class Display | Where-Object { $_.FriendlyName -match "NVIDIA" } | Select-Object Status, Problem
+# OK = healthy, Error/CM_PROB_FAILED_POST_START = stuck, CM_PROB_DISABLED = intentionally disabled
+```
+
+To check log:
+```powershell
+Get-Content "$env:ProgramData\PowerScripts\gpu-health.log" -Tail 20
+```
+
+### 22. Disabled slow charger notification
+
+**Why:** USB-C charger (65-100W) is sometimes insufficient when the dGPU is active. Windows shows an annoying "power adapter not powerful enough" toast. Disabled since user is aware.
+
+```powershell
+# Group Policy registry
+$path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+Set-ItemProperty -Path $path -Name "DisableSlowChargingNotification" -Value 1 -Type DWord
+
+# Toast notification
+$path2 = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.BatteryCharger"
+if (-not (Test-Path $path2)) { New-Item -Path $path2 -Force | Out-Null }
+Set-ItemProperty -Path $path2 -Name "Enabled" -Value 0 -Type DWord
+```
+
+### 23. Windows Hello face: disabled at lock screen, enabled in-session
+
+**Why:** Face recognition at the lock screen is not desired (prefer PIN/password), but in-session apps like 1Password should use face as the default biometric method.
+
+**How it works:** `DevicePasswordLessBuildVersion` controls whether Windows Hello is the default at the lock screen (2=yes, 0=no/password). Two scheduled tasks toggle this value on lock/unlock:
+- **FaceToggle-Lock** (Event 4800 — workstation locked): set to 0 → password at lock screen
+- **FaceToggle-Unlock** (Event 4801 — workstation unlocked): set to 2 → face default for in-session apps
+
+Script: [`scripts/ToggleFaceOnLock.ps1`](scripts/ToggleFaceOnLock.ps1)
+
+```powershell
+# Registry key:
+# HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device
+# DevicePasswordLessBuildVersion: 0 = password default, 2 = Windows Hello default
+```
+
+Tasks run as SYSTEM (need write access to HKLM).
+
+To revert (face everywhere):
+```powershell
+Unregister-ScheduledTask -TaskName "FaceToggle-Lock" -Confirm:$false
+Unregister-ScheduledTask -TaskName "FaceToggle-Unlock" -Confirm:$false
+Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 2 -Type DWord
+```
+
 ## Background: The Fan Problem
 
 With lid closed on AC, fans would spin up aggressively and CPU would drop immediately when the lid was opened. This was NOT malware — it was Windows running background maintenance during Modern Standby (WSAIFabricSvc, SearchIndexer, automatic maintenance, DCOM retry loops). Opening the lid exits Modern Standby, which deprioritizes those tasks.
