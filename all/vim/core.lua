@@ -1141,11 +1141,30 @@ return {
         event = "FileType",
         config = function()
             vim.g.wrapwidth_sign = "↪"
+
+            local function wrapwidth_exclude_tables(buf)
+                local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+                for i, line in ipairs(lines) do
+                    if line:match("^|") then
+                        vim.cmd(i .. "Wrapwidth 0")
+                    end
+                end
+            end
+
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = { "markdown", "text", "gitcommit" },
-                callback = function()
+                callback = function(ev)
                     vim.wo.linebreak = true
                     vim.cmd("Wrapwidth 88")
+                    if ev.match == "markdown" then
+                        wrapwidth_exclude_tables(ev.buf)
+                        vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+                            buffer = ev.buf,
+                            callback = function()
+                                wrapwidth_exclude_tables(ev.buf)
+                            end,
+                        })
+                    end
                 end,
             })
         end,
