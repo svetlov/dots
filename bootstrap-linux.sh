@@ -190,6 +190,33 @@ install_docker() {
     sudo service docker start
 }
 
+# Step 8b: NVIDIA Container Toolkit (only if GPU is present)
+install_nvidia_container_toolkit() {
+    if ! command -v nvidia-smi &>/dev/null; then
+        info "No NVIDIA GPU detected, skipping nvidia-container-toolkit"
+        return
+    fi
+
+    if dpkg -l nvidia-container-toolkit &>/dev/null; then
+        info "nvidia-container-toolkit already installed, skipping"
+        return
+    fi
+
+    info "Installing NVIDIA Container Toolkit"
+
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
+        | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+
+    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
+        | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
+        | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+    sudo apt-get update
+    sudo apt-get install -y nvidia-container-toolkit
+    sudo nvidia-ctk runtime configure --runtime=docker
+    sudo systemctl restart docker
+}
+
 # Step 9: Oh-My-Zsh + plugins
 install_ohmyzsh() {
     if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -232,7 +259,18 @@ fix_permissions() {
     chmod -R 755 "$HOME/.oh-my-zsh/"
 }
 
-# Step 9: Neovim Python virtualenv
+# Step 9b: trash-cli TTL (auto-purge trashed files older than 30 days)
+setup_trash_ttl() {
+    local cron_line="0 3 * * * trash-empty 30"
+    if crontab -l 2>/dev/null | grep -qF "trash-empty"; then
+        info "trash-empty cron already configured, skipping"
+    else
+        info "Adding daily trash-empty cron (30-day TTL)"
+        (crontab -l 2>/dev/null; echo "$cron_line") | crontab -
+    fi
+}
+
+# Step 9c: Neovim Python virtualenv
 install_nvim_venv() {
     if [ -d "$HOME/.virtualenvs/nvim" ]; then
         info "Neovim Python virtualenv already exists, skipping"
@@ -268,10 +306,12 @@ install_tree_sitter
 install_uv
 install_zoxide
 install_docker
+install_nvidia_container_toolkit
 install_ohmyzsh
 install_configs
 fix_permissions
 install_nvim_venv
+setup_trash_ttl
 
 info "Bootstrap complete!"
 echo "To switch to zsh now:  exec zsh"

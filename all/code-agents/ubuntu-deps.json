@@ -9,6 +9,11 @@
       "name": "pciutils",
       "consumer": "cuda checks",
       "purpose": "to get lspci command"
+    },
+    {
+      "name": "trash-cli",
+      "consumer": "shell safety",
+      "purpose": "Move files to trash instead of permanent deletion, with recoverable restore and TTL-based cleanup."
     }
   ]
 }

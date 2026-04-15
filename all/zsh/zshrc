@@ -24,7 +24,7 @@ alias vimconfig="nvim ~/.config/nvim/init.lua"
 alias vimplugins="nvim ~/.config/nvim/lua/plugins/core.lua"
 alias ohmyzsh="nvim ~/.oh-my-zsh"
 alias cx="chmod +x "
-alias rm="rm -i"
+alias rm="trash-put"
 alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'

@@ -191,6 +191,13 @@ allow kubectl events *
 allow kubectl events
 allow kubectl wait *
 
+# trash (safe file deletion)
+allow trash-put *
+allow trash-list *
+allow trash-list
+allow trash-restore *
+ask trash-empty "This permanently deletes trashed files"
+
 # misc
 allow mkdir *
 allow cp *
