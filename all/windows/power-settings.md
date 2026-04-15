@@ -514,9 +514,11 @@ Set-ItemProperty -Path $path2 -Name "Enabled" -Value 0 -Type DWord
 
 **Why:** Face recognition at the lock screen is not desired (prefer PIN/password), but in-session apps like 1Password should use face as the default biometric method.
 
-**How it works:** `DevicePasswordLessBuildVersion` controls whether Windows Hello is the default at the lock screen (2=yes, 0=no/password). Two scheduled tasks toggle this value on lock/unlock:
-- **FaceToggle-Lock** (Event 4800 — workstation locked): set to 0 → password at lock screen
-- **FaceToggle-Unlock** (Event 4801 — workstation unlocked): set to 2 → face default for in-session apps
+**How it works:** `DevicePasswordLessBuildVersion` controls whether Windows Hello is the default at the lock screen (2=yes, 0=no/password). Two scheduled tasks toggle this value on standby enter/exit:
+- **FaceToggle-Lock** (Event 506 — entering Modern Standby): set to 0 → password at lock screen
+- **FaceToggle-Unlock** (Event 507 — exiting Modern Standby): set to 2 → face default for in-session apps
+
+Note: Security events 4800/4801 (workstation lock/unlock) are not generated on Windows 11 Home. Events 506/507 fire reliably on S0 systems for lid close/open.
 
 Script: [`scripts/ToggleFaceOnLock.ps1`](scripts/ToggleFaceOnLock.ps1)
 
