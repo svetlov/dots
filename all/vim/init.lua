@@ -138,6 +138,13 @@ vim.o.incsearch = true
 vim.o.hlsearch = true
 -- Don't wrap around EOF or BOF while searching
 vim.o.wrapscan = false
+-- Clear search highlight on startup (shada restores last search; nohlsearch
+-- only works interactively, so vim.schedule defers it past the autocmd context)
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    vim.schedule(function() vim.cmd("nohlsearch") end)
+  end,
+})
 
 -- Automatically save before commands like :next and :make
 -- vim.o.autowrite = true
