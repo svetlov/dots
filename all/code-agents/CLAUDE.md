@@ -28,7 +28,7 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 ### General
 - Prefer explicit, readable code
 - Avoid clever abstractions
-- Reuse existing code whenever possible, as long as it doesn't hurt readability
+- Reuse existing code whenever possible, as long as it doesn't hurt readability. Prefer upgrading a maintained library over reimplementing its functionality.
 - Keep implementations as simple as possible
 - Keep functions short and focused — extract helpers instead of growing monolithic functions
 - Each function should do one thing at one level of abstraction
@@ -39,6 +39,8 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 - Separate core and dev dependencies
 - Avoid global / static state unless already established or explicitly mentioned
 - Avoid unnamed constants; use named constants for magic numbers/strings
+- No abbreviated variable names — use full descriptive names (`in_batch_negatives_k`, not `ibn_k`)
+- No global variables for input/output paths — use function arguments, CLI args, or pass through `main()`. Global constants as defaults are OK.
 - Python-first unless the spec states otherwise
 - After any dependency modification or addition, run the appropriate environment sync for that ecosystem.
 
@@ -84,8 +86,24 @@ Every task must end with running the relevant tests.
 - Prefer clear failure over silent degradation
 - Match retry semantics exactly as specified
 
+## Safety
+
+- **When an agreed-upon solution doesn't work**, stop and discuss options. Do not silently escalate to a bigger change — the user approved X, not Y.
+- **Never delete non-recoverable data** (S3 objects, checkpoints, database rows, git history) without explicit confirmation. List exactly what will be deleted and wait for approval.
+- **Never change parameters of a running job** (cancel + relaunch with different params) without discussion and explicit approval.
+- **Implement exactly what was asked** — don't substitute a simpler approximation and call it done. Before marking an instruction as addressed, re-read the original request and verify each part is actually implemented.
+- **Never send signals to background processes** (`kill -USR1`, `kill -SIGTERM`, etc.) to check state. Use `ps`, log files, `nvidia-smi`, or `/proc/<pid>/status` instead.
+- **Don't state uncertain things confidently.** If you're not sure, either verify first or say so explicitly ("probably X, worth checking"). Never present a guess as a fact.
+
 ## Logging
 
 - Prefer `logging` / `structlog` / `loguru` over `print` for new code
 - Keep logs machine-readable: structured key=value pairs, timestamps, source context
 - No rich/fancy formatting or emojis in logs
+
+## Efficiency
+
+- **Long-running commands**: run in background (`run_in_background: true`) when expected to take >1 minute. Never pipe long-running output through `head`/`tail`/`grep` — redirect to a file first, then read it.
+- **Progress logging**: for operations that take >10 seconds, log what's starting, periodic progress if possible, and elapsed time when done.
+- **Intermediate results**: for long-running scripts where a crash would lose significant work, save results incrementally (per-iteration with flush), not just at the end. Use judgment — don't add overhead for scripts that finish quickly.
+- **Research**: for quick factual lookups, checking local code or docs is fine. For broader questions (best practices, library capabilities, design alternatives), use web search — and for complex topics, do both web and code exploration.
