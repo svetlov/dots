@@ -17,12 +17,9 @@ for win in $(tmux list-windows -a -F "#{session_name}:#{window_index}"); do
     [ "$win" = "$current" ] && continue
 
     cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null) || continue
-    if [ "$cmd" = "claude" ]; then
+    if [ "$cmd" = "claude" ] || [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
         pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-        echo "$pane" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel" || continue
-    elif [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
-        bval=$(tmux display-message -t "$win" -p "#{@claude_nvim_blocked}" 2>/dev/null)
-        [ "$bval" = "1" ] || continue
+        echo "$pane" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel\|requires confirmation for this command\|Do you want to allow Claude to fetch" || continue
     else
         continue
     fi

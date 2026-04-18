@@ -17,9 +17,9 @@ RST='\033[0m'
 list=$(tmux list-windows -a -F "#{session_name}:#{window_index} #{?@custom_name,#{@custom_name} | ,}#{pane_title} (#{pane_current_command})" | while IFS= read -r line; do
   win=$(echo "$line" | cut -d' ' -f1)
   cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null)
-  if [ "$cmd" = "claude" ]; then
+  if [ "$cmd" = "claude" ] || [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
     tail=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-    if echo "$tail" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel"; then
+    if echo "$tail" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel\|requires confirmation for this command\|Do you want to allow Claude to fetch"; then
       printf "${RED}[?]${RST} %s\n" "$line"
     elif echo "$tail" | grep -q "esc to interrupt"; then
       printf "[*] %s\n" "$line"
@@ -27,14 +27,6 @@ list=$(tmux list-windows -a -F "#{session_name}:#{window_index} #{?@custom_name,
       printf "[*] %s\n" "$line"
     elif echo "$tail" | grep -q "❯\|? for shortcuts"; then
       printf "[>] %s\n" "$line"
-    else
-      printf "    %s\n" "$line"
-    fi
-  elif [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
-    # Check if nvim has Claude blocked (set via @claude_nvim_blocked window option)
-    nvim_blocked=$(tmux display-message -t "$win" -p "#{@claude_nvim_blocked}" 2>/dev/null)
-    if [ "$nvim_blocked" = "1" ]; then
-      printf "${RED}[?]${RST} %s\n" "$line"
     else
       printf "    %s\n" "$line"
     fi

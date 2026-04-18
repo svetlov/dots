@@ -51,7 +51,7 @@ return {
             local function check_text(text)
                 local lines = type(text) == "table" and text or vim.split(text, "\n")
                 local tail = table.concat(lines, "\n", math.max(1, #lines - 4))
-                if text:find("Do you want to proceed") or text:find("Would you like to proceed") or text:find("Esc to cancel") then
+                if text:find("Do you want to proceed") or text:find("Would you like to proceed") or text:find("Esc to cancel") or text:find("requires confirmation for this command") or text:find("Do you want to allow Claude to fetch") then
                     return "blocked", "[?] Claude waiting"
                 elseif tail:find("❯") or tail:find("%? for shortcuts") then
                     return "idle", "[>] Claude idle"
