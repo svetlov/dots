@@ -48,6 +48,7 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 - Avoid using `hasattr` / `getattr` / `setattr` unless explicitly specified
 - Use `pyproject.toml` and `uv` to manage python dependencies, do not touch `.venv` directory directly
 - in general prefer `uv run python` instead of `python` for python code invocation
+- Never use `.to_arrow()` on vortex files — it loads everything into memory (OOM risk) and has broken `string_view` pyarrow integration. Use `.to_batches()` and iterate instead.
 
 ### Rust
 - Do not use `.unwrap` unless it's mentioned explicitly
