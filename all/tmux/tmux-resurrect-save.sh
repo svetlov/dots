@@ -14,7 +14,7 @@ fi
 start_time=$(tmux display-message -p '#{start_time}' 2>/dev/null)
 # If start_time is empty or non-numeric, default to 0 (allows save)
 case "$start_time" in
-  ''|*[!0-9]*) start_time=0 ;;
+  ''|*[!0-9]*) start_time=$now ;;  # can't determine age → assume just started
 esac
 if [ "$((now - start_time))" -lt 30 ]; then
   exit 0

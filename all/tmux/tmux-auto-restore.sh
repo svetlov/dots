@@ -24,9 +24,6 @@ if [ "$already" = "1" ]; then
   log "already restored this server, skipping"
   exit 0
 fi
-# Set immediately — before any sleep
-/usr/bin/tmux set-option -gq @auto-restore-done 1
-
 # Guard: only restore within 60s of server start
 start_time=$(/usr/bin/tmux display-message -p -F '#{start_time}' 2>/dev/null)
 now=$(date +%s)
@@ -97,4 +94,8 @@ log "restoring from: $actual_file ($(wc -l < "$actual_file") lines)"
 "$restore_script" 2>> "$LOG"
 status=$?
 log "restore exit code: $status"
+
+# Mark restore as complete — saves are now allowed
+/usr/bin/tmux set-option -gq @auto-restore-done 1
+
 log "=== auto-restore finished ==="
