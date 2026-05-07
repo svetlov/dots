@@ -4,6 +4,10 @@ ASUS ROG Zephyrus G14 (GA403WW) — Windows 11 Home with GHelper.
 
 ## Power Management
 
+- **CheckGpuHealth.ps1** — Scheduled task that checks NVIDIA GPU health on power events. Skips eco mode (`CM_PROB_PHANTOM`), skips disabled GPU, and attempts multi-step recovery (disable+enable → enable-only → restart-device) for error states. Deployed to `C:\ProgramData\PowerScripts\`.
+- **FixNvidiaGPU.ps1** — Manual GPU reset tool (disable/enable cycle via pnputil). For when the GPU is stuck but not in eco mode.
+- **StayAwakeOnAC.ps1** — Holds `ES_SYSTEM_REQUIRED` power request while on AC to prevent Modern Standby from reaching DRIPS (GPU power-gating). Releases the request on battery for normal standby. Runs as a scheduled task at logon. This prevents `VIDEO_DXGKRNL_FATAL_ERROR` (0x113) crashes on wake.
+- **KillWindowsUpdate.ps1** — Disables Windows Update services on every boot/logon (Medic service re-enables them).
 - **RestartGHelperOnAC.ps1** — Restarts GHelper after AC plug-in during Modern Standby and recovers NVIDIA dGPU if it's in error state (`CM_PROB_FAILED_POST_START`). Session-scoped.
 - **RegisterPerUserTasks.ps1** — Registers per-user scheduled tasks. **Each user must run this once** from admin PowerShell.
 
@@ -37,7 +41,7 @@ Right-click context menu for streaming video files to LG B2 TV via DLNA.
 - **register_tv_menu.ps1** — Registers "Play on LG TV" in Explorer context menu for video extensions (.mkv, .mp4, .avi, etc.)
 - **kill_port.ps1** — Kills any process on port 8080 (cleanup utility)
 
-**Requires:** Node.js, NordVPN must be off (blocks SSDP/UPnP discovery)
+**Requires:** Node.js. NordVPN service can be running (SSDP socket is bound to WiFi interface).
 
 **Setup:**
 ```powershell

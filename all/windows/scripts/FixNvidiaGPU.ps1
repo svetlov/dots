@@ -29,15 +29,14 @@ Write-Host ""
 
 # Disable GPU
 Write-Host "Disabling GPU..." -ForegroundColor Yellow
-try {
-    Disable-PnpDevice -InstanceId $nvidiaGpu.InstanceId -Confirm:$false -ErrorAction Stop
-    Write-Host "GPU disabled successfully" -ForegroundColor Green
-} catch {
-    Write-Host "ERROR: Failed to disable GPU: $_" -ForegroundColor Red
+$result = pnputil /disable-device "$($nvidiaGpu.InstanceId)" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Failed to disable GPU: $result" -ForegroundColor Red
     Write-Host "Press any key to exit..."
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
+Write-Host "GPU disabled successfully" -ForegroundColor Green
 
 # Wait
 Write-Host "Waiting 10 seconds..." -ForegroundColor Yellow
@@ -45,15 +44,14 @@ Start-Sleep -Seconds 10
 
 # Enable GPU
 Write-Host "Enabling GPU..." -ForegroundColor Yellow
-try {
-    Enable-PnpDevice -InstanceId $nvidiaGpu.InstanceId -Confirm:$false -ErrorAction Stop
-    Write-Host "GPU enabled successfully!" -ForegroundColor Green
-} catch {
-    Write-Host "ERROR: Failed to enable GPU: $_" -ForegroundColor Red
+$result = pnputil /enable-device "$($nvidiaGpu.InstanceId)" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Failed to enable GPU: $result" -ForegroundColor Red
     Write-Host "Press any key to exit..."
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
+Write-Host "GPU enabled successfully!" -ForegroundColor Green
 
 # Wait a moment for driver to initialize
 Write-Host "Waiting for driver to initialize..." -ForegroundColor Yellow

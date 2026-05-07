@@ -6,7 +6,7 @@ $port = 8080
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Discover TV DLNA port via SSDP (port changes on TV reboot)
-$udp = New-Object System.Net.Sockets.UdpClient
+$udp = New-Object System.Net.Sockets.UdpClient(New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Parse($pcIP), 0))
 $udp.Client.ReceiveTimeout = 3000
 $msg = "M-SEARCH * HTTP/1.1`r`nHOST: 239.255.255.250:1900`r`nMAN: `"ssdp:discover`"`r`nMX: 2`r`nST: urn:schemas-upnp-org:service:AVTransport:1`r`n`r`n"
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($msg)

@@ -75,6 +75,8 @@ config.enable_tab_bar = false
 
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 
+local is_windows = wezterm.target_triple:find('windows') ~= nil
+
 -- Force iGPU to avoid NVIDIA dGPU power state crashes on hybrid GPU systems
 if is_windows then
   config.front_end = 'WebGpu'
@@ -86,8 +88,6 @@ if is_windows then
     end
   end
 end
-
-local is_windows = wezterm.target_triple:find('windows') ~= nil
 
 config.default_workspace = 'local'
 
