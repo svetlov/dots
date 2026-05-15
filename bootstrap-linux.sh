@@ -243,7 +243,12 @@ install_ohmyzsh() {
         echo "fzf-zsh-plugin already installed, skipping"
     fi
 
-
+    if [ ! -d "$custom_plugins/zsh-uv-env" ]; then
+        info "Installing zsh-uv-env"
+        git clone --depth 1 https://github.com/matthiasha/zsh-uv-env.git "$custom_plugins/zsh-uv-env"
+    else
+        echo "zsh-uv-env already installed, skipping"
+    fi
 }
 
 # Step 7: Dotfile configs via install.py

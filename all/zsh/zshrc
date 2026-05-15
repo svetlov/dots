@@ -117,7 +117,7 @@ ENABLE_CORRECTION="false"
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
-plugins=(git tmux python brew history-substring-search uv vi-mode fzf-zsh zsh-uv-env)
+plugins=(git tmux python brew history-substring-search uv vi-mode fzf-zsh-plugin zsh-uv-env)
 
 # do not forget to make zsh directories properly owned in case of compinit problmes
 # chown -R $USER $ZSH_INSTALL_PREFIX/share/zsh/
