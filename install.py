@@ -198,12 +198,14 @@ class CodeAgentsInstaller(Installer):
     CODEX_DIR = os.path.join(HOME, ".codex")
     CLAUDE_DIR = os.path.join(HOME, ".claude")
     DIPPY_DIR = os.path.join(HOME, ".dippy")
+    WORKMUX_DIR = os.path.join(HOME, ".config", "workmux")
 
     @classmethod
     def install(cls):
         os.makedirs(cls.CODEX_DIR, exist_ok=True)
         os.makedirs(cls.CLAUDE_DIR, exist_ok=True)
         os.makedirs(cls.DIPPY_DIR, exist_ok=True)
+        os.makedirs(cls.WORKMUX_DIR, exist_ok=True)
 
         symlink(
             os.path.join(PWD, "all", "code-agents", "codex.toml"),
@@ -236,6 +238,12 @@ class CodeAgentsInstaller(Installer):
         # Install Ubuntu dependencies reference
         ubuntu_deps = os.path.join(PWD, "all", "code-agents", "ubuntu-deps.json")
         symlink(ubuntu_deps, os.path.join(cls.CODEX_DIR, "ubuntu-deps.json"))
+
+        # Workmux global config
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "workmux.yaml"),
+            os.path.join(cls.WORKMUX_DIR, "config.yaml"),
+        )
 
 
 class SSHInstaller(Installer):

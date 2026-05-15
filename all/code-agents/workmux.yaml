@@ -1,0 +1,16 @@
+nerdfont: true
+agent: claude
+merge_strategy: rebase
+
+files:
+  copy:
+    - .env
+
+panes:
+  - command: <agent>                # pane 0: agent, full window
+  - split: vertical                  # pane 1: terminal (bottom, full width)
+    percentage: 25
+  - command: nvim                    # pane 2: editor (top right)
+    split: horizontal
+    target: 0
+    focus: true
