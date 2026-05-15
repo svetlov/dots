@@ -134,8 +134,6 @@ class NVimInstaller(Installer):
 
     @classmethod
     def install(cls):
-        import distutils.sysconfig as sysconfig
-
         os.makedirs(os.path.join(HOME, ".config", "nvim"), exist_ok=True)
         os.makedirs(
             os.path.join(HOME, ".config", "nvim", "lua", "plugins"), exist_ok=True
@@ -166,6 +164,7 @@ class TmuxInstaller(Installer):
 
     @classmethod
     def install(cls):
+        os.makedirs(os.path.join(HOME, ".tmux"), exist_ok=True)
         symlink(os.path.join(PWD, "all", "tmux", "tmux.conf"), cls.tmuxconf)
         symlink(
             os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
