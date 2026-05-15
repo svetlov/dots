@@ -510,31 +510,48 @@ if (-not (Test-Path $path2)) { New-Item -Path $path2 -Force | Out-Null }
 Set-ItemProperty -Path $path2 -Name "Enabled" -Value 0 -Type DWord
 ```
 
-### 23. Windows Hello face: disabled at lock screen, enabled in-session
+### 23. Windows Hello face recognition disabled
 
-**Why:** Face recognition at the lock screen is not desired (prefer PIN/password), but in-session apps like 1Password should use face as the default biometric method.
+**Why:** Face recognition auto-authenticates on the lock screen when the lid opens, making it impossible to switch users without covering the camera. Disabled entirely via the face credential provider.
 
-**How it works:** `DevicePasswordLessBuildVersion` controls whether Windows Hello is the default at the lock screen (2=yes, 0=no/password). Two scheduled tasks toggle this value on standby enter/exit:
-- **FaceToggle-Lock** (Event 506 — entering Modern Standby): set to 0 → password at lock screen
-- **FaceToggle-Unlock** (Event 507 — exiting Modern Standby): set to 2 → face default for in-session apps
-
-Note: Security events 4800/4801 (workstation lock/unlock) are not generated on Windows 11 Home. Events 506/507 fire reliably on S0 systems for lid close/open.
-
-Script: [`scripts/ToggleFaceOnLock.ps1`](scripts/ToggleFaceOnLock.ps1)
+**How it works:** The face credential provider is disabled in the registry. Face enrollment is preserved but the provider is not loaded by LogonUI or CredUI.
 
 ```powershell
-# Registry key:
-# HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device
-# DevicePasswordLessBuildVersion: 0 = password default, 2 = Windows Hello default
+# Disable face credential provider
+Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers\{8AF662BF-65A0-4D0A-A540-A338A999D36F}" -Name "Disabled" -Value 1 -Type DWord
 ```
 
-Tasks run as SYSTEM (need write access to HKLM).
+Note: `DevicePasswordLessBuildVersion`, `DefaultCredentialProvider`, and `LastLoggedOnProvider` do NOT control face on the lock screen. The only reliable way to prevent face scanning is disabling the face credential provider itself.
 
 To revert (face everywhere):
 ```powershell
-Unregister-ScheduledTask -TaskName "FaceToggle-Lock" -Confirm:$false
-Unregister-ScheduledTask -TaskName "FaceToggle-Unlock" -Confirm:$false
-Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 2 -Type DWord
+Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers\{8AF662BF-65A0-4D0A-A540-A338A999D36F}" -Name "Disabled" -Value 0 -Type DWord
+```
+
+### 24. Windows Update completely disabled
+
+**Why:** Windows auto-installs updates during Modern Standby (overnight), consuming battery and risking unwanted reboots.
+
+**How it works:** Services disabled + registry policies + login script to re-kill (Windows Update Medic re-enables services).
+
+- **wuauserv** (Windows Update): Disabled
+- **UsoSvc** (Update Orchestrator): Disabled
+- **WaaSMedicSvc** (Update Medic): Disabled via registry (`Start=4`)
+- Registry: `NoAutoUpdate=1`, `AUOptions=1` under `HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU`
+- Scheduled task `KillWindowsUpdate` runs on boot + logon to re-disable services
+
+Script: [`scripts/KillWindowsUpdate.ps1`](scripts/KillWindowsUpdate.ps1)
+
+To manually check for updates: open Settings > Windows Update and click "Check for updates".
+
+To revert:
+```powershell
+Set-Service wuauserv -StartupType Manual
+Set-Service UsoSvc -StartupType Automatic
+Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc' -Name 'Start' -Value 3 -Type DWord
+Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Value 0 -Type DWord
+Set-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'AUOptions' -Value 2 -Type DWord
+Unregister-ScheduledTask -TaskName 'KillWindowsUpdate' -Confirm:$false
 ```
 
 ## Background: The Fan Problem
