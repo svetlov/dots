@@ -192,6 +192,21 @@ class VSCodeInstaller(Installer):
             )
 
 
+class KarabinerInstaller(Installer):
+    name = "karabiner"
+    KARABINER_DIR = os.path.join(HOME, ".config", "karabiner")
+
+    @classmethod
+    def install(cls):
+        if ISLINUX:
+            return
+        os.makedirs(cls.KARABINER_DIR, exist_ok=True)
+        symlink(
+            os.path.join(PWD, "all", "karabiner", "karabiner.json"),
+            os.path.join(cls.KARABINER_DIR, "karabiner.json"),
+        )
+
+
 class CodeAgentsInstaller(Installer):
     name = "code-agents"
     CODEX_DIR = os.path.join(HOME, ".codex")
