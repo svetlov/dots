@@ -29,10 +29,11 @@ vim.opt.rtp:prepend(lazypath)
 vim.api.nvim_echo({ { "lazypath = " .. lazypath, "None" } }, false, {})
 require("lazy").setup("plugins")
 
+vim.opt.clipboard = "unnamed,unnamedplus"
+
 -- to prevent ^M symbol at the end of line when copy from windows to wsl
 -- https://www.reddit.com/r/bashonubuntuonwindows/comments/1i0svwc/comment/mr8hbre/
 if vim.fn.has("wsl") == 1 then
-  vim.opt.clipboard = "unnamed,unnamedplus"
   local clip = vim.fn.expand('~/.local/bin/wslcopy.sh')
   vim.g.clipboard = {
     name = 'WslClipboard',
