@@ -48,15 +48,18 @@ while true; do
     done
     [ $skip -eq 1 ] && continue
 
-    # Check panes running claude directly, or nvim with @claude_nvim_blocked
+    # Check panes running claude directly, or nvim with @claude_nvim_blocked.
+    # Claude's foreground command name surfaces as its version string (e.g.
+    # "2.1.143") rather than "claude", so we also match version-like commands.
     cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null)
-    if [ "$cmd" = "claude" ] || [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
-      # Capture full visible pane content and look for permission dialog markers
-      pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-      if ! echo "$pane" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel\|requires confirmation for this command\|Do you want to allow Claude to fetch"; then
-        continue
-      fi
-    else
+    case "$cmd" in
+      claude|nvim|vim) ;;
+      [0-9]*.[0-9]*.[0-9]*) ;;
+      *) continue ;;
+    esac
+    # Capture full visible pane content and look for permission dialog markers
+    pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
+    if ! echo "$pane" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel\|requires confirmation for this command\|Do you want to allow Claude to fetch"; then
       continue
     fi
 
