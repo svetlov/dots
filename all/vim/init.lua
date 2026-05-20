@@ -75,6 +75,10 @@ vim.o.ruler = true
 vim.o.number = true
 -- Always show the statusline
 vim.o.laststatus = 2
+-- Hide the cmdline row entirely (it pops up only when typing ":" or when
+-- nvim has a message to show). Removes the "-- TERMINAL --" / blank line
+-- between the statusline and the outer tmux bar.
+vim.o.cmdheight = 0
 -- Highlight current line
 vim.o.cursorline = true
 -- color 120 characters in line
