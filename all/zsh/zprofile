@@ -169,6 +169,19 @@ _update_env() {
         LD_LIBRARY_PATH=$(_smart_append ${LD_LIBRARY_PATH} "${MPI_PATH}/lib");
     fi
 
+    # nvm: surface the latest installed node on PATH without sourcing nvm.sh
+    # (nvm.sh adds ~200ms of shell startup). If you need the `nvm` CLI itself,
+    # run `source ~/.nvm/nvm.sh` on demand. Mirrors the install path used by
+    # bootstrap-mac.sh / bootstrap-linux.sh.
+    if [[ -d "${HOME}/.nvm/versions/node" ]]; then
+        _nvm_latest=$(ls -1 "${HOME}/.nvm/versions/node" 2>/dev/null | sort -V | tail -1);
+        if [[ -n "${_nvm_latest}" && -x "${HOME}/.nvm/versions/node/${_nvm_latest}/bin/node" ]]; then
+            export NVM_DIR="${HOME}/.nvm";
+            PATH=$(_smart_append ${PATH} "${HOME}/.nvm/versions/node/${_nvm_latest}/bin");
+        fi
+        unset _nvm_latest;
+    fi
+
     export PATH; export CPATH; export LIBRARY_PATH; export LD_LIBRARY_PATH; export MANPATH; export INFOPATH;
 }
 

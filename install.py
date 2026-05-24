@@ -134,8 +134,6 @@ class NVimInstaller(Installer):
 
     @classmethod
     def install(cls):
-        import distutils.sysconfig as sysconfig
-
         os.makedirs(os.path.join(HOME, ".config", "nvim"), exist_ok=True)
         os.makedirs(
             os.path.join(HOME, ".config", "nvim", "lua", "plugins"), exist_ok=True
@@ -166,6 +164,7 @@ class TmuxInstaller(Installer):
 
     @classmethod
     def install(cls):
+        os.makedirs(os.path.join(HOME, ".tmux"), exist_ok=True)
         symlink(os.path.join(PWD, "all", "tmux", "tmux.conf"), cls.tmuxconf)
         symlink(
             os.path.join(PWD, "all", "tmux", "tmux-vim-select-pane"),
@@ -191,6 +190,21 @@ class VSCodeInstaller(Installer):
                 os.path.join(PWD, "all", "vscode", config),
                 os.path.join(cls.VSCODE_SETTINGS_DIR, config),
             )
+
+
+class KarabinerInstaller(Installer):
+    name = "karabiner"
+    KARABINER_DIR = os.path.join(HOME, ".config", "karabiner")
+
+    @classmethod
+    def install(cls):
+        if ISLINUX:
+            return
+        os.makedirs(cls.KARABINER_DIR, exist_ok=True)
+        symlink(
+            os.path.join(PWD, "all", "karabiner", "karabiner.json"),
+            os.path.join(cls.KARABINER_DIR, "karabiner.json"),
+        )
 
 
 class CodeAgentsInstaller(Installer):
@@ -222,6 +236,10 @@ class CodeAgentsInstaller(Installer):
         symlink(
             os.path.join(PWD, "all", "code-agents", "CLAUDE.md"),
             os.path.join(cls.CLAUDE_DIR, "CLAUDE.md"),
+        )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "claude-settings.json"),
+            os.path.join(cls.CLAUDE_DIR, "settings.json"),
         )
 
         # Dippy (Claude Code bash safety hook) config

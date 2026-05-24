@@ -1,6 +1,12 @@
 nerdfont: true
 agent: claude
 merge_strategy: rebase
+# Layout: ~/workspace/keenable/worktrees/<project>__worktrees/<branch>.
+# The __worktrees suffix satisfies workmux's extract_project_name() heuristic
+# so the dashboard's Project column shows the real project name, while the
+# outer "worktrees" dir keeps the keenable root tidy (worktrees segregated
+# from main checkouts).
+worktree_dir: ~/workspace/keenable/worktrees/{project}__worktrees
 
 files:
   copy:

@@ -14,6 +14,10 @@ return {
             vim.opt.fillchars:append({ diff = " " })
             -- kanagawa Normal fg is beige (#DCD7BA); use true white in terminal buffers
             vim.api.nvim_set_hl(0, "TermNormal", { fg = "#FFFFFF", bg = "#1F1F28" })
+            -- kanagawa maps terminal "white" (7/15) to its beige fujiWhite, which
+            -- makes ANSI white text (e.g. Claude Code's UI) render gold. Force true white.
+            vim.g.terminal_color_7 = "#FFFFFF"
+            vim.g.terminal_color_15 = "#FFFFFF"
             vim.api.nvim_create_autocmd("TermOpen", {
                 callback = function()
                     vim.wo.winhighlight = "Normal:TermNormal"
@@ -1375,23 +1379,4 @@ return {
         },
     },
     -- } (jupyter)
-    {
-      dir = "/home/seva/workspace/review.nvim",
-      dependencies = {
-        "esmuellert/codediff.nvim",
-      },
-      cmd = { "Review", "ReviewMCPServerStart", "ReviewMCPServerStop", "ReviewMCPServerRestart" },
-      keys = {
-        { "<leader>r", "<cmd>Review pick<cr>", desc = "Review: pick branch commits" },
-        { "<leader>R", "<cmd>Review pick_all<cr>", desc = "Review: pick all commits" },
-        { "<leader>fr", "<cmd>Review tree<cr>", desc = "Review: file tree of active range" },
-        { "<leader>fR", "<cmd>Review files<cr>", desc = "Review: pick file in active range" },
-      },
-      opts = {
-        mcp = {
-          command = "/home/seva/workspace/review.nvim/review-mcp/.venv/bin/python3",
-          args = { "-m", "review_mcp" },
-        },
-      },
-    }
 }

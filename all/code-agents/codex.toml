@@ -1,9 +1,9 @@
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
 personality = "pragmatic"
 
 [features]
-codex_hooks = true
+hooks = true
 web_search_request = true
 
 # API key sourced from KEENABLE_CODEX_API_KEY env var (in ~/.secrets.rc)
@@ -39,17 +39,8 @@ trust_level = "trusted"
 [projects."/home/seva/workspace/keenable/keenable-model-trainer"]
 trust_level = "trusted"
 
-[projects."/home/vsvetlov/workspace/dots"]
-trust_level = "trusted"
-
-[projects."/home/vsvetlov/workspace/iedit/"]
-trust_level = "trusted"
-
-[projects."/home/vsvetlov/workspace/keenable"]
+[projects."/Users/seva/workspace/keenable/keenable-model-trainer"]
 trust_level = "trusted"
 
 [projects."/home/seva/workspace/dots"]
 trust_level = "trusted"
-
-[sandbox_workspace_write]
-network_access = true
