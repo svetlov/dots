@@ -1,28 +1,55 @@
-personality = "pragmatic"
 model = "gpt-5.4"
 model_reasoning_effort = "high"
-# should be placed in ~/.codex/config.toml
+personality = "pragmatic"
 
 [features]
-web_search_request = true        # allow the model to request web searches
+codex_hooks = true
+web_search_request = true
 
-[sandbox_workspace_write]
-network_access = true
+# API key sourced from KEENABLE_CODEX_API_KEY env var (in ~/.secrets.rc)
+[mcp_servers.keenable]
+url = "https://api.keenable.ai/mcp"
+env_http_headers = { "X-API-Key" = "KEENABLE_CODEX_API_KEY" }
 
-[projects.'/home/vsvetlov/workspace/iedit/']
-trust_level = "trusted"
+[mcp_servers.keenable-webql]
+url = "https://webql.keenable.ai/mcp"
+bearer_token_env_var = "KEENABLE_CODEX_API_KEY"
 
-[projects."/home/vsvetlov/workspace/keenable"]
-trust_level = "trusted"
+[mcp_servers.keenable-webql.tools.search_web_pages]
+approval_mode = "approve"
 
-[projects."/home/vsvetlov/workspace/dots"]
-trust_level = "trusted"
+[mcp_servers.keenable-webql.tools.map_result_set_with_regex]
+approval_mode = "approve"
+
+[mcp_servers.keenable-webql.tools.view_result_set]
+approval_mode = "approve"
+
+[mcp_servers.keenable-webql.tools.map_result_set_with_llm]
+approval_mode = "approve"
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
 
 [projects."/home/seva"]
+trust_level = "trusted"
+
+[projects."/home/seva/workspace/keenable/keenable-flyte-platform"]
 trust_level = "trusted"
 
 [projects."/home/seva/workspace/keenable/keenable-model-trainer"]
 trust_level = "trusted"
 
-[notice.model_migrations]
-"gpt-5.3-codex" = "gpt-5.4"
+[projects."/home/vsvetlov/workspace/dots"]
+trust_level = "trusted"
+
+[projects."/home/vsvetlov/workspace/iedit/"]
+trust_level = "trusted"
+
+[projects."/home/vsvetlov/workspace/keenable"]
+trust_level = "trusted"
+
+[projects."/home/seva/workspace/dots"]
+trust_level = "trusted"
+
+[sandbox_workspace_write]
+network_access = true
