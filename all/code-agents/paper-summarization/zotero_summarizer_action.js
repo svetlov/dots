@@ -1,5 +1,17 @@
 /*
  * Zotero Actions & Tags - Paper Summarizer (simplified)
+ *
+ * ============================================================================
+ *  THIS .js IS THE SOURCE OF TRUTH FOR THE SUMMARIZER SCRIPT.
+ *  Zotero itself imports `zotero-summrarize-paper-action.yml`, which embeds a
+ *  copy of this file under its `data: |` block.
+ *
+ *  AFTER ANY EDIT HERE — including AI-driven edits — YOU MUST RUN:
+ *      python3 build_yaml.py zotero_summarizer_action.js \
+ *                            zotero-summrarize-paper-action.yml
+ *  Otherwise the .yml stays stale and re-importing into Zotero will
+ *  silently load the old script. See README.md → "Editing the script".
+ * ============================================================================
  */
 
 var CONFIG = {
@@ -216,7 +228,12 @@ async function runSummarizer() {
     } else {
         execCmd = "/bin/sh";
         var promptValueLocal = "/" + CONFIG.command + " " + pdfPath + (tagsPath ? (" " + tagsPath) : "");
-        execArgs = ["-c", "claude -p " + bashQuote(promptValueLocal) +
+        // Zotero.app launched from /Applications inherits launchd's minimal
+        // PATH (/usr/bin:/bin:/usr/sbin:/sbin), which doesn't include
+        // ~/.local/bin where claude lives. Prepend it so the subprocess can
+        // resolve `claude` (and any other user-installed tools the prompt
+        // reaches for).
+        execArgs = ["-c", 'export PATH="$HOME/.local/bin:$PATH"; claude -p ' + bashQuote(promptValueLocal) +
             " --output-format text --add-dir " + bashQuote(pdfDir) +
             " > " + bashQuote(outputPath) + " 2>&1"];
     }
