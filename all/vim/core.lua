@@ -64,13 +64,15 @@ return {
                 end
                 return nil, ""
             end
+            -- Forward blocked transitions to workmux. The tmux status-bar
+            -- daemon (tmux-claude-status.sh) reads @workmux_status, which
+            -- workmux sets on the pane's window; the workmux dashboard sees
+            -- the same state. Async via jobstart so polling never stalls
+            -- nvim on a stuck shell call.
             local function tmux_set_blocked(blocked)
                 if in_tmux and tmux_pane then
-                    if blocked then
-                        vim.fn.system("tmux set -wq -t " .. tmux_pane .. " @claude_nvim_blocked 1")
-                    else
-                        vim.fn.system("tmux set -wuq -t " .. tmux_pane .. " @claude_nvim_blocked")
-                    end
+                    local status = blocked and "waiting" or "working"
+                    vim.fn.jobstart({ "workmux", "set-window-status", status }, { detach = true })
                 end
             end
             local prev_blocked = false

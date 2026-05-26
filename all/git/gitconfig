@@ -43,7 +43,7 @@
 	defaultBranch = master
 [credential "https://github.com"]
 	helper =
-	helper = !/home/seva/.local/bin/gh auth git-credential
+	helper = !~/.local/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 	helper =
-	helper = !/home/seva/.local/bin/gh auth git-credential
+	helper = !~/.local/bin/gh auth git-credential
