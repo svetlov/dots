@@ -241,6 +241,10 @@ class CodeAgentsInstaller(Installer):
             os.path.join(PWD, "all", "code-agents", "claude-settings.json"),
             os.path.join(cls.CLAUDE_DIR, "settings.json"),
         )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "hooks"),
+            os.path.join(cls.CLAUDE_DIR, "hooks"),
+        )
 
         # Dippy (Claude Code bash safety hook) config
         symlink(
