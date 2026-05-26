@@ -43,6 +43,7 @@ After Stage 1 research concludes (or anytime without the pipeline), the user inv
 - No global variables for input/output paths — use function arguments, CLI args, or pass through `main()`. Global constants as defaults are OK.
 - Python-first unless the spec states otherwise
 - After any dependency modification or addition, run the appropriate environment sync for that ecosystem.
+- When edits create orphans, remove imports/variables/functions that **your changes** made unused. Don't delete pre-existing dead code — flag it instead.
 
 ### Python
 - Avoid using `hasattr` / `getattr` / `setattr` unless explicitly specified
@@ -75,6 +76,13 @@ Test execution defaults (unless the task specifies otherwise):
 
 Every task must end with running the relevant tests.
 
+When a task maps to a verifiable behavior, convert it into a test-first goal so success is checkable without supervision:
+- "Fix bug X" → write a failing test that reproduces X, then make it pass.
+- "Add validation" → write tests for invalid inputs, then make them pass.
+- "Refactor X" → ensure tests pass before *and* after.
+
+Strong success criteria let you loop independently; weak ones ("make it work") force back-and-forth.
+
 ## Commits & PRs
 - Do not include a "Test plan" section in commit messages or pull request descriptions.
 - Keep PRs reviewable by a human: aim for ~500 LOC of meaningful code (excluding configs, tests, docs, and boilerplate). Not a hard limit, but if a PR grows well past this, split it.
@@ -95,6 +103,7 @@ Every task must end with running the relevant tests.
 - **Implement exactly what was asked** — don't substitute a simpler approximation and call it done. Before marking an instruction as addressed, re-read the original request and verify each part is actually implemented.
 - **Never send signals to background processes** (`kill -USR1`, `kill -SIGTERM`, etc.) to check state. Use `ps`, log files, `nvidia-smi`, or `/proc/<pid>/status` instead.
 - **Don't state uncertain things confidently.** If you're not sure, either verify first or say so explicitly ("probably X, worth checking"). Never present a guess as a fact.
+- **Surface assumptions before implementing.** If the request has multiple plausible interpretations, present them — don't pick silently. If a simpler approach exists, say so. Push back when warranted. Better to ask than to build the wrong thing.
 
 ## Logging
 
