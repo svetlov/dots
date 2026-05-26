@@ -191,6 +191,22 @@ install_zoxide() {
     fi
 }
 
+# Step 11c: GitHub CLI. Installed via brew, then symlinked into ~/.local/bin/gh
+# so the canonical path used elsewhere in dots (e.g. all/git/gitconfig's
+# `helper = !~/.local/bin/gh auth git-credential`) resolves on macOS too —
+# matching the Linux convention where the gh release tarball drops the binary
+# under ~/.local/bin.
+install_gh() {
+    if command -v gh >/dev/null 2>&1; then
+        info "gh already installed ($(gh --version | head -1))"
+    else
+        info "Installing GitHub CLI"
+        brew install gh
+    fi
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(command -v gh)" "$HOME/.local/bin/gh"
+}
+
 # Step 11b: Google Sans Code Nerd Font (referenced by all/windows/wezterm.lua).
 # Not in brew's cask repo; downloaded from a third-party prebuilt release.
 install_nerd_font() {
@@ -319,6 +335,7 @@ install_rust
 install_tree_sitter
 install_uv
 install_zoxide
+install_gh
 install_nerd_font
 install_ohmyzsh
 install_configs
