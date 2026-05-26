@@ -12,3 +12,5 @@ bin/**
 *.swp
 
 .color_coded
+
+**/.claude/settings.local.json
