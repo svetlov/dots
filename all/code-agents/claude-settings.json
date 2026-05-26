@@ -41,7 +41,7 @@
       {
         "hooks": [
           {
-            "command": "/home/seva/.local/share/dippy/bin/dippy-hook",
+            "command": "$HOME/.local/share/dippy/bin/dippy-hook",
             "type": "command"
           }
         ],
@@ -50,7 +50,7 @@
       {
         "hooks": [
           {
-            "command": "/home/seva/.claude/hooks/docker-tee-wrap.sh",
+            "command": "$HOME/.claude/hooks/docker-tee-wrap.sh",
             "timeout": 5,
             "type": "command"
           }
