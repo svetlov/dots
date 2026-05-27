@@ -101,6 +101,19 @@ allow gsutil hash *
 allow gsutil version *
 allow gsutil version
 
+# bq (BigQuery CLI) read-only — `bq query` deliberately excluded since it can
+# run DDL/DML; use `bq query --dry_run *` if you need plan-only validation.
+allow bq show *
+allow bq ls *
+allow bq ls
+allow bq head *
+allow bq query --dry_run *
+allow bq query --dry-run *
+allow bq help *
+allow bq help
+allow bq version *
+allow bq version
+
 # aws read-only
 allow aws sts get-caller-identity *
 allow aws sts get-caller-identity
