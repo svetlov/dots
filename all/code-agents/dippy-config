@@ -4,6 +4,13 @@ deny rm -rf "Use trash or be more targeted"
 deny tail -[0-9]* "Redirect output to a temp file and read it, or consume fully. tail -f is fine."
 deny-redirect **/.env* "Never write secrets, ask me to do it"
 
+# allow redirects to scratch space — /tmp on every OS, /var/folders is macOS's
+# actual TMPDIR (e.g. /var/folders/nk/.../T/...). Without these, Dippy defaults
+# to "ask" on any `cmd > file` form.
+allow-redirect /tmp/*
+allow-redirect /tmp/**
+allow-redirect /var/folders/**
+
 # git read-only
 allow git status *
 allow git status
