@@ -41,6 +41,15 @@
       {
         "hooks": [
           {
+            "command": "$HOME/.claude/hooks/bq-query-classify.py",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
             "command": "$HOME/.local/share/dippy/bin/dippy-hook",
             "type": "command"
           }
