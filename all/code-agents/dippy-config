@@ -2,6 +2,9 @@
 ask python "Use uv run python instead"
 deny rm -rf "Use trash or be more targeted"
 deny tail -[0-9]* "Redirect output to a temp file and read it, or consume fully. tail -f is fine."
+# But `tail -N <file>` is exactly what the message above suggests — allow it.
+# Dippy honors the more-specific allow over the less-specific deny.
+allow tail -[0-9]* ?*
 deny-redirect **/.env* "Never write secrets, ask me to do it"
 
 # allow redirects to scratch space — /tmp on every OS, /var/folders is macOS's
