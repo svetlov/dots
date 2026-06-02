@@ -26,14 +26,16 @@
                         "vendor_id": 2821
                     },
                     "ignore": true,
-                    "ignore_vendor_events": true
+                    "ignore_vendor_events": true,
+                    "manipulate_caps_lock_led": false
                 },
                 {
                     "identifiers": {
                         "is_built_in_keyboard": true,
                         "is_keyboard": true
                     },
-                    "ignore": true
+                    "ignore": true,
+                    "manipulate_caps_lock_led": false
                 }
             ],
             "name": "Default profile",
