@@ -237,6 +237,12 @@ class CodeAgentsInstaller(Installer):
             os.path.join(PWD, "all", "code-agents", "CLAUDE.md"),
             os.path.join(cls.CLAUDE_DIR, "CLAUDE.md"),
         )
+        # Same shared conventions file consumed by Codex as AGENTS.md
+        # (https://developers.openai.com/codex/guides/agents-md).
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "CLAUDE.md"),
+            os.path.join(cls.CODEX_DIR, "AGENTS.md"),
+        )
         symlink(
             os.path.join(PWD, "all", "code-agents", "claude-settings.json"),
             os.path.join(cls.CLAUDE_DIR, "settings.json"),
