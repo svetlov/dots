@@ -12,6 +12,15 @@ files:
   copy:
     - .env
 
+# After worktree creation: install the project's git pre-commit hooks so
+# commits in the new worktree go through the same lint/format gate as the
+# main checkout. Tries `make hooks` first (some repos do more than just
+# `pre-commit install` — e.g. dependency setup) and falls back to bare
+# `pre-commit install` when a .pre-commit-config.yaml is present.
+# Best-effort: anything that fails here doesn't abort worktree creation.
+post_create:
+  - sh -c 'if make -n hooks >/dev/null 2>&1; then make hooks; elif [ -f .pre-commit-config.yaml ] && command -v pre-commit >/dev/null 2>&1; then pre-commit install; fi'
+
 panes:
   - command: <agent>                # pane 0: agent, full window
   - split: vertical                  # pane 1: terminal (bottom, full width)
