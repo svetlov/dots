@@ -12,13 +12,19 @@ files:
   copy:
     - .env
 
-# After worktree creation: install the project's git pre-commit hooks so
-# commits in the new worktree go through the same lint/format gate as the
-# main checkout. Tries `make hooks` first (some repos do more than just
-# `pre-commit install` — e.g. dependency setup) and falls back to bare
-# `pre-commit install` when a .pre-commit-config.yaml is present.
-# Best-effort: anything that fails here doesn't abort worktree creation.
+# After worktree creation: bring the new tree to a working dev state.
+#   1. `uv sync --group dev` — pull in main deps + the PEP 735 dev group
+#      (test/lint/etc.); makes pre-commit and other dev tooling available
+#      before step 2 needs them. No-op if pyproject.toml or `uv` is absent,
+#      or if the project doesn't declare a `dev` group.
+#   2. Install the project's git pre-commit hooks so commits in the new
+#      worktree hit the same lint/format gate as main. Tries `make hooks`
+#      first (some repos do more than `pre-commit install` — extra setup,
+#      stub generation), falls back to bare `pre-commit install`.
+# Best-effort: any failure here doesn't abort worktree creation (each step
+# trails `|| true`).
 post_create:
+  - sh -c 'if [ -f pyproject.toml ] && command -v uv >/dev/null 2>&1; then uv sync --group dev || true; fi'
   - sh -c 'if make -n hooks >/dev/null 2>&1; then make hooks; elif [ -f .pre-commit-config.yaml ] && command -v pre-commit >/dev/null 2>&1; then pre-commit install; fi'
 
 panes:
