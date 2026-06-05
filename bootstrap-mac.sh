@@ -191,6 +191,30 @@ install_zoxide() {
     fi
 }
 
+# Step 11d: trash-cli — base_packages above already `brew install`s it, but
+# the formula is keg-only on macOS (its bare `trash` command conflicts with
+# macos-trash / osx-trash / trash formulae), so brew won't auto-link any of
+# its binaries into $BREW_PREFIX/bin. Without symlinks the zshrc
+# `alias rm="trash-put"` fails — `trash-put: command not found`.
+#
+# Link just the unique commands into ~/.local/bin/, skipping the conflicting
+# bare `trash` so a future user could install macos-trash etc. without
+# tripping over us.
+install_trash_cli_links() {
+    local keg_bin="$BREW_PREFIX/opt/trash-cli/bin"
+    if [ ! -d "$keg_bin" ]; then
+        info "trash-cli keg dir not found at $keg_bin; skipping link step"
+        return
+    fi
+    info "Linking trash-cli commands into ~/.local/bin/"
+    mkdir -p "$HOME/.local/bin"
+    for cmd in trash-put trash-list trash-restore trash-empty trash-rm; do
+        if [ -e "$keg_bin/$cmd" ]; then
+            ln -sf "$keg_bin/$cmd" "$HOME/.local/bin/$cmd"
+        fi
+    done
+}
+
 # Step 11c: GitHub CLI. Installed via brew, then symlinked into ~/.local/bin/gh
 # so the canonical path used elsewhere in dots (e.g. all/git/gitconfig's
 # `helper = !~/.local/bin/gh auth git-credential`) resolves on macOS too —
@@ -336,6 +360,7 @@ install_tree_sitter
 install_uv
 install_zoxide
 install_gh
+install_trash_cli_links
 install_nerd_font
 install_ohmyzsh
 install_configs
