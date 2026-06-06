@@ -13,19 +13,12 @@ files:
     - .env
 
 # After worktree creation: bring the new tree to a working dev state.
-#   1. `uv sync --group dev` — pull in main deps + the PEP 735 dev group
-#      (test/lint/etc.); makes pre-commit and other dev tooling available
-#      before step 2 needs them. No-op if pyproject.toml or `uv` is absent,
-#      or if the project doesn't declare a `dev` group.
-#   2. Install the project's git pre-commit hooks so commits in the new
-#      worktree hit the same lint/format gate as main. Tries `make hooks`
-#      first (some repos do more than `pre-commit install` — extra setup,
-#      stub generation), falls back to bare `pre-commit install`.
-# Best-effort: any failure here doesn't abort worktree creation (each step
-# trails `|| true`).
+# Logic lives in workmux-post-create.sh (next to this file): runs
+# `uv sync --group dev` with a clean fallback to plain `uv sync` when the
+# repo has no PEP 735 `dev` group declared, then installs pre-commit
+# hooks via `make hooks` (preferred) or `pre-commit install`.
 post_create:
-  - sh -c 'if [ -f pyproject.toml ] && command -v uv >/dev/null 2>&1; then uv sync --group dev || true; fi'
-  - sh -c 'if make -n hooks >/dev/null 2>&1; then make hooks; elif [ -f .pre-commit-config.yaml ] && command -v pre-commit >/dev/null 2>&1; then pre-commit install; fi'
+  - $HOME/workspace/dots/all/code-agents/workmux-post-create.sh
 
 panes:
   - command: <agent>                # pane 0: agent, full window
