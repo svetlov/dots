@@ -120,7 +120,8 @@ _update_env() {
     PATH=$(_smart_append ${PATH} "${LOCAL_OS_SPECIFIC}/bin");
     PATH=$(_smart_append ${PATH} "${LOCAL}/bin");
     PATH=$(_smart_append ${PATH} "/usr/local/bin");
-    PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");
+    PATH=$(_smart_append ${PATH} "/usr/local/opt/coreutils/libexec/gnubin");      # Intel Mac brew prefix
+    PATH=$(_smart_append ${PATH} "/opt/homebrew/opt/coreutils/libexec/gnubin");    # Apple Silicon brew prefix
     PATH=$(_smart_append ${PATH} "/usr/texbin");
 
     CPATH=$(_smart_append ${CPATH} "${LOCAL_OS_SPECIFIC}/bin");

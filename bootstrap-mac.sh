@@ -56,6 +56,7 @@ install_brew_packages() {
         ripgrep fd
         python imagemagick luarocks
         jq
+        coreutils                          # GNU `timeout`, `gtimeout`, gnubin dir on PATH via zprofile
     )
 
     # ubuntu-deps.json → brew equivalents
