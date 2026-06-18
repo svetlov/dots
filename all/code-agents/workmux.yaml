@@ -21,10 +21,4 @@ post_create:
   - $HOME/workspace/dots/all/code-agents/workmux-post-create.sh
 
 panes:
-  - command: <agent>                # pane 0: agent, full window
-  - split: vertical                  # pane 1: terminal (bottom, full width)
-    percentage: 25
-  - command: nvim                    # pane 2: editor (top right)
-    split: horizontal
-    target: 0
-    focus: true
+  - command: <agent>                 # single pane: agent, full window
