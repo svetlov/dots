@@ -30,6 +30,38 @@ alias wgetn="wget --no-check-certificate";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
 
+# workmux wrapper: make `workmux add` always branch off a freshly-fetched
+# origin/<default> (typically origin/main, but auto-detected so repos still
+# on `master` work too). Other subcommands and explicit --base / --pr pass
+# through unchanged.
+workmux() {
+  if [[ "$1" != "add" ]]; then
+    command workmux "$@"
+    return $?
+  fi
+  shift
+  local args=("$@") arg
+  # If user already passed --base or --pr, don't override.
+  for arg in "${args[@]}"; do
+    case "$arg" in
+      --base|--base=*|--pr|--pr=*)
+        command workmux add "${args[@]}"
+        return $?
+        ;;
+    esac
+  done
+  # Detect the repo's default branch from origin/HEAD (e.g. main, master).
+  local default_branch
+  default_branch=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+  if [[ -z "$default_branch" ]]; then
+    # Couldn't detect — fall through to plain `workmux add`.
+    command workmux add "${args[@]}"
+    return $?
+  fi
+  git fetch origin "$default_branch" --quiet 2>/dev/null
+  command workmux add --base "origin/$default_branch" "${args[@]}"
+}
+
 # git worktree helpers (gwt/gwta/gwtls/gwtrm provided by oh-my-zsh git plugin)
 gwtn() {
   local branch="$1"
