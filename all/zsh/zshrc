@@ -190,6 +190,14 @@ if [[ -n "$TMUX" ]]; then
     precmd_functions+=(_reset_pane_title)
 fi
 
+# Loudly surface a failed tmux session restore. The auto-restore script drops a
+# marker file on any fatal error (see all/tmux/tmux-auto-restore.sh); show it
+# once per shell so a broken restore can't slip by unnoticed.
+if [[ -n "$TMUX" && -f /tmp/tmux-auto-restore.FAILED ]]; then
+    print -P "%F{red}⛔ tmux session restore FAILED:%f $(cat /tmp/tmux-auto-restore.FAILED)"
+    print -P "%F{red}   details:%f /tmp/tmux-auto-restore.log"
+fi
+
 if [[ -f "${HOMEDIR}/.secrets.rc" ]]; then
     source "${HOMEDIR}/.secrets.rc"
 fi
