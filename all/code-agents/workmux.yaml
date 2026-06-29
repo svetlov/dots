@@ -1,6 +1,12 @@
 nerdfont: true
 agent: claude
 merge_strategy: rebase
+# Default base for new worktrees. The `workmux add` zsh wrapper still passes an
+# explicit --base origin/<detected-default> (which overrides this), so this
+# value governs the paths the wrapper doesn't touch: dashboard worktree
+# creation and `workmux rebase`'s fallback base. Static, so it assumes `main` —
+# repos still on `master` need a per-repo .workmux.yaml override.
+base_branch: origin/main
 # Layout: ~/workspace/keenable/worktrees/<project>__worktrees/<branch>.
 # The __worktrees suffix satisfies workmux's extract_project_name() heuristic
 # so the dashboard's Project column shows the real project name, while the
