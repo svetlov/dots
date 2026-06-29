@@ -1,6 +1,21 @@
 nerdfont: true
 agent: claude
 merge_strategy: rebase
+# Don't let workmux auto-apply its own per-window status format. It would set a
+# per-window window-status-format that appends a bare icon and shadows our
+# global colored format (see tmux.conf). workmux still sets @workmux_status on
+# each window (the state the hooks write), which our format reads for color.
+status_format: false
+# Status icons, aligned with the tmux status-bar scheme (see tmux.conf /
+# tmux-claude-status.sh). These are the literal values workmux writes to
+# @workmux_status, which the bar matches on for per-window color + the tally:
+#   working -> 🤖 thinking (green)
+#   waiting -> ⛔ blocked on a permission/input prompt (red)
+#   done    -> 💬 finished, waiting for your input (yellow)
+status_icons:
+  working: "🤖"
+  waiting: "⛔"
+  done: "💬"
 # Default base for new worktrees. The `workmux add` zsh wrapper still passes an
 # explicit --base origin/<detected-default> (which overrides this), so this
 # value governs the paths the wrapper doesn't touch: dashboard worktree
