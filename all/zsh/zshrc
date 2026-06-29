@@ -29,6 +29,7 @@ alias mv="mv -i"
 alias wgetn="wget --no-check-certificate";
 alias ipython='ipython --TerminalInteractiveShell.editing_mode=vi'
 alias tensorboard="CUDA_VISIBLE_DEVICES= tensorboard";
+alias cloud-auth="${DOTS_HOME}/scripts/cloud-auth.sh"
 
 # workmux wrapper: make `workmux add` always branch off a freshly-fetched
 # origin/<default> (typically origin/main, but auto-detected so repos still
