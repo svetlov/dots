@@ -17,11 +17,24 @@
 #   AWS_SSO_SESSION=other-session scripts/cloud-auth.sh aws
 set -o pipefail
 
-# Run from $HOME so the logins don't pick up any per-directory CLI config
-# (e.g. a project-local gcloud config or env) from wherever this was invoked.
+# Use the GLOBAL CLI binaries, not whatever is first on PATH — a project/worktree
+# venv can shadow them (e.g. a .venv shipping aws-cli v1, which has no
+# `sso login`). Resolving to the Homebrew/system install sidesteps that. The cd
+# to $HOME is belt-and-suspenders for any cwd-relative config; note it does NOT
+# deactivate a venv or change PATH, which is why the explicit binary matters.
 cd "$HOME" || exit 1
 
 AWS_SSO_SESSION="${AWS_SSO_SESSION:-seva-rog-wsl}"
+
+# Prefer the global install over any venv/PATH shim.
+resolve_bin() {
+  for cand in "/opt/homebrew/bin/$1" "/usr/local/bin/$1" "/usr/bin/$1"; do
+    [ -x "$cand" ] && { printf '%s' "$cand"; return 0; }
+  done
+  command -v "$1" 2>/dev/null
+}
+AWS_BIN=$(resolve_bin aws)
+GCLOUD_BIN=$(resolve_bin gcloud)
 
 ok_steps=""
 failed_steps=""
@@ -42,29 +55,29 @@ run_step() {
   fi
 }
 
-# require <cmd> <label> — true if the CLI exists; otherwise record a skip.
+# require <resolved-bin> <label> — true if the CLI resolved; else record a skip.
 require() {
-  if command -v "$1" >/dev/null 2>&1; then
-    return 0
-  fi
-  printf '\n\033[33m- %s skipped: `%s` not found on PATH\033[0m\n' "$2" "$1"
+  [ -n "$1" ] && [ -x "$1" ] && return 0
+  printf '\n\033[33m- %s skipped: no global CLI binary found\033[0m\n' "$2"
   skipped_steps="${skipped_steps:+$skipped_steps, }$2"
   return 1
 }
 
 auth_aws() {
-  require aws "aws" || return 0
-  run_step "aws (SSO: $AWS_SSO_SESSION)" aws sso login --sso-session "$AWS_SSO_SESSION"
+  require "$AWS_BIN" "aws" || return 0
+  run_step "aws (SSO: $AWS_SSO_SESSION)" "$AWS_BIN" sso login --sso-session "$AWS_SSO_SESSION"
 }
 
 auth_gcloud() {
-  require gcloud "gcloud" || return 0
-  run_step "gcloud (account login)" gcloud auth login
+  require "$GCLOUD_BIN" "gcloud" || return 0
+  # --quiet: auto-accept confirmation prompts (takes the default) so the browser
+  # flow isn't gated behind a "continue? (Y/n)".
+  run_step "gcloud (account login)" "$GCLOUD_BIN" auth login --quiet
 }
 
 auth_adc() {
-  require gcloud "adc" || return 0
-  run_step "gcloud ADC (application-default)" gcloud auth application-default login
+  require "$GCLOUD_BIN" "adc" || return 0
+  run_step "gcloud ADC (application-default)" "$GCLOUD_BIN" auth application-default login --quiet
 }
 
 # Resolve which steps to run: no args -> all three, in order.
