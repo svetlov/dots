@@ -41,6 +41,28 @@ return {
       }
     },
 
+    -- vim-tmux-navigator: <C-h/j/k/l> navigate vim splits, then cross into
+    -- tmux panes at the edges. Pairs with the `bind-key -n C-h ...` block
+    -- in ~/.tmux.conf which forwards C-h/j/k/l to vim when vim is the
+    -- foreground program in the pane and `select-pane`s otherwise.
+    {
+      'christoomey/vim-tmux-navigator',
+      lazy = false,
+      cmd = {
+        'TmuxNavigateLeft',
+        'TmuxNavigateDown',
+        'TmuxNavigateUp',
+        'TmuxNavigateRight',
+        'TmuxNavigatePrevious',
+      },
+      keys = {
+        { '<C-h>', '<cmd>TmuxNavigateLeft<cr>',  mode = { 'n', 't' }, desc = 'Pane left'  },
+        { '<C-j>', '<cmd>TmuxNavigateDown<cr>',  mode = { 'n', 't' }, desc = 'Pane down'  },
+        { '<C-k>', '<cmd>TmuxNavigateUp<cr>',    mode = { 'n', 't' }, desc = 'Pane up'    },
+        { '<C-l>', '<cmd>TmuxNavigateRight<cr>', mode = { 'n', 't' }, desc = 'Pane right' },
+      },
+    },
+
     -- Lualine statusline
     {
         "nvim-lualine/lualine.nvim",
