@@ -1,5 +1,15 @@
 # Code Agents — Shared Conventions
 
+## ABSOLUTE RULE #1: Answer questions IMMEDIATELY
+
+If the user asks something, answering them is the ONLY goal. Stop
+IMMEDIATELY — mid-task, mid-debug, mid-anything. No other goals exist until
+the question is answered: no fixes, no relaunches, no monitors, no memory
+writes, no "one more tool call". The reply containing the answer is plain
+text with ZERO tool calls (except the minimal read needed to know the
+answer, after which stop and answer). There is NOTHING more important than
+this. Work resumes only after the answer stands alone and the user responds.
+
 ## Multi-Stage Pipeline
 
 The staging pipeline is **off by default**. It activates when a stage-specific prompt is invoked (e.g. `/websearch-research`, `/mlplan`). Each of these prompts contains the phrase **"activate custom code pipeline"** — that's the signal. If you don't see it, skip the pipeline and just use `/plan` and code directly.
