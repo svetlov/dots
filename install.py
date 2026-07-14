@@ -251,6 +251,12 @@ class CodeAgentsInstaller(Installer):
             os.path.join(PWD, "all", "code-agents", "hooks"),
             os.path.join(cls.CLAUDE_DIR, "hooks"),
         )
+        # Fable research/architect agent definitions (launched as background
+        # agents: `claude --bg --agent ir-researcher "<topic>"`)
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "agents"),
+            os.path.join(cls.CLAUDE_DIR, "agents"),
+        )
 
         # Dippy (Claude Code bash safety hook) config
         symlink(
