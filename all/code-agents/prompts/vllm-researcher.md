@@ -9,7 +9,9 @@ Run this (my request — the text after the command, `$ARGUMENTS` — is the pro
 
     claude --bg --agent imagegen-researcher "$ARGUMENTS"
 
-If `$ARGUMENTS` is empty, ask me for the research topic first, then launch.
+Just launch it — with my prompt if I gave one, or plain (drop the quoted arg:
+`claude --bg --agent imagegen-researcher`) if I didn't. Do NOT ask me for a
+topic or refuse to launch; I'll steer it after attaching.
 
 Then report the background session id and remind me how to drive it:
 - `claude agents` to list; `Space` peek, `Enter`/`→` attach, `←` detach, `Ctrl+T` pin.

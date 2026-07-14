@@ -9,7 +9,9 @@ Run this (my goal — the text after the command, `$ARGUMENTS` — is the prompt
 
     claude --bg --agent ml-architect "$ARGUMENTS"
 
-If `$ARGUMENTS` is empty, ask me for the goal first, then launch.
+Just launch it — with my prompt if I gave one, or plain (drop the quoted arg:
+`claude --bg --agent ml-architect`) if I didn't. Do NOT ask me for a goal or
+refuse to launch; I'll steer it after attaching.
 
 Then report the background session id and remind me how to drive it:
 - `claude agents` to list; `Space` peek, `Enter`/`→` attach, `←` detach, `Ctrl+T` pin.
