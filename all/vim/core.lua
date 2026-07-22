@@ -413,14 +413,15 @@ return {
                 },
             })
 
-            -- Remap diagnostic navigation to use LSP Saga
-            vim.keymap.set("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", {
+            -- Remap diagnostic navigation to use LSP Saga.
+            -- Capitals ([D/]D) so lowercase [d/]d is free for diff hunks.
+            vim.keymap.set("n", "[D", "<cmd>Lspsaga diagnostic_jump_prev<CR>", {
                 desc = "Jump to previous diagnostic",
                 silent = true,
                 noremap = true,
             })
 
-            vim.keymap.set("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", {
+            vim.keymap.set("n", "]D", "<cmd>Lspsaga diagnostic_jump_next<CR>", {
                 desc = "Jump to next diagnostic",
                 silent = true,
                 noremap = true,
@@ -777,10 +778,10 @@ return {
         keys = {
             { "<leader>ff", "<cmd>Telescope find_files<cr>",               desc = "Find files" },
             { "<leader>fg", "<cmd>Telescope live_grep<cr>",                desc = "Live grep" },
-            { "<leader>fd", "<cmd>Telescope aerial<cr>",                   desc = "Code map" },
+            { "<leader>fd", "<cmd>Telescope git_status<cr>",               desc = "Git changed files (diff)" },
             { "<leader>fb", "<cmd>Telescope buffers theme=dropdown<cr>",   desc = "Buffers" },
             { "<leader>fh", "<cmd>Telescope help_tags theme=dropdown<cr>", desc = "Help tags" },
-            { "<leader>fs", "<cmd>Telescope git_status<cr>",               desc = "Git changed files" },
+            { "<leader>fs", "<cmd>Telescope aerial<cr>",                   desc = "Code map" },
             { "<leader>ft", "<cmd>TodoTelescope<cr>",                      desc = "Review comments" },
         },
         config = function()
@@ -1057,6 +1058,8 @@ return {
         keys = {
             { "]c", function() require("unified.navigation").next_hunk() end, desc = "Next diff hunk" },
             { "[c", function() require("unified.navigation").previous_hunk() end, desc = "Previous diff hunk" },
+            { "]d", function() require("unified.navigation").next_hunk() end, desc = "Next diff hunk" },
+            { "[d", function() require("unified.navigation").previous_hunk() end, desc = "Previous diff hunk" },
             { "<leader>gD", function()
                 local hunks = vim.b.unified_hunks
                 if hunks and #hunks > 0 then
