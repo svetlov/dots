@@ -1,6 +1,10 @@
 nerdfont: true
 agent: claude
 merge_strategy: rebase
+# Place new windows at the far right (append) instead of "after_current" (which
+# inserts beside the active window and shifts the others). With renumber-windows
+# on (tmux.conf), this keeps window numbers stable and contiguous.
+window_placement: rightmost
 # Don't let workmux auto-apply its own per-window status format. It would set a
 # per-window window-status-format that appends a bare icon and shadows our
 # global colored format (see tmux.conf). workmux still sets @workmux_status on
