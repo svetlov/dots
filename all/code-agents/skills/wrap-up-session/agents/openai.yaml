@@ -1,0 +1,6 @@
+interface:
+  display_name: "Wrap Up Session"
+  short_description: "Audit and safely retire a Git worktree"
+  default_prompt: "Use $wrap-up-session to audit this Git worktree and clean it up when it is safe."
+policy:
+  allow_implicit_invocation: false

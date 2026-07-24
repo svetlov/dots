@@ -63,6 +63,31 @@ def symlink(source, destination):
     os.symlink(source, destination)
 
 
+def symlink_skills(source_directory, destination_directories):
+    if not os.path.isdir(source_directory):
+        print(
+            "Warning: skills source path does not exist, skipping: {}".format(
+                source_directory
+            )
+        )
+        return
+
+    skill_names = []
+    for entry in sorted(os.listdir(source_directory)):
+        skill_directory = os.path.join(source_directory, entry)
+        skill_file = os.path.join(skill_directory, "SKILL.md")
+        if os.path.isdir(skill_directory) and os.path.isfile(skill_file):
+            skill_names.append(entry)
+
+    for destination_directory in destination_directories:
+        os.makedirs(destination_directory, exist_ok=True)
+        for skill_name in skill_names:
+            symlink(
+                os.path.join(source_directory, skill_name),
+                os.path.join(destination_directory, skill_name),
+            )
+
+
 class RegisterInstallerMetaclass(type):
     def __init__(cls, name, bases, dct):
         super(RegisterInstallerMetaclass, cls).__init__(name, bases, dct)
@@ -210,6 +235,7 @@ class KarabinerInstaller(Installer):
 class CodeAgentsInstaller(Installer):
     name = "code-agents"
     CODEX_DIR = os.path.join(HOME, ".codex")
+    AGENTS_DIR = os.path.join(HOME, ".agents")
     CLAUDE_DIR = os.path.join(HOME, ".claude")
     DIPPY_DIR = os.path.join(HOME, ".dippy")
     WORKMUX_DIR = os.path.join(HOME, ".config", "workmux")
@@ -217,6 +243,7 @@ class CodeAgentsInstaller(Installer):
     @classmethod
     def install(cls):
         os.makedirs(cls.CODEX_DIR, exist_ok=True)
+        os.makedirs(cls.AGENTS_DIR, exist_ok=True)
         os.makedirs(cls.CLAUDE_DIR, exist_ok=True)
         os.makedirs(cls.DIPPY_DIR, exist_ok=True)
         os.makedirs(cls.WORKMUX_DIR, exist_ok=True)
@@ -256,6 +283,22 @@ class CodeAgentsInstaller(Installer):
         symlink(
             os.path.join(PWD, "all", "code-agents", "agents"),
             os.path.join(cls.CLAUDE_DIR, "agents"),
+        )
+
+        # Agent Skills use the same SKILL.md package in Codex and Claude Code.
+        # Link each skill separately so pre-existing personal skills remain intact.
+        shared_skills_source = os.path.join(
+            PWD,
+            "all",
+            "code-agents",
+            "skills",
+        )
+        symlink_skills(
+            shared_skills_source,
+            [
+                os.path.join(cls.AGENTS_DIR, "skills"),
+                os.path.join(cls.CLAUDE_DIR, "skills"),
+            ],
         )
 
         # Dippy (Claude Code bash safety hook) config
