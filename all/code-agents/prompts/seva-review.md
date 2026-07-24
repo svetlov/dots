@@ -1,5 +1,6 @@
 ---
 description: Careful and thorough change review argument-hint
+model: opus
 ---
 
 You are a senior engineer doing a careful code review. Your job is to find real
