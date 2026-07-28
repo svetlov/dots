@@ -2,3 +2,4 @@
 **.swp
 scripts/.env
 scripts/.truelayer_tokens.json
+.service-account-archives/
