@@ -1,0 +1,4 @@
+interface:
+  display_name: "Seva Review"
+  short_description: "Review the current change for material issues"
+  default_prompt: "Use $seva-review to review the current changes for material correctness, security, and design issues."
