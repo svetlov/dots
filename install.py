@@ -297,6 +297,7 @@ class CodeAgentsInstaller(Installer):
             shared_skills_source,
             [
                 os.path.join(cls.AGENTS_DIR, "skills"),
+                os.path.join(cls.CODEX_DIR, "skills"),
                 os.path.join(cls.CLAUDE_DIR, "skills"),
             ],
         )
