@@ -8,6 +8,9 @@ from pathlib import Path
 
 
 STATUS_IGNORED = {".", " ", "?"}
+PATCH_EQUIVALENT_APPROVAL = (
+    "squash-merged branch requires explicit cleanup approval"
+)
 
 
 class GitCommandError(RuntimeError):
@@ -117,6 +120,10 @@ def base_result(repository_path, reference, source):
         "ref": reference,
         "source": source,
         "head": resolve_commit(repository_path, reference),
+        "refresh": {
+            "attempted": False,
+            "status": "not-requested",
+        },
     }
 
 
@@ -165,7 +172,148 @@ def resolve_base(repository_path, branch_name, explicit_base):
         if candidate["head"]:
             return candidate
 
-    return {"ref": None, "source": "unresolved", "head": None}
+    return {
+        "ref": None,
+        "source": "unresolved",
+        "head": None,
+        "refresh": {
+            "attempted": False,
+            "status": "not-requested",
+        },
+    }
+
+
+def resolve_remote_base_target(repository_path, reference):
+    if not reference:
+        return None
+
+    normalized_reference = reference
+    remote_prefix = "refs/remotes/"
+    is_remote_tracking_reference = normalized_reference.startswith(
+        remote_prefix
+    )
+    if is_remote_tracking_reference:
+        normalized_reference = normalized_reference[len(remote_prefix):]
+    else:
+        tracking_result = run_git(
+            repository_path,
+            [
+                "show-ref",
+                "--verify",
+                "--quiet",
+                "{}{}".format(remote_prefix, normalized_reference),
+            ],
+            check=False,
+        )
+        is_remote_tracking_reference = tracking_result.returncode == 0
+
+    remote, separator, branch = normalized_reference.partition("/")
+    if not separator or not branch:
+        return None
+
+    remotes = set(
+        git_text(repository_path, "remote").splitlines()
+    )
+    if remote not in remotes and not is_remote_tracking_reference:
+        return None
+
+    if branch == "HEAD":
+        symbolic_result = run_git(
+            repository_path,
+            [
+                "symbolic-ref",
+                "--quiet",
+                "--short",
+                "refs/remotes/{}/HEAD".format(remote),
+            ],
+            check=False,
+        )
+        if symbolic_result.returncode != 0:
+            return None
+        resolved_reference = symbolic_result.stdout.strip()
+        resolved_remote, separator, resolved_branch = (
+            resolved_reference.partition("/")
+        )
+        if (
+            not separator
+            or resolved_remote != remote
+            or not resolved_branch
+        ):
+            return None
+        branch = resolved_branch
+
+    return {
+        "remote": remote,
+        "branch": branch,
+    }
+
+
+def refresh_remote_base(repository_path, base):
+    refreshed_base = dict(base)
+    target = resolve_remote_base_target(
+        repository_path,
+        refreshed_base["ref"],
+    )
+    if target is None:
+        refreshed_base["refresh"] = {
+            "attempted": False,
+            "status": "not-applicable",
+        }
+        return refreshed_base
+
+    before_head = refreshed_base["head"]
+    remote_tracking_refspec = (
+        "+refs/heads/{branch}:refs/remotes/{remote}/{branch}".format(
+            remote=target["remote"],
+            branch=target["branch"],
+        )
+    )
+    fetch_result = run_git(
+        repository_path,
+        [
+            "fetch",
+            "--no-tags",
+            target["remote"],
+            remote_tracking_refspec,
+        ],
+        check=False,
+    )
+    if fetch_result.returncode != 0:
+        refreshed_base["refresh"] = {
+            "attempted": True,
+            "status": "failed",
+            "remote": target["remote"],
+            "branch": target["branch"],
+            "before_head": before_head,
+            "exit_code": fetch_result.returncode,
+        }
+        return refreshed_base
+
+    after_head = resolve_commit(
+        repository_path,
+        refreshed_base["ref"],
+    )
+    if after_head is None:
+        refreshed_base["refresh"] = {
+            "attempted": True,
+            "status": "failed",
+            "remote": target["remote"],
+            "branch": target["branch"],
+            "before_head": before_head,
+            "exit_code": fetch_result.returncode,
+        }
+        return refreshed_base
+
+    refreshed_base["head"] = after_head
+    refreshed_base["refresh"] = {
+        "attempted": True,
+        "status": "updated" if before_head != after_head else "current",
+        "remote": target["remote"],
+        "branch": target["branch"],
+        "before_head": before_head,
+        "after_head": after_head,
+    }
+    return refreshed_base
 
 
 def decode_path(raw_value):
@@ -398,16 +546,22 @@ def cleanup_blockers(worktree, branch, base, status, operations, integration):
         blockers.append("detached HEAD")
     if not base["head"]:
         blockers.append("base ref is unavailable")
+    if base["refresh"]["status"] == "failed":
+        blockers.append("remote base refresh failed")
     if integration["status"] == "unmerged":
         blockers.append("branch is not merged")
     elif integration["status"] == "patch-equivalent":
-        blockers.append("branch is only patch-equivalent to base")
+        blockers.append(PATCH_EQUIVALENT_APPROVAL)
     elif integration["status"] == "unknown" and base["head"]:
         blockers.append("branch integration is unknown")
     return blockers
 
 
-def inspect_repository(repository_path, explicit_base=None):
+def inspect_repository(
+    repository_path,
+    explicit_base=None,
+    refresh_remote=False,
+):
     repository = Path(repository_path).expanduser().resolve()
     if not repository.is_dir():
         raise GitCommandError(
@@ -425,6 +579,8 @@ def inspect_repository(repository_path, explicit_base=None):
     worktree = collect_worktree(repository)
     branch = collect_branch(repository)
     base = resolve_base(repository, branch["name"], explicit_base)
+    if refresh_remote:
+        base = refresh_remote_base(repository, base)
     status = collect_status(repository)
     operations = collect_operations(repository)
     commits = collect_commits(repository, base)
@@ -436,6 +592,10 @@ def inspect_repository(repository_path, explicit_base=None):
         status,
         operations,
         integration,
+    )
+    requires_approval = (
+        integration["status"] == "patch-equivalent"
+        and blockers == [PATCH_EQUIVALENT_APPROVAL]
     )
 
     return {
@@ -449,6 +609,10 @@ def inspect_repository(repository_path, explicit_base=None):
         "cleanup": {
             "eligible": not blockers,
             "blockers": blockers,
+            "requires_approval": requires_approval,
+            "approval_reason": (
+                "squash-merged" if requires_approval else None
+            ),
         },
     }
 
@@ -466,6 +630,11 @@ def parse_arguments():
         "--base",
         help="Explicit integration base ref.",
     )
+    parser.add_argument(
+        "--refresh-remote",
+        action="store_true",
+        help="Fetch the selected remote base before comparing it.",
+    )
     return parser.parse_args()
 
 
@@ -475,6 +644,7 @@ def main():
         report = inspect_repository(
             repository_path=arguments.repository,
             explicit_base=arguments.base,
+            refresh_remote=arguments.refresh_remote,
         )
     except GitCommandError as error:
         print("inspection failed: {}".format(error), file=sys.stderr)
