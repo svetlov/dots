@@ -97,6 +97,7 @@ Strong success criteria let you loop independently; weak ones ("make it work") f
 - Do not include a "Test plan" section in commit messages or pull request descriptions.
 - Keep PRs reviewable by a human: aim for ~500 LOC of meaningful code (excluding configs, tests, docs, and boilerplate). Not a hard limit, but if a PR grows well past this, split it.
 - PR descriptions should include a list of core files changed (skip tests, configs, docs, and boilerplate).
+- **GitHub credentials:** sandboxed commands may not access the macOS Keychain, even when `gh auth status` works in the user's terminal. Before treating `gh` authentication as invalid, retry the read-only check with escalated permissions; use escalated `gh`/`git push` commands when the sandbox lacks Keychain or SSH-agent access.
 
 ## Error Handling
 
