@@ -15,7 +15,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -100,13 +100,27 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline-command.sh\""
+  },
   "enabledPlugins": {
     "github@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "clangd-lsp@claude-plugins-official": true
+    "clangd-lsp@claude-plugins-official": true,
+    "codex@keenable-claude-skills": true
   },
-  "effortLevel": "high",
+  "extraKnownMarketplaces": {
+    "keenable-claude-skills": {
+      "source": {
+        "source": "github",
+        "repo": "keenableai/keenable-claude-skills"
+      }
+    }
+  },
+  "effortLevel": "medium",
   "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
