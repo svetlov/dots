@@ -1,0 +1,523 @@
+# Codex equivalents for the unambiguously read-only prefixes in dippy-config.
+# Ambiguous entries such as `git branch *`, `gh api *`, and cloud-storage copy
+# commands intentionally remain subject to normal Codex approval.
+
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr"]],
+    decision = "forbidden",
+    justification = "Use trash or remove a narrower, explicitly verified target.",
+    match = ["rm -rf build", "rm -fr build"],
+    not_match = ["rm file.txt"],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Preserve worktree changes; use a non-destructive Git operation.",
+    match = ["git reset --hard", "git reset --hard HEAD~1"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean", ["-f", "-fd", "-df", "-fx", "-fdx"]],
+    decision = "forbidden",
+    justification = "Inspect untracked files and remove only explicit targets.",
+    match = ["git clean -fd", "git clean -fdx"],
+    not_match = ["git clean -n"],
+)
+
+prefix_rule(
+    pattern = ["git", "branch", "-D"],
+    decision = "forbidden",
+    justification = "Use git branch -d after verifying the branch is merged.",
+    match = ["git branch -D feature"],
+    not_match = ["git branch --list"],
+)
+
+prefix_rule(
+    pattern = [["python", "python3"]],
+    decision = "prompt",
+    justification = "Prefer uv run python so the project environment is explicit.",
+    match = ["python script.py", "python3 -m unittest"],
+    not_match = ["uv run python script.py"],
+)
+
+prefix_rule(
+    pattern = ["trash-empty"],
+    decision = "prompt",
+    justification = "Emptying trash permanently deletes recoverable files.",
+    match = ["trash-empty", "trash-empty --all"],
+)
+
+# Git read-only operations.
+prefix_rule(
+    pattern = [
+        "git",
+        [
+            "status",
+            "log",
+            "diff",
+            "show",
+            "rev-parse",
+            "shortlog",
+            "describe",
+            "blame",
+            "ls-files",
+            "ls-tree",
+            "ls-remote",
+            "cat-file",
+            "cherry",
+            "count-objects",
+        ],
+    ],
+    decision = "allow",
+    justification = "Read-only Git inspection.",
+    match = ["git status --short", "git log -5", "git diff --stat"],
+    not_match = ["git push origin main", "git branch -D feature"],
+)
+
+prefix_rule(
+    pattern = ["git", "config", ["--get", "--get-all", "--list"]],
+    decision = "allow",
+    justification = "Read-only Git configuration inspection.",
+    match = ["git config --get remote.origin.url", "git config --list"],
+    not_match = ["git config user.name Example"],
+)
+
+prefix_rule(
+    pattern = ["git", "branch", ["--list", "--show-current"]],
+    decision = "allow",
+    justification = "Read-only local branch inspection.",
+    match = ["git branch --list", "git branch --show-current"],
+    not_match = ["git branch -D feature"],
+)
+
+prefix_rule(
+    pattern = ["git", "remote", ["get-url", "show"]],
+    decision = "allow",
+    justification = "Read-only Git remote inspection.",
+    match = ["git remote get-url origin", "git remote show origin"],
+    not_match = ["git remote remove origin"],
+)
+
+prefix_rule(
+    pattern = ["git", "tag", "--list"],
+    decision = "allow",
+    justification = "Read-only Git tag inspection.",
+    match = ["git tag --list", "git tag --list v1.*"],
+    not_match = ["git tag -d v1.0"],
+)
+
+prefix_rule(
+    pattern = ["git", "stash", ["list", "show"]],
+    decision = "allow",
+    justification = "Read-only Git stash inspection.",
+    match = ["git stash list", "git stash show stash@{0}"],
+    not_match = ["git stash drop"],
+)
+
+prefix_rule(
+    pattern = ["git", "reflog", "show"],
+    decision = "allow",
+    justification = "Read-only Git reflog inspection.",
+    match = ["git reflog show", "git reflog show main"],
+    not_match = ["git reflog delete HEAD@{1}"],
+)
+
+prefix_rule(
+    pattern = ["git", "worktree", "list"],
+    decision = "allow",
+    justification = "Read-only Git worktree inspection.",
+    match = ["git worktree list", "git worktree list --porcelain"],
+    not_match = ["git worktree remove /tmp/worktree"],
+)
+
+# Google Cloud read-only operations.
+prefix_rule(
+    pattern = ["gcloud", "auth", ["list", "print-access-token"]],
+    decision = "allow",
+    justification = "Read-only gcloud authentication inspection.",
+)
+
+prefix_rule(
+    pattern = [
+        "gcloud",
+        "auth",
+        "application-default",
+        "print-access-token",
+    ],
+    decision = "allow",
+    justification = "Read the current application-default access token.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "config", ["list", "get-value"]],
+    decision = "allow",
+    justification = "Read-only gcloud configuration inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "projects", ["list", "describe", "get-iam-policy"]],
+    decision = "allow",
+    justification = "Read-only Google Cloud project inspection.",
+)
+
+prefix_rule(
+    pattern = [
+        "gcloud",
+        "iam",
+        "service-accounts",
+        ["list", "describe", "get-iam-policy"],
+    ],
+    decision = "allow",
+    justification = "Read-only service-account inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "iam", "roles", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only IAM role inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "compute", "instances", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Compute Engine instance inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "compute", ["regions", "zones"], "list"],
+    decision = "allow",
+    justification = "Read-only Compute Engine location inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "container", "clusters", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only GKE cluster inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "storage", ["ls", "cat", "stat", "du", "hash"]],
+    decision = "allow",
+    justification = "Read-only Cloud Storage inspection.",
+    not_match = ["gcloud storage cp local.txt gs://bucket/object"],
+)
+
+prefix_rule(
+    pattern = ["gcloud", "storage", "objects", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Cloud Storage object inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "storage", "buckets", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Cloud Storage bucket inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "bigtable", "instances", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Bigtable instance inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "bigtable", "tables", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Bigtable table inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "sql", "instances", ["list", "describe"]],
+    decision = "allow",
+    justification = "Read-only Cloud SQL inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "services", "list"],
+    decision = "allow",
+    justification = "Read-only service inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "logging", "read"],
+    decision = "allow",
+    justification = "Read Cloud Logging entries.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "artifacts", "repositories", "list"],
+    decision = "allow",
+    justification = "Read-only Artifact Registry repository inspection.",
+)
+
+prefix_rule(
+    pattern = ["gcloud", "artifacts", "docker", "images", "list"],
+    decision = "allow",
+    justification = "Read-only Artifact Registry image inspection.",
+)
+
+prefix_rule(
+    pattern = ["gsutil", ["ls", "cat", "stat", "du", "hash", "version"]],
+    decision = "allow",
+    justification = "Read-only gsutil operation.",
+    not_match = ["gsutil cp local.txt gs://bucket/object"],
+)
+
+# BigQuery read-only operations.
+prefix_rule(
+    pattern = ["bq", ["show", "ls", "head", "help", "version"]],
+    decision = "allow",
+    justification = "Read-only BigQuery inspection.",
+)
+
+prefix_rule(
+    pattern = ["bq", "query", ["--dry_run", "--dry-run"]],
+    decision = "allow",
+    justification = "BigQuery dry-run validation does not execute the query.",
+    match = ["bq query --dry_run 'SELECT 1'"],
+    not_match = ["bq query 'DELETE FROM dataset.table'"],
+)
+
+# AWS read-only operations.
+prefix_rule(
+    pattern = ["aws", "sts", "get-caller-identity"],
+    decision = "allow",
+    justification = "Read the active AWS identity.",
+)
+
+prefix_rule(
+    pattern = ["aws", "configure", ["list", "export-credentials"]],
+    decision = "allow",
+    justification = "Read the active AWS credential configuration.",
+)
+
+prefix_rule(
+    pattern = ["aws", "s3", "ls"],
+    decision = "allow",
+    justification = "List S3 buckets or objects.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "s3api",
+        ["list-buckets", "list-objects", "list-objects-v2", "head-object"],
+    ],
+    decision = "allow",
+    justification = "Read-only S3 API inspection.",
+    not_match = ["aws s3api put-object --bucket example --key item"],
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "ec2",
+        [
+            "describe-instances",
+            "describe-vpcs",
+            "describe-subnets",
+            "describe-security-groups",
+            "describe-regions",
+        ],
+    ],
+    decision = "allow",
+    justification = "Read-only EC2 inspection.",
+)
+
+prefix_rule(
+    pattern = ["aws", "eks", ["list-clusters", "describe-cluster"]],
+    decision = "allow",
+    justification = "Read-only EKS inspection.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "iam",
+        [
+            "list-roles",
+            "list-users",
+            "get-role",
+            "get-user",
+            "get-policy",
+            "list-attached-role-policies",
+            "list-attached-user-policies",
+        ],
+    ],
+    decision = "allow",
+    justification = "Read-only AWS IAM inspection.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "rds",
+        ["describe-db-instances", "describe-db-clusters"],
+    ],
+    decision = "allow",
+    justification = "Read-only RDS inspection.",
+)
+
+prefix_rule(
+    pattern = ["aws", "ecr", ["describe-repositories", "list-images"]],
+    decision = "allow",
+    justification = "Read-only ECR inspection.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "logs",
+        ["describe-log-groups", "get-log-events", "filter-log-events"],
+    ],
+    decision = "allow",
+    justification = "Read CloudWatch log metadata and events.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "secretsmanager",
+        ["list-secrets", "get-secret-value"],
+    ],
+    decision = "allow",
+    justification = "Read Secrets Manager metadata or an explicitly requested value.",
+)
+
+prefix_rule(
+    pattern = [
+        "aws",
+        "cloudformation",
+        ["describe-stacks", "list-stacks"],
+    ],
+    decision = "allow",
+    justification = "Read-only CloudFormation inspection.",
+)
+
+# GitHub CLI read-only operations.
+prefix_rule(
+    pattern = [
+        "gh",
+        "pr",
+        ["list", "view", "status", "diff", "checks"],
+    ],
+    decision = "allow",
+    justification = "Read-only pull-request inspection.",
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", ["list", "view", "status"]],
+    decision = "allow",
+    justification = "Read-only issue inspection.",
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", ["list", "view"]],
+    decision = "allow",
+    justification = "Read-only repository inspection.",
+    not_match = ["gh repo delete owner/repository"],
+)
+
+prefix_rule(
+    pattern = ["gh", "run", ["list", "view", "watch"]],
+    decision = "allow",
+    justification = "Read-only workflow-run inspection.",
+)
+
+prefix_rule(
+    pattern = ["gh", "release", ["list", "view"]],
+    decision = "allow",
+    justification = "Read-only release inspection.",
+)
+
+prefix_rule(
+    pattern = ["gh", "auth", "status"],
+    decision = "allow",
+    justification = "Read GitHub CLI authentication status.",
+)
+
+prefix_rule(
+    pattern = ["gh", "search"],
+    decision = "allow",
+    justification = "Read-only GitHub search.",
+)
+
+prefix_rule(
+    pattern = ["gh", "label", "list"],
+    decision = "allow",
+    justification = "Read repository labels.",
+)
+
+# Kubernetes read-only operations.
+prefix_rule(
+    pattern = [
+        "kubectl",
+        [
+            "get",
+            "describe",
+            "logs",
+            "top",
+            "explain",
+            "api-resources",
+            "api-versions",
+            "cluster-info",
+            "version",
+            "diff",
+            "events",
+            "wait",
+        ],
+    ],
+    decision = "allow",
+    justification = "Read-only Kubernetes inspection.",
+    not_match = ["kubectl delete pod example"],
+)
+
+prefix_rule(
+    pattern = [
+        "kubectl",
+        "config",
+        ["view", "get-contexts", "current-context"],
+    ],
+    decision = "allow",
+    justification = "Read-only Kubernetes configuration inspection.",
+)
+
+prefix_rule(
+    pattern = ["kubectl", "auth", ["can-i", "whoami"]],
+    decision = "allow",
+    justification = "Read-only Kubernetes authorization inspection.",
+)
+
+# Small local read-only helpers from Claude's personal allowlist.
+prefix_rule(
+    pattern = ["ssh-add", "-l"],
+    decision = "allow",
+    justification = "List loaded SSH key fingerprints.",
+)
+
+prefix_rule(
+    pattern = ["ioreg", "-lrn", "ROG FALCHION RX LOW PROFILE"],
+    decision = "allow",
+    justification = "Inspect the configured keyboard device.",
+)
+
+prefix_rule(
+    pattern = ["hidutil", "list"],
+    decision = "allow",
+    justification = "List HID devices.",
+)
+
+prefix_rule(
+    pattern = ["trash-list"],
+    decision = "allow",
+    justification = "List recoverable trashed files.",
+)
+
+prefix_rule(
+    pattern = ["workmux", "set-window-status", "waiting"],
+    decision = "allow",
+    justification = "Mark the current agent window as waiting for user input.",
+    match = ["workmux set-window-status waiting"],
+    not_match = ["workmux remove session"],
+)

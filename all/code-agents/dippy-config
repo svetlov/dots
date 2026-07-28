@@ -223,5 +223,6 @@ allow trash-restore *
 ask trash-empty "This permanently deletes trashed files"
 
 # misc
+allow workmux set-window-status waiting
 allow mkdir *
 allow cp *

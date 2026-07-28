@@ -243,6 +243,8 @@ class CodeAgentsInstaller(Installer):
     @classmethod
     def install(cls):
         os.makedirs(cls.CODEX_DIR, exist_ok=True)
+        os.makedirs(os.path.join(cls.CODEX_DIR, "hooks"), exist_ok=True)
+        os.makedirs(os.path.join(cls.CODEX_DIR, "rules"), exist_ok=True)
         os.makedirs(cls.AGENTS_DIR, exist_ok=True)
         os.makedirs(cls.CLAUDE_DIR, exist_ok=True)
         os.makedirs(cls.DIPPY_DIR, exist_ok=True)
@@ -251,6 +253,38 @@ class CodeAgentsInstaller(Installer):
         symlink(
             os.path.join(PWD, "all", "code-agents", "codex.toml"),
             os.path.join(cls.CODEX_DIR, "config.toml"),
+        )
+        symlink(
+            os.path.join(PWD, "all", "code-agents", "codex-hooks.json"),
+            os.path.join(cls.CODEX_DIR, "hooks.json"),
+        )
+        symlink(
+            os.path.join(
+                PWD,
+                "all",
+                "code-agents",
+                "codex-hooks",
+                "dippy_adapter.py",
+            ),
+            os.path.join(
+                cls.CODEX_DIR,
+                "hooks",
+                "dippy_adapter.py",
+            ),
+        )
+        symlink(
+            os.path.join(
+                PWD,
+                "all",
+                "code-agents",
+                "codex-rules",
+                "dippy.rules",
+            ),
+            os.path.join(
+                cls.CODEX_DIR,
+                "rules",
+                "dippy.rules",
+            ),
         )
         symlink(
             os.path.join(PWD, "all", "code-agents", "prompts"),
