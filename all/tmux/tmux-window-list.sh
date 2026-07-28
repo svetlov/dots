@@ -9,6 +9,9 @@
 
 CUR="$1"
 FZF_TMUX="${2:-fzf-tmux}"
+SCRIPT_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+BLOCKING_PROMPT_CLASSIFIER="$SCRIPT_DIR/agent-blocking-prompt.sh"
+PANE_CHILD_COMMANDS="$SCRIPT_DIR/agent-pane-child-commands.sh"
 
 RED='\033[31m'
 RST='\033[0m'
@@ -16,10 +19,14 @@ RST='\033[0m'
 # Build window list with Claude status indicators
 list=$(tmux list-windows -a -F "#{session_name}:#{window_index} #{?@custom_name,#{@custom_name} | ,}#{pane_title} (#{pane_current_command})" | while IFS= read -r line; do
   win=$(echo "$line" | cut -d' ' -f1)
-  cmd=$(tmux display-message -t "$win" -p "#{pane_current_command}" 2>/dev/null)
-  if [ "$cmd" = "claude" ] || [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ]; then
+  pane_metadata=$(tmux display-message -t "$win" -p "#{pane_pid}|#{pane_current_command}" 2>/dev/null)
+  pane_pid=${pane_metadata%%|*}
+  cmd=${pane_metadata#*|}
+  if [ "$cmd" = "claude" ] || [ "$cmd" = "codex" ] || [ "$cmd" = "nvim" ] || [ "$cmd" = "vim" ] || [ "$cmd" = "node" ]; then
+    child_commands=
+    [ "$cmd" = "node" ] && child_commands=$(sh "$PANE_CHILD_COMMANDS" "$pane_pid")
     tail=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-    if echo "$tail" | grep -q "Do you want to proceed\|Would you like to proceed\|Esc to cancel\|requires confirmation for this command\|Do you want to allow Claude to fetch"; then
+    if printf '%s\n' "$tail" | sh "$BLOCKING_PROMPT_CLASSIFIER" "$cmd" "$child_commands"; then
       printf "${RED}[?]${RST} %s\n" "$line"
     elif echo "$tail" | grep -q "esc to interrupt"; then
       printf "[*] %s\n" "$line"

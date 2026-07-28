@@ -42,6 +42,9 @@ WORKING_STATUS="${WORKING_STATUS:-🤖}"
 BLOCKED_STATUS="${BLOCKED_STATUS:-⛔}"
 INPUT_STATUS="${INPUT_STATUS:-💬}"
 DONE_GLYPH="✅"   # derived "visited while waiting" state; not a workmux status
+SCRIPT_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+BLOCKING_PROMPT_CLASSIFIER="$SCRIPT_DIR/agent-blocking-prompt.sh"
+PANE_CHILD_COMMANDS="$SCRIPT_DIR/agent-pane-child-commands.sh"
 
 # Kill previous instances (exclude self)
 for pid in $(pgrep -f "tmux-claude-status\.sh"); do
@@ -131,6 +134,53 @@ while true; do
     rest=${vals#*|}
     visited=${rest%%|*}
     prev=${rest#*|}
+
+    # Claude reports permission prompts through hooks. Codex does not, so
+    # detect its confirmation dialog from the visible pane and temporarily
+    # override the window state. Remember the previous state and restore it
+    # only if our override is still present after the dialog disappears.
+    codex_prompt_blocked=0
+    pane_metadata=$(tmux display-message -t "$win" -p "#{pane_pid}|#{pane_current_command}" 2>/dev/null)
+    pane_pid=${pane_metadata%%|*}
+    pane_command=${pane_metadata#*|}
+    pane_child_commands=
+    if [ "$pane_command" = "node" ]; then
+      pane_child_commands=$(sh "$PANE_CHILD_COMMANDS" "$pane_pid")
+    fi
+    case "$pane_command" in
+      codex|node)
+      if tmux capture-pane -t "$win" -p 2>/dev/null \
+        | sh "$BLOCKING_PROMPT_CLASSIFIER" "$pane_command" "$pane_child_commands"; then
+        codex_prompt_blocked=1
+      fi
+      ;;
+    esac
+    codex_prompt_marker=$(tmux show -wqv -t "$win" @agent_codex_prompt_blocked 2>/dev/null)
+    codex_previous_status=$(tmux show -wqv -t "$win" @agent_codex_prompt_previous 2>/dev/null)
+
+    if [ "$codex_prompt_blocked" = 1 ]; then
+      if [ "$status" != "$BLOCKED_STATUS" ]; then
+        if [ "$codex_prompt_marker" != 1 ]; then
+          tmux set -w -t "$win" @agent_codex_prompt_previous "$status" 2>/dev/null
+          tmux set -w -t "$win" @agent_codex_prompt_blocked 1 2>/dev/null
+        fi
+        tmux set -w -t "$win" @workmux_status "$BLOCKED_STATUS" 2>/dev/null
+        status="$BLOCKED_STATUS"
+        changed=1
+      fi
+    elif [ "$codex_prompt_marker" = 1 ]; then
+      tmux set -wu -t "$win" @agent_codex_prompt_blocked 2>/dev/null
+      tmux set -wu -t "$win" @agent_codex_prompt_previous 2>/dev/null
+      if [ "$status" = "$BLOCKED_STATUS" ]; then
+        if [ -n "$codex_previous_status" ]; then
+          tmux set -w -t "$win" @workmux_status "$codex_previous_status" 2>/dev/null
+        else
+          tmux set -wu -t "$win" @workmux_status 2>/dev/null
+        fi
+        status="$codex_previous_status"
+        changed=1
+      fi
+    fi
 
     is_active=0
     for a in $active; do
