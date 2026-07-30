@@ -15,7 +15,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "Notification": [
       {
@@ -118,7 +118,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "xhigh",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "dark",

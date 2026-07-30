@@ -222,6 +222,10 @@ allow trash-list
 allow trash-restore *
 ask trash-empty "This permanently deletes trashed files"
 
+# testing
+allow uv run pytest *
+allow uv run pytest
+
 # misc
 allow workmux set-window-status waiting
 allow mkdir *

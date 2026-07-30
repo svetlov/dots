@@ -489,6 +489,15 @@ prefix_rule(
     justification = "Read-only Kubernetes authorization inspection.",
 )
 
+# Project test suite.
+prefix_rule(
+    pattern = ["uv", "run", "pytest"],
+    decision = "allow",
+    justification = "Run the project test suite inside the uv environment.",
+    match = ["uv run pytest", "uv run pytest -x tests"],
+    not_match = ["uv run python script.py"],
+)
+
 # Small local read-only helpers from Claude's personal allowlist.
 prefix_rule(
     pattern = ["ssh-add", "-l"],
